@@ -516,50 +516,102 @@ html, body {
 }
 
 
-/* OCKSYNE_SUN_INTERACTIVE_V1 */
 
-/* Soleil derrière les dunes et devant le ciel */
+/* OCKSYNE_SUN_REBUILD_V2 */
+
+/* Ordre des profondeurs :
+   ciel 0, soleil 1, montagnes 2, contenu 4 */
+
+.hero {
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+}
+
+.hero .sky,
+.hero .stars {
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
 .hero .sun {
+  position: absolute !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
   z-index: 1 !important;
-  pointer-events: none;
+  pointer-events: none !important;
+
+  left: 50% !important;
+  top: 20% !important;
+
+  width: min(78vmin, 640px) !important;
+  max-width: 92% !important;
+
+  translate: -50% 0 !important;
+
   filter:
-    brightness(var(--ock-sun-bright, 1))
+    brightness(var(--sun-brightness, 1))
     drop-shadow(
-      0 0 var(--ock-sun-glow, 20px)
-      rgba(255, 130, 25, .42)
-    );
-  transition: filter .3s ease;
+      0 0 var(--sun-glow, 20px)
+      rgba(255,125,20,.5)
+    ) !important;
+
+  transition:
+    filter .28s ease,
+    top .15s linear !important;
 }
 
-/* Les montagnes passent visuellement devant le soleil */
-.hero .dune {
+.hero .sun .sunin {
+  translate:
+    var(--sun-x, 0px)
+    var(--sun-y, 0px) !important;
+
+  scale: var(--sun-scale, 1) !important;
+
+  transition:
+    translate .24s cubic-bezier(.2,.8,.2,1),
+    scale .28s cubic-bezier(.2,.8,.2,1) !important;
+}
+
+.hero .sun .halo {
+  opacity: var(--sun-halo, .8) !important;
+  transition: opacity .3s ease !important;
+}
+
+/* Les trois montagnes sont devant le soleil */
+.hero .dune.d1,
+.hero .dune.d2,
+.hero .dune.d3 {
+  position: absolute !important;
   z-index: 2 !important;
-  pointer-events: none;
+  pointer-events: none !important;
 }
 
-/* Le texte et les boutons restent au premier plan */
+/* Texte et boutons devant le paysage */
 .hero .hero-in {
+  position: relative !important;
   z-index: 4 !important;
 }
 
-/* Réactivité plus marquée du soleil */
-.hero .sun .sunin {
-  scale: var(--ock-sun-scale, 1);
-  transition:
-    translate .22s cubic-bezier(.2,.8,.2,1),
-    scale .28s cubic-bezier(.2,.8,.2,1);
+/* Ne pas réafficher les degrés */
+.hero .deg,
+.hero .coords {
+  display: none !important;
 }
 
-/* Halo lumineux réactif */
-.hero .sun .halo {
-  opacity: var(--ock-sun-halo, .8);
-  transition: opacity .25s ease;
+@media (max-width: 750px) {
+  .hero .sun {
+    top: 19% !important;
+    width: min(82vw, 510px) !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero .sun .sunin {
-    scale: 1 !important;
     translate: 0 0 !important;
+    scale: 1 !important;
+    transition: none !important;
   }
 }
 
@@ -718,7 +770,7 @@ html, body {
       var r=hero.getBoundingClientRect();
       root.style.setProperty('--mx',((e.clientX-r.left)/r.width*100).toFixed(1)+'%');
       root.style.setProperty('--my',((e.clientY-r.top)/r.height*100).toFixed(1)+'%');
-      root.style.setProperty('--tx',((e.clientX-r.left)/r.width-.5)*26+'px');root.style.setProperty('--ty',((e.clientY-r.top)/r.height-.5)*16+'px');
+
     });
     document.querySelectorAll('.card').forEach(function(c){
       c.addEventListener('pointermove',function(e){
@@ -768,6 +820,7 @@ html, body {
 <script src="assets/ock-aurora.js" defer></script>
 <script src="assets/ock-meteors.js" defer></script>
 
+
 <script id="ock-sun-interaction">
 (() => {
   "use strict";
@@ -777,91 +830,84 @@ html, body {
 
   if (!hero || !sun) return;
 
-  const root = document.documentElement;
-
-  const finePointer = window.matchMedia(
+  const finePointer = matchMedia(
     "(hover: hover) and (pointer: fine)"
   ).matches;
 
-  const reducedMotion = window.matchMedia(
+  const reducedMotion = matchMedia(
     "(prefers-reduced-motion: reduce)"
   ).matches;
 
   if (!finePointer || reducedMotion) return;
 
   function reset() {
-    root.style.setProperty("--tx", "0px");
-    root.style.setProperty("--ty", "0px");
-    root.style.setProperty("--ock-sun-scale", "1");
-    root.style.setProperty("--ock-sun-bright", "1");
-    root.style.setProperty("--ock-sun-glow", "20px");
-    root.style.setProperty("--ock-sun-halo", ".8");
+    sun.style.setProperty("--sun-x", "0px");
+    sun.style.setProperty("--sun-y", "0px");
+    sun.style.setProperty("--sun-scale", "1");
+    sun.style.setProperty("--sun-brightness", "1");
+    sun.style.setProperty("--sun-glow", "20px");
+    sun.style.setProperty("--sun-halo", ".8");
   }
 
   hero.addEventListener("pointermove", event => {
     const rect = sun.getBoundingClientRect();
 
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
 
-    const dx = event.clientX - cx;
-    const dy = event.clientY - cy;
+    const dx = event.clientX - centerX;
+    const dy = event.clientY - centerY;
 
-    const radius = Math.max(rect.width * .65, 1);
+    const radius = Math.max(rect.width * .82, 1);
     const distance = Math.hypot(dx, dy);
 
     const proximity = Math.max(
       0,
-      1 - distance / radius
+      Math.min(1, 1 - distance / radius)
     );
-
-    if (proximity <= 0) {
-      root.style.setProperty("--ock-sun-scale", "1");
-      root.style.setProperty("--ock-sun-bright", "1");
-      root.style.setProperty("--ock-sun-glow", "20px");
-      root.style.setProperty("--ock-sun-halo", ".8");
-      return;
-    }
 
     const nx = Math.max(-1, Math.min(1, dx / radius));
     const ny = Math.max(-1, Math.min(1, dy / radius));
 
-    root.style.setProperty(
-      "--tx",
-      (nx * 42).toFixed(1) + "px"
+    sun.style.setProperty(
+      "--sun-x",
+      (nx * proximity * 55).toFixed(1) + "px"
     );
 
-    root.style.setProperty(
-      "--ty",
-      (ny * 30).toFixed(1) + "px"
+    sun.style.setProperty(
+      "--sun-y",
+      (ny * proximity * 38).toFixed(1) + "px"
     );
 
-    root.style.setProperty(
-      "--ock-sun-scale",
-      (1 + proximity * .065).toFixed(3)
+    sun.style.setProperty(
+      "--sun-scale",
+      (1 + proximity * .09).toFixed(3)
     );
 
-    root.style.setProperty(
-      "--ock-sun-bright",
-      (1 + proximity * .22).toFixed(3)
+    sun.style.setProperty(
+      "--sun-brightness",
+      (1 + proximity * .35).toFixed(3)
     );
 
-    root.style.setProperty(
-      "--ock-sun-glow",
-      (20 + proximity * 45).toFixed(1) + "px"
+    sun.style.setProperty(
+      "--sun-glow",
+      (20 + proximity * 70).toFixed(1) + "px"
     );
 
-    root.style.setProperty(
-      "--ock-sun-halo",
+    sun.style.setProperty(
+      "--sun-halo",
       (.8 + proximity * .2).toFixed(3)
     );
-  });
+  }, {passive: true});
 
   hero.addEventListener("pointerleave", reset);
 
   reset();
+
+  console.info("OCKSYNE — Sun Rebuild V2 active");
 })();
 </script>
+
 
 </body>
 </html>
