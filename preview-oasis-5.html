@@ -333,6 +333,58 @@ html, body {
   }
 }
 
+
+/* OCKSYNE_NATURAL_SKY_V2 */
+
+/* Désactivation des anciennes animations répétitives */
+.sky .shoot,
+.sky .sf,
+.sky .gl {
+  display: none !important;
+}
+
+/* Nouvelle étoile : apparition et disparition uniques */
+.sky .ock-natural-star {
+  position: absolute;
+  width: var(--star-size, 2px);
+  height: var(--star-size, 2px);
+  border-radius: 50%;
+  background: #fff8ee;
+  box-shadow:
+    0 0 5px 1px rgba(255,248,238,.7),
+    0 0 13px rgba(255,190,110,.22);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* Nouvelle comète : ligne droite uniquement */
+.sky .ock-natural-comet {
+  position: absolute;
+  width: var(--comet-length, 120px);
+  height: var(--comet-width, 2px);
+  border-radius: 99px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+  transform-origin: center center;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,.16) 28%,
+    rgba(255,255,255,.72) 80%,
+    #ffffff 100%
+  );
+  filter: drop-shadow(0 0 4px rgba(255,255,255,.75));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky .ock-natural-star,
+  .sky .ock-natural-comet {
+    display: none !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -352,7 +404,7 @@ html, body {
 </nav>
 
 <header class="hero" id="hero">
-  <div class="sky" id="sky" aria-hidden="true"><div class="au a"></div><div class="au b"></div><div class="au c"></div><div class="shoot"></div></div>
+  <div class="sky" id="sky" aria-hidden="true"><div class="au a"></div><div class="au b"></div><div class="au c"></div></div>
   <div class="stars" aria-hidden="true"></div>
   <div class="sun" aria-hidden="true">
     <div class="halo"></div>

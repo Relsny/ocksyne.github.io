@@ -3,101 +3,137 @@
   "use strict";
 
   const sky = document.getElementById("sky");
-  if (!sky || !Element.prototype.animate) return;
+  if (!sky || typeof Element.prototype.animate !== "function") return;
 
-  const reduced = matchMedia(
-    "(prefers-reduced-motion: reduce)"
-  ).matches;
-
-  if (reduced) return;
-
-  const random = (a, b) => a + Math.random() * (b - a);
-  let timer = null;
-  let active = null;
-
-  function schedule() {
-    clearTimeout(timer);
-    timer = setTimeout(launch, random(2000, 9500));
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
   }
 
-  function launch() {
-    if (document.hidden || !sky.isConnected) {
-      schedule();
-      return;
-    }
+  const random = (min, max) =>
+    min + Math.random() * (max - min);
 
-    const bounds = sky.getBoundingClientRect();
-    if (!bounds.width || !bounds.height) {
-      schedule();
-      return;
-    }
+  const timers = new Set();
+  const particles = new Set();
 
-    const star = document.createElement("span");
-    star.className = "ock-meteor";
-    star.setAttribute("aria-hidden", "true");
+  function schedule(callback, min, max) {
+    const timer = setTimeout(() => {
+      timers.delete(timer);
+      callback();
+    }, random(min, max));
 
-    star.style.left = random(5, 65) + "%";
-    star.style.top = random(5, 55) + "%";
-    star.style.setProperty(
-      "--meteor-size",
-      random(70, 155) + "px"
-    );
+    timers.add(timer);
+  }
 
-    sky.appendChild(star);
-    active = star;
+  function animateOnce(element, frames, duration) {
+    particles.add(element);
+    sky.appendChild(element);
 
-    const distance = random(145, 390);
-    const angle = random(15, 35) * Math.PI / 180;
-    const dx = Math.cos(angle) * distance;
-    const dy = Math.sin(angle) * distance;
-    const rotation = angle * 180 / Math.PI;
-
-    const animation = star.animate([
-      {
-        opacity: 0,
-        transform: `translate3d(0,0,0) rotate(${rotation}deg)`,
-        offset: 0
-      },
-      {
-        opacity: 1,
-        transform: `translate3d(${dx*.15}px,${dy*.15}px,0) rotate(${rotation}deg)`,
-        offset: .15
-      },
-      {
-        opacity: .9,
-        transform: `translate3d(${dx*.65}px,${dy*.65}px,0) rotate(${rotation}deg)`,
-        offset: .65
-      },
-      {
-        opacity: 0,
-        transform: `translate3d(${dx}px,${dy}px,0) rotate(${rotation}deg)`,
-        offset: 1
-      }
-    ], {
-      duration: random(550, 1150),
+    const animation = element.animate(frames, {
+      duration,
       easing: "linear",
+      iterations: 1,
       fill: "forwards"
     });
 
-    animation.finished.then(() => {
-      star.remove();
-      active = null;
-      schedule();
-    }).catch(() => {
-      star.remove();
-      active = null;
-      schedule();
-    });
+    const remove = () => {
+      element.remove();
+      particles.delete(element);
+    };
+
+    animation.onfinish = remove;
+    animation.oncancel = remove;
   }
 
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden && active) {
-      active.remove();
-      active = null;
+  function spawnStar() {
+    if (!document.hidden && sky.isConnected) {
+      const star = document.createElement("span");
+      star.className = "ock-natural-star";
+      star.setAttribute("aria-hidden", "true");
+
+      const size = random(1, 3.2);
+
+      star.style.left = random(3, 97) + "%";
+      star.style.top = random(3, 82) + "%";
+      star.style.setProperty("--star-size", size + "px");
+
+      const brightness = random(.45, 1);
+
+      animateOnce(star, [
+        {opacity: 0, offset: 0},
+        {opacity: brightness, offset: .3},
+        {opacity: brightness, offset: .57},
+        {opacity: 0, offset: 1}
+      ], random(1100, 3300));
     }
-  });
 
-  timer = setTimeout(launch, random(1000, 3500));
+    schedule(spawnStar, 300, 1500);
+  }
 
-  console.info("OCKSYNE — Natural shooting stars enabled");
+  function spawnComet() {
+    if (!document.hidden && sky.isConnected) {
+      const box = sky.getBoundingClientRect();
+
+      if (box.width > 0 && box.height > 0) {
+        const comet = document.createElement("span");
+        comet.className = "ock-natural-comet";
+        comet.setAttribute("aria-hidden", "true");
+
+        const direction = Math.random() < .5 ? 1 : -1;
+        const length = random(65, 155);
+        const distance = random(130, 350);
+        const angle = random(18, 37) * Math.PI / 180;
+
+        const dx = direction * Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+
+        const degrees = direction === 1
+          ? angle * 180 / Math.PI
+          : 180 - angle * 180 / Math.PI;
+
+        comet.style.left = random(12, 88) + "%";
+        comet.style.top = random(4, 56) + "%";
+        comet.style.setProperty("--comet-length", length + "px");
+        comet.style.setProperty(
+          "--comet-width",
+          random(1, 2.3) + "px"
+        );
+
+        const position = fraction =>
+          "translate3d(" +
+          (dx * fraction) + "px," +
+          (dy * fraction) + "px,0) rotate(" +
+          degrees + "deg)";
+
+        animateOnce(comet, [
+          {
+            opacity: 0,
+            transform: position(0),
+            offset: 0
+          },
+          {
+            opacity: 1,
+            transform: position(.18),
+            offset: .18
+          },
+          {
+            opacity: .9,
+            transform: position(.7),
+            offset: .7
+          },
+          {
+            opacity: 0,
+            transform: position(1),
+            offset: 1
+          }
+        ], random(650, 1250));
+      }
+    }
+
+    schedule(spawnComet, 2500, 8500);
+  }
+
+  schedule(spawnStar, 200, 900);
+  schedule(spawnComet, 1200, 3500);
+
+  console.info("OCKSYNE — Natural Sky V2 active");
 })();
