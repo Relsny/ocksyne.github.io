@@ -1,0 +1,387 @@
+
+/* OCKSYNE 4.1 — SIGNATURE INTERACTIONS */
+
+:root {
+  --ock-spring: cubic-bezier(.2,1,.25,1);
+  --ock-edge: rgba(255,255,255,.32);
+}
+
+a,button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a:focus-visible,button:focus-visible {
+  outline: 2px solid #f2f2f5;
+  outline-offset: 4px;
+}
+
+/* Navigation : indicateur mobile et précis */
+
+.navlinks a {
+  position: relative;
+  isolation: isolate;
+  transition: color .3s, background .3s, transform .4s var(--ock-spring);
+}
+
+.navlinks a::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 5px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform .55s var(--ock-spring);
+  opacity: .85;
+}
+
+.navlinks a:hover::after,
+.navlinks a:focus-visible::after,
+.navlinks a.active::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.navlinks a:hover { transform: translateY(-2px); }
+
+.brand {
+  display: inline-flex;
+  align-items: baseline;
+  transition: letter-spacing .45s var(--ock-spring);
+}
+
+.brand:hover { letter-spacing: 3px; }
+.brand span { transition: color .3s, text-shadow .4s; }
+.brand:hover span {
+  color: white;
+  text-shadow: 0 0 14px #ffffff8a;
+}
+
+/* Boutons principaux : textes qui se remplacent */
+
+.ock-signature-btn {
+  --btn-y: 0px;
+  --btn-x: 0px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  isolation: isolate;
+  overflow: hidden;
+  transform: translate(var(--btn-x),var(--btn-y));
+  transition:
+    transform .45s var(--ock-spring),
+    border-color .35s,
+    box-shadow .45s,
+    background .35s;
+}
+
+.ock-signature-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background: linear-gradient(115deg,transparent 20%,#ffffff34 48%,transparent 74%);
+  transform: translateX(-130%);
+  transition: transform .8s var(--ock-spring);
+}
+
+.ock-signature-btn:hover::before,
+.ock-signature-btn:focus-visible::before {
+  transform: translateX(130%);
+}
+
+.ock-signature-btn:hover {
+  --btn-y: -3px;
+  box-shadow: 0 16px 38px #00000045;
+}
+
+.ock-signature-label {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  min-width: 0;
+  text-align: left;
+}
+
+.ock-signature-label span {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+  transition:
+    transform .55s var(--ock-spring),
+    opacity .4s;
+}
+
+.ock-signature-label .ock-label-original {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.ock-signature-label .ock-label-alternate {
+  transform: translateY(125%);
+  opacity: 0;
+}
+
+.ock-signature-btn:hover .ock-label-original,
+.ock-signature-btn:focus-visible .ock-label-original {
+  transform: translateY(-125%);
+  opacity: 0;
+}
+
+.ock-signature-btn:hover .ock-label-alternate,
+.ock-signature-btn:focus-visible .ock-label-alternate {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.ock-signature-arrow {
+  display: inline-block;
+  font-size: 21px;
+  line-height: 1;
+  flex: none;
+  transition: transform .5s var(--ock-spring);
+}
+
+.ock-signature-btn:hover .ock-signature-arrow {
+  transform: translate(4px,-4px) rotate(6deg);
+}
+
+/* Liens de lecture : progression horizontale */
+
+.ock-text-link {
+  position: relative;
+  isolation: isolate;
+  transition: padding .5s var(--ock-spring), color .3s;
+}
+
+.ock-text-link::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: white;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .7s var(--ock-spring);
+}
+
+.ock-text-link:hover {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.ock-text-link:hover::after { transform: scaleX(1); }
+
+/* Projet principal : éclairage ciblé et détails techniques */
+
+.ock-deadly-card {
+  --px: 50%;
+  --py: 50%;
+  isolation: isolate;
+}
+
+.ock-deadly-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    440px circle at var(--px) var(--py),
+    #ffffff1d,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity .5s;
+}
+
+.ock-deadly-card:hover::before { opacity: 1; }
+
+.ock-deadly-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ock-deadly-name h2 {
+  transition: letter-spacing .7s var(--ock-spring);
+}
+
+.ock-deadly-card:hover .ock-deadly-name h2 {
+  letter-spacing: -.075em;
+}
+
+.ock-deadly-bottom span {
+  transition: color .4s, transform .5s var(--ock-spring);
+}
+
+.ock-deadly-card:hover .ock-deadly-bottom span {
+  color: #ffffff;
+  transform: translateY(-3px);
+}
+
+/* Cartes éditoriales : lumière et mouvement internes */
+
+.ock-explore-card,
+.panel,
+.panel.social {
+  --px: 50%;
+  --py: 50%;
+  isolation: isolate;
+}
+
+.ock-explore-card::before,
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    350px circle at var(--px) var(--py),
+    #ffffff12,
+    transparent 72%
+  );
+  opacity: 0;
+  transition: opacity .45s;
+}
+
+.ock-explore-card:hover::before,
+.panel:hover::before { opacity: 1; }
+
+.ock-explore-card > *,
+.panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.panel { position: relative; }
+
+.ock-explore-card .ock-card-index {
+  transition: color .4s, letter-spacing .6s var(--ock-spring);
+}
+
+.ock-explore-card:hover .ock-card-index {
+  color: white;
+  letter-spacing: .24em;
+}
+
+.ock-explore-large:hover .ock-card-visual {
+  transform: scale(1.1) rotate(4deg);
+}
+
+.ock-visual-type {
+  transition: transform .7s var(--ock-spring), color .5s;
+}
+
+.ock-explore-card:hover .ock-visual-type {
+  transform: translateX(16px) rotate(-9deg);
+}
+
+.ock-visual-grid {
+  transition: transform .8s var(--ock-spring);
+}
+
+.ock-explore-card:hover .ock-visual-grid {
+  transform: rotate(36deg) scale(1.08);
+}
+
+/* Pages secondaires : interactions éditoriales */
+
+.page-hero .kicker {
+  transition: letter-spacing .5s, color .5s;
+}
+
+.page-hero:hover .kicker {
+  letter-spacing: 3px;
+  color: #f6f6f6;
+}
+
+.panel.social {
+  transition:
+    background .45s,
+    border-color .45s,
+    box-shadow .45s,
+    transform .45s var(--ock-spring);
+}
+
+.panel.social h2 {
+  transition: transform .5s var(--ock-spring);
+}
+
+.panel.social:hover h2 { transform: translateX(7px); }
+
+.gallery-card .media {
+  overflow: hidden;
+}
+
+.gallery-card .media img {
+  transition: transform .75s var(--ock-spring);
+}
+
+.gallery-card:hover .media img {
+  transform: scale(1.06);
+}
+
+/* Abonnement : ne pas toucher au contenu contrôlé par Supabase */
+
+#ock-subscribe {
+  isolation: isolate;
+  letter-spacing: .015em;
+  transition:
+    transform .4s var(--ock-spring),
+    letter-spacing .4s,
+    box-shadow .45s,
+    background .35s;
+}
+
+#ock-subscribe:not(:disabled):hover {
+  letter-spacing: .045em;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 34px #ffffff18;
+}
+
+#ock-subscribe[aria-pressed="true"] {
+  border-color: #ffffffb0;
+}
+
+#ock-subscribe:disabled {
+  cursor: wait;
+}
+
+/* Animations adaptées aux appareils et préférences */
+
+@media(max-width:720px) {
+  .ock-signature-btn {
+    --btn-x: 0px !important;
+    --btn-y: 0px !important;
+  }
+  .ock-signature-label span { white-space: normal; }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .ock-signature-btn,
+  .ock-signature-label span,
+  .ock-signature-arrow,
+  .ock-text-link,
+  .ock-text-link::after,
+  .ock-deadly-card,
+  .ock-deadly-name h2,
+  .ock-deadly-bottom span,
+  .ock-explore-card,
+  .ock-explore-card *,
+  .panel,
+  .panel * {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+  .ock-label-alternate { display: none !important; }
+  .ock-label-original { opacity: 1 !important; }
+}

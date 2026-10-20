@@ -40,7 +40,7 @@
     const phrases = [
       "Développeur web",
       "Créateur de Deadly.io",
-      "Fondateur de DCAS Studio",
+      "Concepteur de jeux vidéo",
       "Création et design numérique"
     ];
 
@@ -74,7 +74,7 @@
 
   // Sliding text on navigation and action buttons.
   if (!reduce) {
-    document.querySelectorAll(".navlinks a, .actions .action").forEach(link => {
+    document.querySelectorAll(".navlinks a").forEach(link => {
       if (link.querySelector("img, svg, .motion-copy")) return;
 
       const label = link.textContent.trim();
