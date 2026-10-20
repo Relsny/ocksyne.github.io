@@ -255,6 +255,29 @@ h1 span{-webkit-background-clip:text;background-clip:text;color:transparent;
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
   h1 span{opacity:1;transform:none}
 }
+
+/* OCKSYNE RANDOM METEORS */
+.sky .shoot {
+  display: none !important;
+}
+.sky .ock-meteor {
+  position: absolute;
+  width: var(--meteor-size, 120px);
+  height: 2px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+  border-radius: 99px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,138,30,.2) 35%,
+    rgba(255,192,106,.8) 80%,
+    #fff8e9
+  );
+  filter: drop-shadow(0 0 5px rgba(255,162,60,.75));
+}
+
 </style>
 </head>
 <body>
@@ -456,5 +479,6 @@ h1 span{-webkit-background-clip:text;background-clip:text;color:transparent;
   }
 })();
 </script>
+<script src="assets/ock-meteors.js" defer></script>
 </body>
 </html>
