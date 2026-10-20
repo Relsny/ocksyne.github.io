@@ -385,6 +385,43 @@ html, body {
   }
 }
 
+
+/* OCKSYNE_AURORA_52 */
+
+/* Remplacer les anciens rideaux CSS */
+.sky .au {
+  display: none !important;
+}
+
+/* Aurores dessinées avec Canvas */
+.sky #ock-aurora-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  z-index: 0;
+  opacity: .82;
+  mix-blend-mode: screen;
+  filter: saturate(1.2);
+}
+
+/* Les étoiles et comètes restent devant les aurores */
+.sky .ock-natural-star {
+  z-index: 4;
+}
+
+.sky .ock-natural-comet {
+  z-index: 5;
+}
+
+@media (max-width: 750px) {
+  .sky #ock-aurora-canvas {
+    opacity: .72;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -404,7 +441,8 @@ html, body {
 </nav>
 
 <header class="hero" id="hero">
-  <div class="sky" id="sky" aria-hidden="true"><div class="au a"></div><div class="au b"></div><div class="au c"></div></div>
+  <div class="sky" id="sky" aria-hidden="true">
+<canvas id="ock-aurora-canvas" aria-hidden="true"></canvas><div class="au a"></div><div class="au b"></div><div class="au c"></div></div>
   <div class="stars" aria-hidden="true"></div>
   <div class="sun" aria-hidden="true">
     <div class="halo"></div>
@@ -586,6 +624,7 @@ html, body {
   }
 })();
 </script>
+<script src="assets/ock-aurora.js" defer></script>
 <script src="assets/ock-meteors.js" defer></script>
 </body>
 </html>
