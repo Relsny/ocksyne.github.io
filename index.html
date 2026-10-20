@@ -31,17 +31,13 @@
   </div>
 </div>
 <button type="button" id="ock-subscribe" disabled>S’abonner à Ocksyne</button>
-<div class="ock-login">
-  <input type="email" id="ock-email" placeholder="Ton adresse email"
-    aria-label="Adresse email de connexion" autocomplete="email">
-  <button type="button" id="ock-email-login" disabled>Connexion par email</button>
-</div>
+<div id="ock-turnstile" aria-label="Vérification de sécurité"></div>
 <p id="ock-community-status" role="status">Connexion aux statistiques...</p>
-<button type="button" class="ock-logout" id="ock-logout">Se déconnecter</button>
+
 </section>
 <section class="section"><div class="section-title">MON UNIVERS</div><div class="cards"><article class="panel"><h3>Développement</h3><p>Je crée des projets web, des interfaces et des jeux vidéo.</p></article><article class="panel"><h3>Communautés Discord</h3><p>Depuis 2024, je travaille sur la gestion, la modération et la création de serveurs.</p></article><article class="panel"><h3>DCAS Studio</h3><p>Mon projet consacré au design, à la création et à la rénovation de serveurs.</p></article></div></section>
 <section class="section"><div class="section-title">DÉCOUVRIR MES PROJETS</div><div class="cards"><article class="panel"><h3>Deadly.io</h3><p>Mon jeu de survie multijoueur en développement.</p></article><article class="panel"><h3>Belfort & Lupin</h3><p>Mon rôle au sein de la communauté francophone.</p></article><article class="panel"><h3>Code pénal Discord</h3><p>Un document pour structurer la modération et les sanctions.</p></article></div></section>
 <div class="actions"><a class="action" href="projets.html">Deadly.io ↗</a><a class="action" href="dcas.html">DCAS ↗</a><a class="action" href="palmares.html">Palmarès ↗</a></div>
 </main>
 <footer class="wrap"><span>© Ocksyne · Personal Website</span><span>Designed in black &amp; white ✧</span></footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/community-config.js"></script><script src="assets/community.js"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/community-config.js"></script><script src="assets/turnstile-config.js"></script><script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script><script src="assets/community.js" defer></script></body></html>

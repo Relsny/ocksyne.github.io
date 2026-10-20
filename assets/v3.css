@@ -70,3 +70,8 @@ footer{padding:30px 0 45px;margin-top:40px;border-top:1px solid #ffffff20;color:
 .ock-community-status{color:#aaaab8;font-size:12px;min-height:20px;margin-top:12px}
 .ock-community .ock-logout{background:transparent;color:#aaaab8;font-size:11px;padding:7px 11px}
 @media(max-width:520px){.ock-community{padding:15px}.ock-login{flex-direction:column}.ock-stat strong{font-size:28px}}
+
+/* Abonnement anonyme Ocksyne */
+#ock-turnstile{display:flex;justify-content:center;margin-top:12px}
+#ock-subscribe[aria-pressed="true"]{background:#222229;color:#f4f4f6;border-color:#ffffff65}
+#ock-subscribe:focus-visible{outline:2px solid white;outline-offset:3px}
