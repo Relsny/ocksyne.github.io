@@ -515,6 +515,54 @@ html, body {
   }
 }
 
+
+/* OCKSYNE_SUN_INTERACTIVE_V1 */
+
+/* Soleil derrière les dunes et devant le ciel */
+.hero .sun {
+  z-index: 1 !important;
+  pointer-events: none;
+  filter:
+    brightness(var(--ock-sun-bright, 1))
+    drop-shadow(
+      0 0 var(--ock-sun-glow, 20px)
+      rgba(255, 130, 25, .42)
+    );
+  transition: filter .3s ease;
+}
+
+/* Les montagnes passent visuellement devant le soleil */
+.hero .dune {
+  z-index: 2 !important;
+  pointer-events: none;
+}
+
+/* Le texte et les boutons restent au premier plan */
+.hero .hero-in {
+  z-index: 4 !important;
+}
+
+/* Réactivité plus marquée du soleil */
+.hero .sun .sunin {
+  scale: var(--ock-sun-scale, 1);
+  transition:
+    translate .22s cubic-bezier(.2,.8,.2,1),
+    scale .28s cubic-bezier(.2,.8,.2,1);
+}
+
+/* Halo lumineux réactif */
+.hero .sun .halo {
+  opacity: var(--ock-sun-halo, .8);
+  transition: opacity .25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero .sun .sunin {
+    scale: 1 !important;
+    translate: 0 0 !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -552,7 +600,7 @@ html, body {
         <circle class="ring r1" cx="300" cy="300" r="225"/>
         <circle class="ring r2" cx="300" cy="300" r="255"/>
         <circle class="ring r3" cx="300" cy="300" r="285"/>
-        <g class="deg"><text x="300" y="8" text-anchor="middle">0°</text><text x="596" y="304" text-anchor="end">90°</text><text x="300" y="598" text-anchor="middle">180°</text><text x="4" y="304">270°</text></g>
+
       </svg>
       <div class="flare"></div>
     </div>
@@ -562,7 +610,7 @@ html, body {
   <svg class="dune d3" viewBox="0 0 1200 300" preserveAspectRatio="none" aria-hidden="true"><path d="M0 220C260 170 500 240 760 210s300-50 440-10V300H0Z"/></svg>
 
   <div class="wrap hero-in">
-    <div class="coords" aria-hidden="true"><span>Repère décoratif 31°N 07°W</span><span>Soleil à <b id="alt">0</b>°</span><span>Version 5.0</span></div>
+
     <h1 id="titre" aria-label="OCKSYNE"></h1>
     <p class="lead">Je développe des sites, des interfaces et des jeux. Mon projet principal est Deadly.io.</p>
     <div class="cta">
@@ -659,7 +707,7 @@ html, body {
   function onScroll(){
     var p=Math.min(1,Math.max(0,window.scrollY/(hero.offsetHeight*0.9)));
     root.style.setProperty('--p',p.toFixed(3));
-    alt.textContent=Math.round(40-p*40);
+    if(alt) alt.textContent=Math.round(40-p*40);
     tick=false;
   }
   window.addEventListener('scroll',function(){if(!tick){tick=true;requestAnimationFrame(onScroll)}},{passive:true});
@@ -719,5 +767,101 @@ html, body {
 </script>
 <script src="assets/ock-aurora.js" defer></script>
 <script src="assets/ock-meteors.js" defer></script>
+
+<script id="ock-sun-interaction">
+(() => {
+  "use strict";
+
+  const hero = document.getElementById("hero");
+  const sun = hero && hero.querySelector(".sun");
+
+  if (!hero || !sun) return;
+
+  const root = document.documentElement;
+
+  const finePointer = window.matchMedia(
+    "(hover: hover) and (pointer: fine)"
+  ).matches;
+
+  const reducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  if (!finePointer || reducedMotion) return;
+
+  function reset() {
+    root.style.setProperty("--tx", "0px");
+    root.style.setProperty("--ty", "0px");
+    root.style.setProperty("--ock-sun-scale", "1");
+    root.style.setProperty("--ock-sun-bright", "1");
+    root.style.setProperty("--ock-sun-glow", "20px");
+    root.style.setProperty("--ock-sun-halo", ".8");
+  }
+
+  hero.addEventListener("pointermove", event => {
+    const rect = sun.getBoundingClientRect();
+
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    const dx = event.clientX - cx;
+    const dy = event.clientY - cy;
+
+    const radius = Math.max(rect.width * .65, 1);
+    const distance = Math.hypot(dx, dy);
+
+    const proximity = Math.max(
+      0,
+      1 - distance / radius
+    );
+
+    if (proximity <= 0) {
+      root.style.setProperty("--ock-sun-scale", "1");
+      root.style.setProperty("--ock-sun-bright", "1");
+      root.style.setProperty("--ock-sun-glow", "20px");
+      root.style.setProperty("--ock-sun-halo", ".8");
+      return;
+    }
+
+    const nx = Math.max(-1, Math.min(1, dx / radius));
+    const ny = Math.max(-1, Math.min(1, dy / radius));
+
+    root.style.setProperty(
+      "--tx",
+      (nx * 42).toFixed(1) + "px"
+    );
+
+    root.style.setProperty(
+      "--ty",
+      (ny * 30).toFixed(1) + "px"
+    );
+
+    root.style.setProperty(
+      "--ock-sun-scale",
+      (1 + proximity * .065).toFixed(3)
+    );
+
+    root.style.setProperty(
+      "--ock-sun-bright",
+      (1 + proximity * .22).toFixed(3)
+    );
+
+    root.style.setProperty(
+      "--ock-sun-glow",
+      (20 + proximity * 45).toFixed(1) + "px"
+    );
+
+    root.style.setProperty(
+      "--ock-sun-halo",
+      (.8 + proximity * .2).toFixed(3)
+    );
+  });
+
+  hero.addEventListener("pointerleave", reset);
+
+  reset();
+})();
+</script>
+
 </body>
 </html>
