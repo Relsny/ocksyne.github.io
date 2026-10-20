@@ -8,50 +8,186 @@
 <title>Accueil | Ocksyne</title>
 <link rel="stylesheet" href="assets/v3.css">
 <script src="assets/v3.js" defer></script>
-<link rel="stylesheet" href="assets/motion.css"><link rel="stylesheet" href="assets/home-v4.css"><link rel="stylesheet" href="assets/premium-interactions.css"><link rel="stylesheet" href="assets/oasis-sunset.css"></head>
+<link rel="stylesheet" href="assets/motion.css"><link rel="stylesheet" href="assets/home-v4.css"><link rel="stylesheet" href="assets/premium-interactions.css"><link rel="stylesheet" href="assets/oasis-sunset.css">
+<style>
+.ock-home .ock-fusion-hero {
+  position: relative;
+  width: 100%;
+  height: min(900px, 96svh);
+  min-height: 660px;
+  margin: 28px 0 0;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgba(255,138,30,.42);
+  background: #090909;
+  box-shadow: 0 30px 100px rgba(0,0,0,.45);
+}
+.ock-fusion-hero iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #090909;
+}
+@media(max-width:750px) {
+  .ock-home .ock-fusion-hero {
+    height: 90svh;
+    min-height: 570px;
+    border-radius: 16px;
+    margin-top: 15px;
+  }
+}
+</style>
+
+
+<style>
+/* OCKSYNE_FUSION_PREMIUM_V1 */
+
+/* Introduction cinématique en pleine largeur */
+.ock-home .ock-fusion-hero {
+  width: min(100vw - 24px, 1680px);
+  max-width: none;
+  height: 94svh;
+  min-height: 670px;
+  max-height: 1100px;
+  margin-top: 18px;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255,168,78,.24);
+  border-radius: 18px;
+  overflow: hidden;
+  background: #090909;
+  box-shadow:
+    0 40px 100px rgba(0,0,0,.35),
+    0 0 85px rgba(255,103,0,.09);
+}
+
+.ock-fusion-hero iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Transition entre coucher de soleil et contenu */
+.ock-home > .ock-community-section {
+  position: relative;
+  margin-top: 0;
+  padding-top: 80px;
+  padding-bottom: 55px;
+  margin-bottom: 65px;
+}
+
+.ock-home > .ock-community-section::before {
+  content: "";
+  position: absolute;
+  top: -55px;
+  left: 50%;
+  width: min(90vw, 1050px);
+  height: 145px;
+  transform: translateX(-50%);
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255,112,19,.18),
+    transparent 70%
+  );
+}
+
+.ock-home > .ock-community-section .ock-eyebrow {
+  border-top-color: rgba(255,171,88,.32);
+}
+
+.ock-home .ock-community {
+  background:
+    radial-gradient(
+      ellipse at 100% 0%,
+      rgba(255,129,25,.11),
+      transparent 62%
+    ),
+    linear-gradient(145deg,#21150f,#100d0b);
+  border: 1px solid rgba(255,166,77,.35);
+  box-shadow:
+    inset 0 1px rgba(255,219,161,.07),
+    0 20px 70px rgba(0,0,0,.25);
+}
+
+/* Réduire les ruptures entre les sections */
+.ock-home .ock-ticker {
+  margin-top: 0;
+  border-color: rgba(255,158,66,.28);
+}
+
+.ock-home .ock-editorial,
+.ock-home .ock-feature-section,
+.ock-home .ock-explore-section {
+  position: relative;
+}
+
+.ock-home .ock-deadly-card {
+  box-shadow:
+    inset 0 1px rgba(255,198,126,.12),
+    0 20px 75px rgba(0,0,0,.3);
+}
+
+/* Détails sur les liens */
+.ock-home a:focus-visible {
+  outline: 2px solid #ffc06a;
+  outline-offset: 4px;
+}
+
+/* Tablettes et téléphones */
+@media(max-width:900px) {
+  .ock-home .ock-fusion-hero {
+    height: 88svh;
+    min-height: 610px;
+  }
+
+  .ock-home > .ock-community-section {
+    padding-top: 55px;
+  }
+}
+
+@media(max-width:620px) {
+  .ock-home .ock-fusion-hero {
+    width: calc(100vw - 12px);
+    height: 91svh;
+    min-height: 560px;
+    margin-top: 8px;
+    border-radius: 12px;
+  }
+
+  .ock-home > .ock-community-section {
+    padding-top: 40px;
+    margin-bottom: 55px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .ock-home .ock-fusion-hero {
+    scroll-behavior: auto;
+  }
+}
+</style>
+
+</head>
 <body>
 <nav aria-label="Navigation principale"><a class="brand" href="index.html">OCKSYNE<span>.</span></a><div class="navlinks"><a href="index.html" class="active">Accueil</a><a href="apropos.html">À propos</a><a href="discord.html">Discord</a><a href="dcas.html">DCAS</a><a href="palmares.html">Palmarès</a><a href="projets.html">Projets</a><a href="galerie.html">Galerie</a><a href="reseaux.html">Réseaux</a></div></nav>
 
 <main class="wrap ock-home">
 
-<section class="ock-hero" aria-label="Présentation Ocksyne">
-  <div class="ock-hero-top">
-    <span><i class="ock-pulse"></i> DIGITAL CREATOR / PERSONAL PORTFOLIO</span>
-    <span class="ock-hero-index">EST. 2024 — DIGITAL SPACE</span>
-  </div>
 
-  <div class="ock-hero-main">
-    <div class="ock-hero-copy intro">
-      <div class="kicker">CREATE. CODE. EXPERIMENT.</div>
-      <h1>OCKSYNE<em>.</em></h1>
-      <div class="ock-hero-statement">
-        Je ne me contente pas
-        <span class="ock-line">de <strong id="ock-changing-word">coder.</strong></span>
-      </div>
-      <p>Je conçois des expériences numériques, des jeux vidéo et des interfaces qui donnent vie à mes idées.</p>
-      <div class="actions">
-        <a class="action ock-action-primary" href="projets.html"><span>Explorer mes créations</span><b>↗</b></a>
-        <a class="action ock-action-secondary" href="apropos.html"><span>Découvrir mon univers</span><b>↗</b></a>
-      </div>
-    </div>
-
-    <div class="ock-hero-art" aria-hidden="true">
-      <div class="ock-orbit ock-orbit-one"></div>
-      <div class="ock-orbit ock-orbit-two"></div>
-      <div class="ock-orbit ock-orbit-three"></div>
-      <div class="ock-art-core">O<span>.</span></div>
-      <div class="ock-art-tag ock-art-tag-one">WEB / JS / UI</div>
-      <div class="ock-art-tag ock-art-tag-two">GAME DEVELOPMENT</div>
-      <div class="ock-art-cross">+</div>
-      <div class="ock-art-number">001 / OCKSYNE</div>
-    </div>
-  </div>
-
-  <div class="ock-hero-bottom">
-    <span>INDEPENDENT CREATOR</span>
-    <span>SCROLL TO EXPLORE <b>↓</b></span>
-  </div>
+<section class="ock-fusion-hero" aria-label="Introduction Oasis Sunset">
+  <iframe
+    id="ock-fusion-frame"
+    title="Introduction animée OCKSYNE"
+    src="preview-oasis-5.html"
+    loading="eager"
+    scrolling="no"
+  ></iframe>
 </section>
+
 
 <section class="ock-community-section">
   <div class="ock-eyebrow"><span>04 / COMMUNITY</span><span>FOLLOW THE JOURNEY</span></div>
@@ -170,4 +306,94 @@
 </main>
 
 <footer class="wrap"><span>© Ocksyne · Personal Website</span><span>OASIS SUNSET / OCKSYNE ✧</span></footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/community-config.js"></script><script src="assets/turnstile-config.js"></script><script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script><script src="assets/community.js" defer></script><script src="assets/motion.js" defer></script><script src="assets/home-v4.js" defer></script><script src="assets/premium-interactions.js" defer></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/community-config.js"></script><script src="assets/turnstile-config.js"></script><script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script><script src="assets/community.js" defer></script><script src="assets/motion.js" defer></script><script src="assets/home-v4.js" defer></script><script src="assets/premium-interactions.js" defer></script>
+<script>
+(() => {
+  const frame = document.getElementById("ock-fusion-frame");
+  if (!frame) return;
+
+  frame.addEventListener("load", () => {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc) return;
+
+      const style = doc.createElement("style");
+      style.textContent = `
+        .nav { display: none !important; }
+        .intro { display: none !important; }
+        html { overflow: hidden !important; }
+        body { overflow: hidden !important; }
+        .hero { min-height: 100% !important; height: 100% !important; }
+      `;
+      doc.head.appendChild(style);
+
+      doc.querySelectorAll("a[href]").forEach(link => {
+        link.setAttribute("target", "_top");
+      });
+
+      console.info("OCKSYNE 5.0 — Hero Oasis activé");
+    } catch (error) {
+      console.warn("Isolation du hero indisponible", error);
+    }
+  });
+})();
+</script>
+
+
+<script>
+(() => {
+  "use strict";
+
+  const frame = document.getElementById("ock-fusion-frame");
+  if (!frame) return;
+
+  function refineHero() {
+    let doc;
+    try {
+      doc = frame.contentDocument;
+    } catch (error) {
+      return;
+    }
+
+    if (!doc || !doc.head) return;
+    if (doc.getElementById("ock-fusion-inner-style")) return;
+
+    const style = doc.createElement("style");
+    style.id = "ock-fusion-inner-style";
+
+    style.textContent = `
+      html,body {
+        margin: 0 !important;
+        overflow: hidden !important;
+        height: 100% !important;
+      }
+      .nav,.intro,.gauge,.ret {
+        display: none !important;
+      }
+      .hero {
+        height: 100% !important;
+        min-height: 100% !important;
+        overflow: hidden !important;
+      }
+      .hero-in {
+        padding-bottom: clamp(45px,7vh,95px) !important;
+      }
+    `;
+
+    doc.head.appendChild(style);
+
+    doc.querySelectorAll("a[href]").forEach(link => {
+      link.setAttribute("target", "_top");
+    });
+
+    console.info("OCKSYNE 5.1 — Hero intégré");
+  }
+
+  frame.addEventListener("load", refineHero);
+  if (frame.contentDocument?.readyState === "complete") {
+    refineHero();
+  }
+})();
+</script>
+
+</body></html>
