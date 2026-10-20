@@ -1,0 +1,258 @@
+
+/* OCKSYNE 4.0 — CINEMATIC MOTION SYSTEM */
+
+:root {
+  --motion-ease: cubic-bezier(.22,1,.36,1);
+  --motion-fast: 320ms;
+  --motion-slow: 900ms;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  --mx: 50vw;
+  --my: 50vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      450px circle at var(--mx) var(--my),
+      rgba(255,255,255,.042),
+      transparent 75%
+    );
+  opacity: .9;
+}
+
+main, nav, footer {
+  position: relative;
+}
+
+.intro h1,
+.page-hero h1 {
+  overflow: hidden;
+}
+
+.motion-letter {
+  display: inline-block;
+  white-space: pre;
+  opacity: 0;
+  transform: translateY(110%) rotate(5deg);
+  filter: blur(7px);
+  animation: ock-letter-in 1000ms var(--motion-ease) forwards;
+  animation-delay: calc(var(--letter-index) * 48ms);
+}
+
+@keyframes ock-letter-in {
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+    filter: blur(0);
+  }
+}
+
+.motion-rotator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 14px auto;
+  min-height: 28px;
+  font-size: clamp(10px,1.5vw,12px);
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.72);
+}
+
+.motion-rotator::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 13px rgba(255,255,255,.75);
+  flex: none;
+}
+
+.motion-rotator-text {
+  display: inline-block;
+  transition:
+    opacity 340ms ease,
+    filter 340ms ease,
+    transform 500ms var(--motion-ease);
+}
+
+.motion-rotator-text.is-leaving {
+  opacity: 0;
+  filter: blur(7px);
+  transform: translateY(-14px);
+}
+
+.motion-link {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.motion-link .motion-copy {
+  display: grid;
+  overflow: hidden;
+  position: relative;
+}
+
+.motion-link .motion-copy-front,
+.motion-link .motion-copy-back {
+  grid-area: 1 / 1;
+  display: block;
+  transition:
+    transform 520ms var(--motion-ease),
+    opacity 350ms ease;
+}
+
+.motion-link .motion-copy-front {
+  transform: translateY(0);
+}
+
+.motion-link .motion-copy-back {
+  transform: translateY(130%);
+  opacity: 0;
+}
+
+.motion-link:hover .motion-copy-front,
+.motion-link:focus-visible .motion-copy-front {
+  transform: translateY(-130%);
+  opacity: 0;
+}
+
+.motion-link:hover .motion-copy-back,
+.motion-link:focus-visible .motion-copy-back {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.motion-link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+body.motion-ready [data-motion-reveal] {
+  opacity: 0;
+  transform: translateY(45px);
+  filter: blur(8px);
+  transition:
+    opacity 850ms var(--motion-ease),
+    transform 850ms var(--motion-ease),
+    filter 850ms var(--motion-ease);
+  transition-delay: var(--motion-delay,0ms);
+}
+
+body.motion-ready [data-motion-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+.panel,
+.ock-stat,
+.v2-card {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --lift: 0px;
+  transform:
+    perspective(900px)
+    rotateX(var(--tilt-x))
+    rotateY(var(--tilt-y))
+    translateY(var(--lift));
+  transition:
+    transform 450ms var(--motion-ease),
+    border-color 350ms ease,
+    box-shadow 450ms ease;
+  will-change: auto;
+}
+
+.panel:hover,
+.ock-stat:hover,
+.v2-card:hover {
+  --lift: -5px;
+  border-color: rgba(255,255,255,.3);
+  box-shadow: 0 20px 55px rgba(0,0,0,.22);
+}
+
+#ock-subscribe {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 450ms var(--motion-ease),
+    box-shadow 450ms var(--motion-ease),
+    background 300ms ease;
+}
+
+#ock-subscribe:not(:disabled):hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(255,255,255,.12);
+}
+
+#ock-subscribe:not(:disabled):active {
+  transform: translateY(0) scale(.985);
+}
+
+.page-hero,
+.cover {
+  position: relative;
+}
+
+.page-hero::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 1px;
+  background: rgba(255,255,255,.45);
+  margin-top: 22px;
+  animation: ock-line 1200ms var(--motion-ease) 350ms forwards;
+}
+
+@keyframes ock-line {
+  to { width: min(100%,350px); }
+}
+
+@media (max-width: 720px) {
+  .motion-rotator {
+    gap: 8px;
+    letter-spacing: .08em;
+  }
+
+  .panel,
+  .ock-stat,
+  .v2-card {
+    --tilt-x: 0deg !important;
+    --tilt-y: 0deg !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+
+  .motion-letter,
+  body.motion-ready [data-motion-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .motion-copy-back { display: none !important; }
+  .motion-copy-front { transform: none !important; opacity: 1 !important; }
+}
