@@ -472,6 +472,49 @@ html, body {
   }
 }
 
+
+/* OCKSYNE_AURORA_EDGE_FIX_V2 */
+
+/* Aurore continue sur toute la largeur */
+.sky #ock-aurora-canvas {
+  inset: auto !important;
+  top: 5% !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+
+  width: 100% !important;
+  height: 43% !important;
+  opacity: .34 !important;
+
+  /* Estompage horizontal et vertical sans bord net */
+  -webkit-mask-image:
+    radial-gradient(
+      ellipse 92% 88% at 50% 48%,
+      black 0%,
+      black 47%,
+      transparent 100%
+    ) !important;
+
+  mask-image:
+    radial-gradient(
+      ellipse 92% 88% at 50% 48%,
+      black 0%,
+      black 47%,
+      transparent 100%
+    ) !important;
+}
+
+@media (max-width: 750px) {
+  .sky #ock-aurora-canvas {
+    top: 7% !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 38% !important;
+    opacity: .28 !important;
+  }
+}
+
 </style>
 </head>
 <body>
