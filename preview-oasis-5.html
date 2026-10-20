@@ -278,6 +278,61 @@ h1 span{-webkit-background-clip:text;background-clip:text;color:transparent;
   filter: drop-shadow(0 0 5px rgba(255,162,60,.75));
 }
 
+
+/* OCKSYNE_SOLEIL_VISIBLE_V1 */
+
+/* Garder le paysage dans la zone visible */
+html, body {
+  background: #090909;
+}
+
+.hero {
+  isolation: isolate !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* Aurores et étoiles en arrière-plan */
+.hero .sky {
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Soleil de Claude, au-dessus du fond */
+.hero .sun {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 1 !important;
+  left: 50% !important;
+  top: 13% !important;
+  width: min(78vmin, 640px) !important;
+  max-width: 92% !important;
+}
+
+/* Texte et boutons devant le soleil */
+.hero .hero-in {
+  position: relative !important;
+  z-index: 4 !important;
+}
+
+/* Ne pas laisser la navigation interne masquer le paysage */
+.nav, .intro {
+  display: none !important;
+}
+
+/* Ne jamais réactiver les anciennes étoiles répétitives */
+.sky .shoot {
+  display: none !important;
+}
+
+@media (max-width: 750px) {
+  .hero .sun {
+    top: 17% !important;
+    width: min(82vw, 510px) !important;
+  }
+}
+
 </style>
 </head>
 <body>
