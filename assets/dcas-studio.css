@@ -909,3 +909,172 @@ body.dcas-page .dcas-offer-card:hover .dcas-pack-logo {
     grid-row: auto;
   }
 }
+
+
+/* OCKSYNE_DCAS_OPTIONS_V1 */
+
+body.dcas-page .dcas-options-information {
+  padding: 25px 30px;
+  margin-bottom: 22px;
+}
+
+body.dcas-page .dcas-options-information h2 {
+  margin: 0 0 18px;
+  font-size: 24px;
+}
+
+body.dcas-page .dcas-options-information p {
+  margin: 10px 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+body.dcas-page .dcas-options-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 19px;
+}
+
+body.dcas-page .dcas-options-tags span {
+  padding: 7px 11px;
+  border-radius: 8px;
+  background: #8D51A627;
+  border: 1px solid #8D51A650;
+  color: #e2c7f4;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+body.dcas-page .dcas-options-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 20px;
+}
+
+body.dcas-page .dcas-option-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  padding: 25px;
+  border-color: #8D51A64b;
+  transition: transform .35s ease,
+              border-color .35s ease,
+              background .35s ease,
+              box-shadow .35s ease;
+}
+
+body.dcas-page .dcas-option-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--offer-accent);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb,var(--offer-accent) 28%,#160e20),
+    #0d0914
+  );
+  box-shadow: 0 15px 45px
+    color-mix(in srgb,var(--offer-accent) 23%,transparent);
+}
+
+body.dcas-page .dcas-option-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+body.dcas-page .dcas-option-card-heading h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+body.dcas-page .dcas-option-icon {
+  color: var(--offer-accent);
+  font-size: 20px;
+}
+
+body.dcas-page .dcas-option-card > p {
+  flex: 1;
+  line-height: 1.7;
+  margin: 20px 0;
+}
+
+body.dcas-page .dcas-option-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+body.dcas-page .dcas-option-card-bottom strong {
+  color: var(--offer-accent);
+  font-size: 22px;
+}
+
+body.dcas-page .dcas-option-card-bottom
+.dcas-offer-more {
+  margin: 0;
+  font-size: 11px;
+  text-align: right;
+}
+
+body.dcas-page .dcas-option-description {
+  display: flex;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid
+    color-mix(in srgb,var(--offer-accent) 40%,transparent);
+  border-radius: 13px;
+  background: #ffffff08;
+}
+
+body.dcas-page .dcas-option-description > span {
+  flex: none;
+  color: var(--offer-accent);
+  font-size: 21px;
+}
+
+body.dcas-page .dcas-option-description p {
+  margin: 0;
+  line-height: 1.7;
+}
+
+body.dcas-page .dcas-option-modal-info {
+  margin-top: 25px;
+}
+
+body.dcas-page .dcas-option-modal-info h3 {
+  font-size: 18px;
+  margin-bottom: 13px;
+}
+
+body.dcas-page .dcas-option-modal-info ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+body.dcas-page .dcas-option-modal-info li {
+  margin: 10px 0;
+  line-height: 1.7;
+  color: #d4c3dd;
+}
+
+body.dcas-page .dcas-option-modal-info p {
+  color: #bbaac9;
+  margin-top: 18px;
+  font-size: 13px;
+}
+
+@media (max-width:900px) {
+  body.dcas-page .dcas-options-grid {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+}
+
+@media (max-width:600px) {
+  body.dcas-page .dcas-options-grid {
+    grid-template-columns: 1fr;
+  }
+  body.dcas-page .dcas-option-card {
+    min-height: 190px;
+  }
+}
