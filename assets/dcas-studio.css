@@ -829,3 +829,52 @@ body.dcas-page .dcas-offer-contact {
     font-size: 14px;
   }
 }
+
+
+/* OCKSYNE_DCAS_PACK_LOGOS_V1 */
+/* Logos métalliques dans les cartes et leurs détails. */
+
+body.dcas-page .dcas-offer-mark,
+body.dcas-page .dcas-offer-large-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+body.dcas-page .dcas-offer-mark {
+  width: 40px;
+  height: 40px;
+}
+
+body.dcas-page .dcas-offer-large-mark {
+  width: 58px;
+  height: 58px;
+}
+
+body.dcas-page .dcas-pack-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 7px rgba(0,0,0,.35));
+  transition: transform .35s ease, filter .35s ease;
+}
+
+body.dcas-page .dcas-offer-card:hover .dcas-pack-logo {
+  transform: scale(1.12);
+  filter:
+    drop-shadow(0 4px 9px rgba(0,0,0,.45))
+    drop-shadow(0 0 10px var(--offer-accent));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.dcas-page .dcas-pack-logo {
+    transition: none;
+  }
+}
