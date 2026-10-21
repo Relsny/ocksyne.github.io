@@ -531,3 +531,301 @@ body.dcas-page .dcas-reflet-spot {
     will-change: auto;
   }
 }
+
+
+/* OCKSYNE_DCAS_OFFRES_V1 */
+/* Couleurs exclusives aux quatre offres */
+
+body.dcas-page .dcas-offers-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 20px;
+}
+
+body.dcas-page .dcas-offer-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 240px;
+  padding: 27px;
+  border: 1px solid color-mix(in srgb,var(--offer-accent) 30%,#422c53);
+  background: linear-gradient(145deg,#1a1121,#0e0a14 85%);
+  border-radius: 23px;
+  transition: background .4s,border-color .4s,
+              box-shadow .4s,transform .4s;
+}
+
+body.dcas-page .dcas-offer-card:hover {
+  border-color: var(--offer-accent);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb,var(--offer-accent) 36%,#160d20),
+    color-mix(in srgb,var(--offer-accent) 12%,#0b0810)
+  );
+  box-shadow: 0 14px 52px
+    color-mix(in srgb,var(--offer-accent) 33%,transparent);
+  transform: translateY(-6px);
+}
+
+body.dcas-page .dcas-offer-top {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+body.dcas-page .dcas-offer-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--offer-accent);
+  border-radius: 9px;
+  background: color-mix(in srgb,var(--offer-accent) 25%,#130c1a);
+  color: var(--offer-accent);
+  font-size: 19px;
+}
+
+body.dcas-page .dcas-offer-card h3 {
+  margin: 0;
+  font-size: clamp(18px,1.6vw,24px);
+}
+
+body.dcas-page .dcas-offer-card > p {
+  flex: 1;
+  margin: 17px 0 25px;
+  line-height: 1.7;
+}
+
+body.dcas-page .dcas-offer-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  align-self: flex-end;
+  margin-top: auto;
+  padding: 6px 0;
+  font: 700 12px/1.4 Arial,Helvetica,sans-serif;
+  color: #e9dbf0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: color .25s,transform .25s;
+}
+
+body.dcas-page .dcas-offer-more:hover,
+body.dcas-page .dcas-offer-more:focus-visible {
+  color: var(--offer-accent);
+  transform: translateX(3px);
+}
+
+body.dcas-page .dcas-offer-more:focus-visible,
+body.dcas-page .dcas-offer-close:focus-visible,
+body.dcas-page .dcas-offer-contact:focus-visible {
+  outline: 2px solid var(--offer-accent);
+  outline-offset: 5px;
+}
+
+/* Fenêtres de détails */
+body.dcas-page .dcas-offer-dialog {
+  position: fixed;
+  width: min(720px,calc(100vw - 28px));
+  max-width: 720px;
+  max-height: min(85vh,900px);
+  margin: auto;
+  padding: 28px;
+  overflow-y: auto;
+  color: #f7efff;
+  border: 1px solid var(--offer-accent);
+  border-radius: 24px;
+  background:
+    radial-gradient(ellipse at 90% 0%,
+      color-mix(in srgb,var(--offer-accent) 21%,transparent),
+      transparent 50%),
+    linear-gradient(145deg,#191020,#0d0914);
+  box-shadow: 0 30px 100px #000b;
+}
+
+body.dcas-page .dcas-offer-dialog::backdrop {
+  background: rgba(3,2,7,.82);
+  backdrop-filter: blur(10px);
+}
+
+body.dcas-page .dcas-offer-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+body.dcas-page .dcas-offer-dialog-heading {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+body.dcas-page .dcas-offer-large-mark {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border-radius: 14px;
+  border: 1px solid var(--offer-accent);
+  background: color-mix(in srgb,var(--offer-accent) 30%,#180f20);
+  color: var(--offer-accent);
+  font-size: 28px;
+}
+
+body.dcas-page .dcas-offer-dialog-eyebrow {
+  font-size: 10px;
+  letter-spacing: .16em;
+  color: #c8b5d8;
+}
+
+body.dcas-page .dcas-offer-dialog-heading h2 {
+  margin: 5px 0;
+  font-size: clamp(25px,5vw,35px);
+  color: #fff6ff;
+}
+
+body.dcas-page .dcas-offer-close {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  color: white;
+  background: #ffffff14;
+  border: 1px solid #ffffff32;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+body.dcas-page .dcas-offer-price {
+  margin: 20px 0;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #ffffff21;
+  font-size: 27px;
+  font-weight: 800;
+}
+
+body.dcas-page .dcas-offer-price del {
+  color: #ac98b9;
+  font-size: 21px;
+  margin-right: 10px;
+}
+
+body.dcas-page .dcas-offer-price strong {
+  color: var(--offer-accent);
+}
+
+body.dcas-page .dcas-offer-recommended {
+  display: inline-flex;
+  margin-bottom: 20px;
+  padding: 7px 12px;
+  color: #d3f7dd;
+  border: 1px solid #5ac38b5c;
+  border-radius: 30px;
+  background: #327f5224;
+  font-weight: 800;
+}
+
+body.dcas-page .dcas-offer-details-list,
+body.dcas-page .dcas-offer-exclusions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+body.dcas-page .dcas-offer-details-list li,
+body.dcas-page .dcas-offer-exclusions li {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 8px 0;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+body.dcas-page .dcas-offer-check {
+  flex: none;
+  color: var(--offer-accent);
+  font-size: 19px;
+  font-weight: 900;
+}
+
+body.dcas-page .dcas-offer-intro-line {
+  font-weight: 700;
+  color: #f9f0ff;
+  margin-bottom: 9px;
+}
+
+body.dcas-page .dcas-offer-exclusion-label {
+  margin: 22px 0 5px;
+  padding-top: 18px;
+  border-top: 1px solid #ffffff1e;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  color: #c5b0cf;
+  text-transform: uppercase;
+}
+
+body.dcas-page .dcas-offer-excluded {
+  color: #baadbf;
+}
+
+body.dcas-page .dcas-offer-excluded > span:first-child {
+  flex: none;
+  color: #ed626e;
+  font-weight: 900;
+  font-size: 18px;
+}
+
+body.dcas-page .dcas-offer-dialog-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 19px;
+  border-top: 1px solid #ffffff1e;
+}
+
+body.dcas-page .dcas-offer-dialog-footer > span {
+  color: #c7b7d1;
+  font-size: 12px;
+}
+
+body.dcas-page .dcas-offer-contact {
+  display: inline-flex;
+  padding: 11px 17px;
+  border: 1px solid var(--offer-accent);
+  border-radius: 11px;
+  background: color-mix(in srgb,var(--offer-accent) 40%,#1b1020);
+  color: #fff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+@media(max-width:900px) {
+  body.dcas-page .dcas-offers-grid {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:600px) {
+  body.dcas-page .dcas-offers-grid {
+    grid-template-columns: 1fr;
+  }
+  body.dcas-page .dcas-offer-card {
+    min-height: 205px;
+  }
+  body.dcas-page .dcas-offer-dialog {
+    padding: 20px;
+  }
+  body.dcas-page .dcas-offer-details-list li,
+  body.dcas-page .dcas-offer-exclusions li {
+    font-size: 14px;
+  }
+}

@@ -8,7 +8,7 @@
 <title>DCAS | Ocksyne</title>
 <link rel="stylesheet" href="assets/v3.css">
 <script src="assets/v3.js" defer></script>
-<link rel="stylesheet" href="assets/motion.css"><link rel="stylesheet" href="assets/premium-interactions.css"><link rel="stylesheet" href="assets/oasis-sunset.css"><link rel="stylesheet" href="assets/dcas-studio.css?v=dcas-reflets-1">
+<link rel="stylesheet" href="assets/motion.css"><link rel="stylesheet" href="assets/premium-interactions.css"><link rel="stylesheet" href="assets/oasis-sunset.css"><link rel="stylesheet" href="assets/dcas-studio.css?v=offres-20261021">
 </head>
 <body class="dcas-page">
 <nav aria-label="Navigation principale"><a class="brand" href="index.html">OCKSYNE<span>.</span></a><div class="navlinks"><a href="index.html">Accueil</a><a href="apropos.html">À propos</a><a href="discord.html">Discord</a><a href="dcas.html" class="active">DCAS</a><a href="palmares.html">Palmarès</a><a href="projets.html">Projets</a><a href="galerie.html">Galerie</a><a href="reseaux.html">Réseaux</a></div></nav>
@@ -56,11 +56,215 @@
     </div>
   </div>
 </section>
-<section class="section"><div class="section-title" id="dcas-offres">NOS OFFRES</div><div class="cards"><article class="panel"><h3>BASIQUE · 4,99 €</h3><p>Structure simple, salons, rôles de base et bots essentiels.</p></article><article class="panel"><h3>STANDARD · 29,99 €</h3><p>Organisation optimisée, design personnalisé et automatisations.</p></article><article class="panel"><h3>PREMIUM · 59,99 €</h3><p>Configuration avancée, sécurité renforcée et systèmes communautaires.</p></article><article class="panel"><h3>ULTIMATE · 99,99 €</h3><p>Serveur complet sur mesure et accompagnement approfondi.</p></article></div></section>
+
+<section class="section dcas-offers-section" id="dcas-offers-section"
+         data-dcas-offers="OCKSYNE_DCAS_OFFRES_V1">
+  <div class="section-title" id="dcas-offres">NOS OFFRES</div>
+  <div class="dcas-offers-grid">
+
+<article class="panel dcas-offer-card dcas-offer-basique"
+         style="--offer-accent:#6B3E0E">
+  <div class="dcas-offer-top">
+    <span class="dcas-offer-mark">◆</span>
+    <h3>BASIQUE · 4,99 €</h3>
+  </div>
+  <p>Structure simple, salons, rôles de base et bots essentiels.</p>
+  <button type="button"
+          class="dcas-offer-more"
+          data-offer-open="basique"
+          aria-haspopup="dialog"
+          aria-controls="dcas-dialog-basique">
+    Voir plus de détail <span aria-hidden="true">↗</span>
+  </button>
+</article>
+<article class="panel dcas-offer-card dcas-offer-standard"
+         style="--offer-accent:#A8A8A8">
+  <div class="dcas-offer-top">
+    <span class="dcas-offer-mark">◆</span>
+    <h3>STANDARD · 29,99 €</h3>
+  </div>
+  <p>Organisation optimisée, design personnalisé et automatisations.</p>
+  <button type="button"
+          class="dcas-offer-more"
+          data-offer-open="standard"
+          aria-haspopup="dialog"
+          aria-controls="dcas-dialog-standard">
+    Voir plus de détail <span aria-hidden="true">↗</span>
+  </button>
+</article>
+<article class="panel dcas-offer-card dcas-offer-premium"
+         style="--offer-accent:#DEA800">
+  <div class="dcas-offer-top">
+    <span class="dcas-offer-mark">◆</span>
+    <h3>PREMIUM · 59,99 €</h3>
+  </div>
+  <p>Configuration avancée, sécurité renforcée et systèmes communautaires.</p>
+  <button type="button"
+          class="dcas-offer-more"
+          data-offer-open="premium"
+          aria-haspopup="dialog"
+          aria-controls="dcas-dialog-premium">
+    Voir plus de détail <span aria-hidden="true">↗</span>
+  </button>
+</article>
+<article class="panel dcas-offer-card dcas-offer-ultimate"
+         style="--offer-accent:#00DEDA">
+  <div class="dcas-offer-top">
+    <span class="dcas-offer-mark">◆</span>
+    <h3>ULTIMATE · 99,99 €</h3>
+  </div>
+  <p>Serveur complet sur mesure et accompagnement approfondi.</p>
+  <button type="button"
+          class="dcas-offer-more"
+          data-offer-open="ultimate"
+          aria-haspopup="dialog"
+          aria-controls="dcas-dialog-ultimate">
+    Voir plus de détail <span aria-hidden="true">↗</span>
+  </button>
+</article>
+  </div>
+
+<dialog class="dcas-offer-dialog"
+        id="dcas-dialog-basique"
+        aria-labelledby="dcas-dialog-title-basique"
+        style="--offer-accent:#6B3E0E">
+  <div class="dcas-offer-dialog-header">
+    <div class="dcas-offer-dialog-heading">
+      <span class="dcas-offer-large-mark" aria-hidden="true">◆</span>
+      <div>
+        <div class="dcas-offer-dialog-eyebrow">DCAS STUDIO / NOS OFFRES</div>
+        <h2 id="dcas-dialog-title-basique">Pack Basique</h2>
+      </div>
+    </div>
+    <button class="dcas-offer-close"
+            type="button"
+            data-offer-close
+            aria-label="Fermer les détails">✕</button>
+  </div>
+  <div class="dcas-offer-price"><del>14,99 €</del> <strong>4,99 €</strong></div>
+
+  <div class="dcas-offer-dialog-body">
+    <ul class="dcas-offer-details-list">
+      <li class="dcas-offer-intro-line"><span class="dcas-offer-check" aria-hidden="true">➜</span><span>L’essentiel pour démarrer avec un serveur fonctionnel.</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Structure : Simple (Catégories, salons et rôles de base)</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Design : Classique (intégration d’emojis standards)</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Bots &amp; Automatisations : Mise en place des bots essentiels</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Sécurité : Basique (paramétrages Discord standards)</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Assistance : Suivi offert pendant 7 jours</span></li>
+    </ul>
+    <div class="dcas-offer-exclusion-label">Non inclus</div>
+    <ul class="dcas-offer-exclusions"><li class="dcas-offer-excluded"><span aria-hidden="true">✕</span><span>Suivi d’assistance offerte 1 mois</span></li><li class="dcas-offer-excluded"><span aria-hidden="true">✕</span><span>Design propre (emojis)</span></li><li class="dcas-offer-excluded"><span aria-hidden="true">✕</span><span>Bots essentiels</span></li><li class="dcas-offer-excluded"><span aria-hidden="true">✕</span><span>Sécurité renforcée</span></li></ul>
+  </div>
+  <div class="dcas-offer-dialog-footer">
+    <span>Conditions exactes à confirmer avant commande.</span>
+    <a href="https://discord.gg/EK9s2P2P8V"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="dcas-offer-contact">Contacter DCAS ↗</a>
+  </div>
+</dialog>
+<dialog class="dcas-offer-dialog"
+        id="dcas-dialog-standard"
+        aria-labelledby="dcas-dialog-title-standard"
+        style="--offer-accent:#A8A8A8">
+  <div class="dcas-offer-dialog-header">
+    <div class="dcas-offer-dialog-heading">
+      <span class="dcas-offer-large-mark" aria-hidden="true">◆</span>
+      <div>
+        <div class="dcas-offer-dialog-eyebrow">DCAS STUDIO / NOS OFFRES</div>
+        <h2 id="dcas-dialog-title-standard">Pack Standard</h2>
+      </div>
+    </div>
+    <button class="dcas-offer-close"
+            type="button"
+            data-offer-close
+            aria-label="Fermer les détails">✕</button>
+  </div>
+  <div class="dcas-offer-price"><del>39,99 €</del> <strong>29,99 €</strong></div>
+  <div class="dcas-offer-recommended">✓ Recommandé</div>
+  <div class="dcas-offer-dialog-body">
+    <ul class="dcas-offer-details-list">
+      <li class="dcas-offer-intro-line"><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Un serveur bien organisé et automatisé pour engager une communauté.</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Structure : Optimisée (Organisation claire et fluide)</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Design : Personnalisé (Salons et emojis thématiques)</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Bots &amp; Automatisations : Automatisations avancées (systèmes de bienvenue, rôles automatiques)</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Sécurité : Renforcée (Filtres anti-spam et protection basique)</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Assistance : Suivi offert pendant 1 mois</span></li>
+    </ul>
+    <div class="dcas-offer-exclusion-label">Non inclus</div>
+    <ul class="dcas-offer-exclusions"><li class="dcas-offer-excluded"><span aria-hidden="true">✕</span><span>Sécurité renforcée</span></li><li class="dcas-offer-excluded"><span aria-hidden="true">✕</span><span>Automatisations avancées</span></li></ul>
+  </div>
+  <div class="dcas-offer-dialog-footer">
+    <span>Conditions exactes à confirmer avant commande.</span>
+    <a href="https://discord.gg/EK9s2P2P8V"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="dcas-offer-contact">Contacter DCAS ↗</a>
+  </div>
+</dialog>
+<dialog class="dcas-offer-dialog"
+        id="dcas-dialog-premium"
+        aria-labelledby="dcas-dialog-title-premium"
+        style="--offer-accent:#DEA800">
+  <div class="dcas-offer-dialog-header">
+    <div class="dcas-offer-dialog-heading">
+      <span class="dcas-offer-large-mark" aria-hidden="true">◆</span>
+      <div>
+        <div class="dcas-offer-dialog-eyebrow">DCAS STUDIO / NOS OFFRES</div>
+        <h2 id="dcas-dialog-title-premium">Pack Premium</h2>
+      </div>
+    </div>
+    <button class="dcas-offer-close"
+            type="button"
+            data-offer-close
+            aria-label="Fermer les détails">✕</button>
+  </div>
+  <div class="dcas-offer-price"><del>69,99 €</del> <strong>59,99 €</strong></div>
+
+  <div class="dcas-offer-dialog-body">
+    <ul class="dcas-offer-details-list">
+      <li class="dcas-offer-intro-line"><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Pour les projets sérieux exigeant une image professionnelle.</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Structure : Serveur complet avec une organisation de niveau professionnel</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Design : Travaillé &amp; esthétique (Visuels poussés, charte harmonisée)</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Bots &amp; Automatisations : Configurations expertes (systèmes de tickets, économie, statistiques)</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Sécurité : Ultra-renforcée (Logs complets, protection anti-raid)</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Assistance : Suivi offert pendant 3 mois</span></li>
+    </ul>
+    <div class="dcas-offer-exclusion-label">Non inclus</div>
+    <ul class="dcas-offer-exclusions"><li class="dcas-offer-excluded"><span aria-hidden="true">✕</span><span>Fonctionnalités exclusives Ultimate</span></li></ul>
+  </div>
+  <div class="dcas-offer-dialog-footer">
+    <span>Conditions exactes à confirmer avant commande.</span>
+    <a href="https://discord.gg/EK9s2P2P8V"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="dcas-offer-contact">Contacter DCAS ↗</a>
+  </div>
+</dialog>
+<dialog class="dcas-offer-dialog"
+        id="dcas-dialog-ultimate"
+        aria-labelledby="dcas-dialog-title-ultimate"
+        style="--offer-accent:#00DEDA">
+  <div class="dcas-offer-dialog-header">
+    <div class="dcas-offer-dialog-heading">
+      <span class="dcas-offer-large-mark" aria-hidden="true">◆</span>
+      <div>
+        <div class="dcas-offer-dialog-eyebrow">DCAS STUDIO / NOS OFFRES</div>
+        <h2 id="dcas-dialog-title-ultimate">Pack Ultimate</h2>
+      </div>
+    </div>
+    <button class="dcas-offer-close"
+            type="button"
+            data-offer-close
+            aria-label="Fermer les détails">✕</button>
+  </div>
+  <div class="dcas-offer-price"><strong>99,99 €</strong></div>
+
+  <div class="dcas-offer-dialog-body">
+    <ul class="dcas-offer-details-list">
+      <li class="dcas-offer-intro-line"><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Le haut de gamme : sur-mesure, sécurisé au maximum et sans compromis.</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Structure : Organisation sur-mesure, complète et entièrement automatisée</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Design : Exclusif (Tous les designs personnalisés, émojis et bannières inclus)</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Bots &amp; Automatisations : Accès à toutes les fonctionnalités avancées et verrouillées</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Sécurité : Maximale (Protection absolue, anti-nuke)</span></li><li class=""><span class="dcas-offer-check" aria-hidden="true">➜</span><span>Assistance : Suivi VIP offert pendant 6 mois</span></li>
+    </ul>
+
+
+  </div>
+  <div class="dcas-offer-dialog-footer">
+    <span>Conditions exactes à confirmer avant commande.</span>
+    <a href="https://discord.gg/EK9s2P2P8V"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="dcas-offer-contact">Contacter DCAS ↗</a>
+  </div>
+</dialog>
+</section>
 <section class="section"><div class="section-title">NOS DOMAINES</div><div class="cards"><article class="panel"><h3>Création sur mesure</h3><p>Une structure adaptée au projet et à sa communauté.</p></article><article class="panel"><h3>Design</h3><p>Une présentation moderne et cohérente.</p></article><article class="panel"><h3>Automatisation</h3><p>Des bots et des systèmes configurés selon les besoins.</p></article><article class="panel"><h3>Sécurité</h3><p>Une meilleure organisation des permissions et des protections.</p></article><article class="panel"><h3>Accompagnement</h3><p>Conseils, assistance et suivi personnalisé.</p></article></div></section>
 <section class="section"><div class="section-title">OPTIONS</div><div class="cards"><article class="panel"><h3>Option Basique</h3><p>À partir de 5 €.</p></article><article class="panel"><h3>Option Standard</h3><p>À partir de 10 €.</p></article><article class="panel"><h3>Option Premium</h3><p>À partir de 20 €.</p></article><article class="panel"><h3>Option Ultimate</h3><p>À partir de 30 €.</p></article><article class="panel"><h3>Pack émojis</h3><p>25 émojis pour 5 €.</p></article></div></section>
 <div class="panel"><h2>Rejoindre DCAS</h2><p>Les prestations et leurs conditions exactes sont à confirmer avant commande.</p>
 <a class="action" href="https://discord.gg/EK9s2P2P8V" target="_blank" rel="noopener noreferrer">Serveur DCAS ↗</a></div>
 </main>
 <footer class="wrap"><span>© Ocksyne · Personal Website</span><span>Designed in black &amp; white ✧</span></footer>
-<script src="assets/motion.js" defer></script><script src="assets/premium-interactions.js" defer></script><script src="assets/dcas-reflet.js" defer></script></body></html>
+<script src="assets/motion.js" defer></script><script src="assets/premium-interactions.js" defer></script><script src="assets/dcas-reflet.js" defer></script><script src="assets/dcas-offres.js" defer></script></body></html>
