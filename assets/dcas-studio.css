@@ -393,3 +393,34 @@ body.dcas-page .panel::before {
     transparent 72%
   );
 }
+
+
+/* OCKSYNE_DCAS_CURSOR_VIOLET_V2 */
+
+/* Halo global suivant la souris */
+html body.dcas-page::before {
+  background: radial-gradient(
+    450px circle at var(--mx, 50vw) var(--my, 50vh),
+    rgba(141,81,166,.27) 0%,
+    rgba(141,81,166,.10) 35%,
+    transparent 75%
+  );
+}
+
+/* Halo des cartes */
+html body.dcas-page .panel::before,
+html body.dcas-page .dcas-logo-card::before,
+html body.dcas-page .dcas-presentation-copy::before {
+  background: radial-gradient(
+    390px circle at var(--px, 50%) var(--py, 50%),
+    rgba(141,81,166,.25),
+    transparent 72%
+  );
+}
+
+/* Lumière de fond */
+html body.dcas-page {
+  background-image:
+    radial-gradient(ellipse at 85% 9%, #8D51A629, transparent 35%),
+    radial-gradient(ellipse at 5% 65%, #8D51A612, transparent 42%);
+}
