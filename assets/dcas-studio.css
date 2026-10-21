@@ -1078,3 +1078,41 @@ body.dcas-page .dcas-option-modal-info p {
     min-height: 190px;
   }
 }
+
+
+/* OCKSYNE_DCAS_OPTION_IMAGES_V1 */
+
+body.dcas-page .dcas-options-section .dcas-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+}
+
+body.dcas-page .dcas-options-section .dcas-option-icon img,
+body.dcas-page .dcas-options-section .dcas-offer-large-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 7px rgba(0,0,0,.35));
+  transition: transform .35s ease, filter .35s ease;
+}
+
+body.dcas-page .dcas-option-card:hover .dcas-option-icon img {
+  transform: scale(1.12);
+  filter:
+    drop-shadow(0 4px 8px rgba(0,0,0,.4))
+    drop-shadow(0 0 10px var(--offer-accent));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.dcas-page .dcas-options-section img.dcas-pack-logo {
+    transition: none;
+  }
+}
