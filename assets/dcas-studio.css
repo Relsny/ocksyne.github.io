@@ -894,3 +894,18 @@ body.dcas-page .dcas-offer-card:hover .dcas-pack-logo {
     grid-column: auto;
   }
 }
+
+
+/* OCKSYNE_DCAS_ULTIMATE_CENTER_V2 */
+@media (min-width: 901px) {
+  body.dcas-page .dcas-offers-grid > .dcas-offer-ultimate {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+@media (max-width: 900px) {
+  body.dcas-page .dcas-offers-grid > .dcas-offer-ultimate {
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
