@@ -1,0 +1,376 @@
+
+/* OCKSYNE_DCAS_STUDIO_V1 */
+/* Thème exclusif DCAS Studio */
+
+body.dcas-page {
+  --dcas-purple: #8D51A6;
+  --dcas-light: #d9b5ed;
+  --dcas-white: #f7edff;
+  --oasis-orange: #8D51A6;
+  --oasis-flame: #6e2e91;
+  --oasis-amber: #d9b5ed;
+  --oasis-sand: #d9b5ed;
+  --oasis-white: #f7edff;
+  background-color: #09060e;
+  background-image:
+    radial-gradient(ellipse at 85% 9%, #8D51A629, transparent 35%),
+    radial-gradient(ellipse at 5% 65%, #8D51A612, transparent 42%);
+  color: var(--dcas-white);
+}
+
+body.dcas-page::before {
+  background: radial-gradient(
+    450px circle at var(--mx,50vw) var(--my,50vh),
+    #8D51A618, transparent 75%
+  );
+}
+
+body.dcas-page nav {
+  background: #0c0814ed;
+  border-color: #8D51A660;
+  box-shadow: 0 12px 55px #0008, 0 0 34px #8D51A615;
+}
+
+body.dcas-page .brand {
+  color: #f8efff;
+}
+
+body.dcas-page .brand span,
+body.dcas-page .page-hero h1 em {
+  color: #8D51A6;
+}
+
+body.dcas-page .navlinks a {
+  color: #c9bcd4;
+}
+
+body.dcas-page .navlinks a:hover,
+body.dcas-page .navlinks a.active {
+  background: #8D51A628;
+  color: #e6bbff;
+}
+
+body.dcas-page .navlinks a::after {
+  background: linear-gradient(90deg,#6c2b8f,#c27bea);
+}
+
+body.dcas-page .kicker,
+body.dcas-page .section-title {
+  color: #be8bd7;
+}
+
+body.dcas-page .section-title::after,
+body.dcas-page .page-hero::after {
+  background: linear-gradient(90deg,#8D51A6a8,transparent);
+}
+
+body.dcas-page .wrap {
+  width: min(1260px,calc(100% - 36px));
+}
+
+body.dcas-page .dcas-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  min-height: 550px;
+  padding: 95px 6%;
+  border: 1px solid #8D51A64a;
+  border-radius: 28px;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at 78% 40%,#8D51A653,transparent 42%),
+    radial-gradient(ellipse at 12% 95%,#6c2b8f2b,transparent 58%),
+    linear-gradient(125deg,#11091b,#09070d 72%);
+  box-shadow: 0 28px 100px #0008, inset 0 1px #ffffff12;
+}
+
+body.dcas-page .dcas-hero::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg,transparent,#aa6cc7,transparent);
+}
+
+body.dcas-page .dcas-hero-content {
+  position: relative;
+  z-index: 3;
+  max-width: 880px;
+}
+
+body.dcas-page .dcas-hero .kicker {
+  letter-spacing: .29em;
+  font-size: 12px;
+  color: #d4b2e9;
+}
+
+body.dcas-page .dcas-hero h1 {
+  position: relative;
+  margin: 20px 0;
+  font-size: clamp(55px,7.6vw,120px);
+  line-height: 1;
+  letter-spacing: -.065em;
+  color: #fff6ff;
+  text-shadow: 0 6px 30px #0009;
+}
+
+body.dcas-page .dcas-hero p {
+  margin: 20px 0 30px;
+  max-width: 700px;
+  font-size: clamp(17px,1.8vw,24px);
+  color: #d7c7e2;
+}
+
+body.dcas-page .dcas-hero-art {
+  position: absolute;
+  right: -5%;
+  top: -19%;
+  bottom: -19%;
+  width: 65%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: .54;
+  pointer-events: none;
+  z-index: 1;
+  filter: drop-shadow(0 0 40px #ad63da6b);
+  animation: dcas-logo-float 9s ease-in-out infinite alternate;
+}
+
+body.dcas-page .dcas-hero-art img {
+  width: 100%;
+  max-height: 120%;
+  object-fit: contain;
+  mix-blend-mode: screen;
+}
+
+body.dcas-page .dcas-hero-shine {
+  position: absolute;
+  inset: -70%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    110deg,
+    transparent 38%,
+    #b76ae200 44%,
+    #d7a9ff14 49%,
+    #ffffff35 50%,
+    #d7a9ff14 51%,
+    transparent 60%
+  );
+  transform: translateX(-80%) rotate(-5deg);
+  animation: dcas-light-sweep 8s ease-in-out infinite;
+}
+
+@keyframes dcas-logo-float {
+  from { transform: translate3d(0,8px,0) scale(1); }
+  to { transform: translate3d(-12px,-8px,0) scale(1.04); }
+}
+
+@keyframes dcas-light-sweep {
+  0%,23% { transform: translateX(-80%) rotate(-5deg); }
+  50%,100% { transform: translateX(80%) rotate(-5deg); }
+}
+
+body.dcas-page .dcas-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 13px;
+}
+
+body.dcas-page .dcas-primary-button,
+body.dcas-page .dcas-secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 24px;
+  border-radius: 13px;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform .3s,box-shadow .3s,border-color .3s;
+}
+
+body.dcas-page .dcas-primary-button {
+  color: white;
+  border: 1px solid #d5a2f1a8;
+  background: linear-gradient(135deg,#70318f,#8D51A6,#ab6bca);
+  box-shadow: 0 8px 30px #8D51A64c;
+}
+
+body.dcas-page .dcas-secondary-button {
+  color: #ecd5ff;
+  background: #120b1bc9;
+  border: 1px solid #8D51A66b;
+}
+
+body.dcas-page .dcas-primary-button:hover,
+body.dcas-page .dcas-secondary-button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px #8D51A64d;
+}
+
+body.dcas-page .section {
+  scroll-margin-top: 100px;
+}
+
+body.dcas-page .panel {
+  background: linear-gradient(145deg,#191021,#0d0a12 78%);
+  border-color: #8D51A64e;
+  box-shadow: inset 0 1px #e9ceff0a;
+}
+
+body.dcas-page .panel:hover {
+  border-color: #bd83dd9a;
+  background: linear-gradient(145deg,#24152e,#110d18 80%);
+  box-shadow: 0 20px 65px #8D51A619;
+}
+
+body.dcas-page .panel p {
+  color: #cbbdd6;
+}
+
+body.dcas-page .panel h2,
+body.dcas-page .panel h3 {
+  color: #fff3ff;
+}
+
+body.dcas-page .dcas-intro-grid {
+  display: grid;
+  grid-template-columns: 1.08fr 1fr;
+  align-items: stretch;
+  gap: 24px;
+}
+
+body.dcas-page .dcas-logo-card {
+  position: relative;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 35px;
+  background:
+    radial-gradient(ellipse at 50% 80%,#8D51A632,transparent 65%),
+    linear-gradient(150deg,#1a1126,#09070e);
+}
+
+body.dcas-page .dcas-logo-card::after {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border: 1px solid #ad70ce32;
+  border-radius: 13px;
+  pointer-events: none;
+}
+
+body.dcas-page .dcas-logo-card-label {
+  margin-bottom: 22px;
+  color: #d5b5e9;
+  font-size: 11px;
+  letter-spacing: .2em;
+  font-weight: 800;
+}
+
+body.dcas-page .dcas-official-logo {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 570px;
+  max-height: 310px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  filter: drop-shadow(0 0 22px #8D51A62a);
+}
+
+body.dcas-page .dcas-logo-caption {
+  margin-top: 19px;
+  letter-spacing: .2em;
+  font-weight: 800;
+  font-size: 10px;
+  color: #b995ce;
+}
+
+body.dcas-page .dcas-presentation-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(25px,3vw,42px);
+}
+
+body.dcas-page .dcas-presentation-copy h2 {
+  font-size: clamp(28px,3vw,43px);
+  letter-spacing: -.05em;
+}
+
+body.dcas-page .dcas-presentation-copy .kicker {
+  color: #b98bd4;
+}
+
+body.dcas-page .action {
+  color: white;
+  background: linear-gradient(120deg,#71358e,#8D51A6);
+  border: 1px solid #b17bcc;
+}
+
+body.dcas-page .action:hover {
+  box-shadow: 0 12px 36px #8D51A64a;
+}
+
+body.dcas-page footer {
+  border-top-color: #8D51A645;
+}
+
+@media (max-width:850px) {
+  body.dcas-page .dcas-intro-grid {
+    grid-template-columns: 1fr;
+  }
+  body.dcas-page .dcas-hero {
+    min-height: 450px;
+    padding: 70px 6%;
+  }
+  body.dcas-page .dcas-hero-art {
+    width: 90%;
+    right: -30%;
+    opacity: .25;
+  }
+}
+
+@media (max-width:550px) {
+  body.dcas-page .dcas-hero {
+    padding: 65px 24px;
+    min-height: 405px;
+    border-radius: 20px;
+  }
+  body.dcas-page .dcas-hero h1 {
+    font-size: clamp(45px,11vw,68px);
+  }
+  body.dcas-page .dcas-hero p {
+    font-size: 16px;
+  }
+  body.dcas-page .dcas-hero-art {
+    width: 130%;
+    right: -60%;
+  }
+  body.dcas-page .dcas-logo-card {
+    min-height: 260px;
+    padding: 24px;
+  }
+  body.dcas-page .dcas-official-logo {
+    max-height: 230px;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  body.dcas-page .dcas-hero-art,
+  body.dcas-page .dcas-hero-shine {
+    animation: none;
+  }
+}
