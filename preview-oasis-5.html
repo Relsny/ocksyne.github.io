@@ -616,6 +616,74 @@ html, body {
   }
 }
 
+
+/* OCKSYNE_PREMIUM_TYPO_V1 */
+
+/* Bienvenue : même famille typographique que OCKSYNE */
+.hero .lead {
+  font-family: var(--serif) !important;
+  font-weight: 600 !important;
+  font-size: clamp(1.12rem, 1.85vw, 1.48rem) !important;
+  line-height: 1.48 !important;
+  letter-spacing: -0.015em !important;
+
+  color: #fff0d9 !important;
+  width: 100% !important;
+  max-width: 55rem !important;
+  margin-top: 1.9rem !important;
+
+  /* Contour noir sur chaque caractère */
+  -webkit-text-stroke: 0.7px rgba(0,0,0,.96);
+  paint-order: stroke fill;
+
+  text-shadow:
+    -1px -1px 0 rgba(0,0,0,.9),
+     1px -1px 0 rgba(0,0,0,.9),
+    -1px  1px 0 rgba(0,0,0,.9),
+     1px  1px 0 rgba(0,0,0,.9),
+     0 3px 8px rgba(0,0,0,.95),
+     0 7px 22px rgba(0,0,0,.72);
+
+  /* Léger contraste sans cacher le soleil */
+  background: linear-gradient(
+    90deg,
+    rgba(9,6,4,.28),
+    rgba(9,6,4,.12) 65%,
+    transparent 100%
+  );
+
+  border-radius: 6px;
+  padding: .3rem .4rem;
+}
+
+/* Relief sombre discret autour du pseudo */
+.hero h1 span {
+  -webkit-text-stroke: .7px rgba(19,8,3,.78);
+  paint-order: stroke fill;
+}
+
+/* Boutons plus cohérents avec la typographie */
+.hero .btn {
+  font-family: var(--sans);
+  font-weight: 700;
+  letter-spacing: -.015em;
+}
+
+.hero .btn-ghost {
+  text-shadow: 0 2px 5px rgba(0,0,0,.9);
+}
+
+/* Conserver des proportions lisibles sur téléphone */
+@media (max-width: 750px) {
+  .hero .lead {
+    font-size: clamp(1.02rem, 3.5vw, 1.2rem) !important;
+    line-height: 1.52 !important;
+    max-width: 100% !important;
+    margin-top: 1.2rem !important;
+    -webkit-text-stroke: .45px rgba(0,0,0,.95);
+  }
+}
+
 </style>
 </head>
 <body>
