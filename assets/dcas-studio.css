@@ -374,3 +374,22 @@ body.dcas-page footer {
     animation: none;
   }
 }
+
+
+/* OCKSYNE_DCAS_CURSOR_VIOLET_V1 */
+/* Halo de souris violet, uniquement sur DCAS */
+body.dcas-page::before {
+  background: radial-gradient(
+    450px circle at var(--mx, 50vw) var(--my, 50vh),
+    rgba(141, 81, 166, .20),
+    transparent 75%
+  );
+}
+
+body.dcas-page .panel::before {
+  background: radial-gradient(
+    390px circle at var(--px, 50%) var(--py, 50%),
+    rgba(141, 81, 166, .19),
+    transparent 72%
+  );
+}
