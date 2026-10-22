@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fleur de lys 3D</title>
+<style>
+  /* Aucun fond : la page est transparente */
+  body{margin:0;height:100vh;display:grid;place-items:center;overflow:hidden;background:transparent}
+  /* Taille du logo : change 360px */
+  .stage{width:min(64vw,48vh,360px);aspect-ratio:3/4;perspective:1300px;position:relative}
+  /* Inclinaison diagonale + rotation 3D */
+  .obj{position:absolute;inset:0;transform-style:preserve-3d;
+       transform:rotateZ(14deg) rotateX(10deg) rotateY(-26deg);
+       animation:sway 2s ease-in-out infinite alternate}
+  .l,.front{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .front{transform:translateZ(14px)}
+  /* Brillance : change 4s pour la vitesse */
+  .sweep{animation:sweep 4s cubic-bezier(.5,0,.3,1) infinite}
+  .spark{transform-box:fill-box;transform-origin:center;opacity:0;animation:spark 4s ease-in-out infinite}
+  @keyframes sway{to{transform:rotateZ(14deg) rotateX(10deg) rotateY(26deg)}}
+  @keyframes sweep{0%{transform:translateX(-420px)}60%,100%{transform:translateX(760px)}}
+  @keyframes spark{0%,100%{opacity:0;transform:scale(.2) rotate(0)}12%{opacity:1;transform:scale(1) rotate(45deg)}28%{opacity:0;transform:scale(.2) rotate(90deg)}}
+  @media (prefers-reduced-motion:reduce){.obj,.sweep,.spark{animation:none}.sweep{opacity:0}}
+</style>
+</head>
+<body>
+
+<!-- Définitions : formes, dégradé or, reflet, relief -->
+<svg width="0" height="0" style="position:absolute"><defs>
+  <path id="mid" d="M300 36C336 98 364 170 364 252C364 334 338 402 324 476L276 476C262 402 236 334 236 252C236 170 264 98 300 36Z"/>
+  <path id="sr" d="M322 478C332 404 362 336 422 312C492 286 552 328 546 402C542 444 516 474 480 478C506 444 498 408 458 402C412 396 372 430 322 478Z"/>
+  <path id="sl" transform="translate(600 0) scale(-1 1)" d="M322 478C332 404 362 336 422 312C492 286 552 328 546 402C542 444 516 474 480 478C506 444 498 408 458 402C412 396 372 430 322 478Z"/>
+  <rect id="bar" x="208" y="486" width="184" height="26" rx="7"/>
+  <rect id="bar2" x="236" y="522" width="128" height="10" rx="5"/>
+  <path id="tail" d="M268 542L332 542C332 584 348 614 400 650C354 636 328 650 320 676L300 760L280 676C272 650 246 636 200 650C252 614 268 584 268 542Z"/>
+  <g id="all"><use href="#mid"/><use href="#sr"/><use href="#sl"/><use href="#bar"/><use href="#bar2"/><use href="#tail"/></g>
+
+  <!-- Couleurs de l'or : modifie les stop-color -->
+  <linearGradient id="gold" x1=".1" y1="0" x2=".9" y2="1">
+    <stop offset="0" stop-color="#fff4b8"/><stop offset=".22" stop-color="#f0bb38"/>
+    <stop offset=".45" stop-color="#a8680f"/><stop offset=".62" stop-color="#f6d062"/>
+    <stop offset=".82" stop-color="#9a5d0b"/><stop offset="1" stop-color="#e9b73c"/>
+  </linearGradient>
+  <linearGradient id="shine" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+  </linearGradient>
+  <clipPath id="cp"><use href="#mid"/><use href="#sr"/><use href="#sl"/><use href="#bar"/><use href="#bar2"/><use href="#tail"/></clipPath>
+  <filter id="bevel" x="-5%" y="-5%" width="110%" height="110%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="7" result="b"/>
+    <feSpecularLighting in="b" surfaceScale="9" specularConstant="1.1" specularExponent="32" lighting-color="#fff6d0" result="s"><fePointLight x="150" y="-120" z="320"/></feSpecularLighting>
+    <feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/>
+    <feComposite in="SourceGraphic" in2="s2" operator="arithmetic" k1="0" k2="1" k3=".85" k4="0"/>
+  </filter>
+</defs></svg>
+
+<div class="stage" role="img" aria-label="Fleur de lys dorée en 3D">
+  <div class="obj">
+    <!-- Les couches d'épaisseur sont ajoutées par le script en bas -->
+    <svg class="front" viewBox="0 0 600 800">
+      <g fill="#4a2704" stroke="#4a2704" stroke-width="7" stroke-linejoin="round"><use href="#all"/></g>
+      <g fill="url(#gold)" filter="url(#bevel)"><use href="#all"/></g>
+      <g clip-path="url(#cp)" fill="none">
+        <g stroke="#fff3c0" stroke-opacity=".7" stroke-width="7" stroke-linejoin="round"><use href="#all"/></g>
+        <!-- Nervures gravées -->
+        <g stroke="#6b3d08" stroke-opacity=".55" stroke-width="3" stroke-linecap="round">
+          <path d="M300 90C300 200 300 340 300 470"/><path d="M352 482C384 392 440 350 510 376"/><path d="M248 482C216 392 160 350 90 376"/>
+          <path d="M274 130C262 200 262 300 280 420"/><path d="M326 130C338 200 338 300 320 420"/>
+          <path d="M286 560C290 620 296 680 300 730"/><path d="M314 560C310 620 304 680 300 730"/>
+        </g>
+        <!-- Reflet qui balaye en diagonale -->
+        <g class="sweep"><rect x="-120" y="-120" width="90" height="1100" fill="url(#shine)" transform="rotate(24 300 400)"/></g>
+      </g>
+      <!-- Étincelles -->
+      <g fill="#fff">
+        <path class="spark" style="animation-delay:.4s" d="M300 20l7 22 22 7-22 7-7 22-7-22-22-7 22-7z"/>
+        <path class="spark" style="animation-delay:1.2s" d="M505 330l6 18 18 6-18 6-6 18-6-18-18-6 18-6z"/>
+        <path class="spark" style="animation-delay:2s" d="M95 335l6 18 18 6-18 6-6 18-6-18-18-6 18-6z"/>
+        <path class="spark" style="animation-delay:2.7s" d="M300 640l6 18 18 6-18 6-6 18-6-18-18-6 18-6z"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<script>
+  /* Épaisseur 3D : 14 couches dorées empilées derrière la face avant */
+  const obj=document.querySelector('.obj'), front=document.querySelector('.front');
+  for(let i=0;i<14;i++){
+    const s=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    s.setAttribute('viewBox','0 0 600 800'); s.setAttribute('class','l');
+    s.style.transform=`translateZ(${-16+i*2}px)`;
+    s.innerHTML=`<g fill="hsl(34 ${70-i}% ${18+i*1.3}%)"><use href="#all"/></g>`;
+    obj.insertBefore(s,front);
+  }
+</script>
+</body>
+</html>
