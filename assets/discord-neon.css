@@ -1026,46 +1026,56 @@ body.discord-page .section:nth-of-type(2)
   }
 }
 
-/* OCKSYNE_FLEUR_SIZE_LIMIT_V3 */
 
-/* Fleur de lys plus discrète : elle reste dans la largeur du cadre texte. */
+/* OCKSYNE_FLEUR_WIDTH_V4 */
+
+/* Le cadre de texte détermine la taille de la fleur. */
 body.discord-page .section:nth-of-type(2) .feature > div:first-child {
+  position: relative !important;
+  isolation: isolate !important;
   overflow: hidden !important;
 }
 
+/* Fleur dimensionnée sur toute la largeur disponible. */
 body.discord-page .fleur-lys-decoration {
+  position: absolute !important;
   top: 50% !important;
   left: 50% !important;
-  width: 72% !important;
-  height: 82% !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
   transform: translate(-50%, -50%) !important;
-  opacity: .13 !important;
+  opacity: .15 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
+/* Retirer le rétrécissement de la version précédente. */
 body.discord-page .fleur-lys-decoration iframe {
-  transform: scale(.82) !important;
-  transform-origin: center center !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: none !important;
+  border: 0 !important;
+  background: transparent !important;
+  pointer-events: none !important;
 }
 
-@media (max-width: 1100px) and (min-width: 701px) {
-  body.discord-page .fleur-lys-decoration {
-    width: 68% !important;
-    height: 78% !important;
-  }
-
-  body.discord-page .fleur-lys-decoration iframe {
-    transform: scale(.78) !important;
-  }
+/* Texte toujours devant la décoration. */
+body.discord-page .section:nth-of-type(2)
+.feature > div:first-child > :not(.fleur-lys-decoration) {
+  position: relative !important;
+  z-index: 2 !important;
 }
 
+/* Sur téléphone, garder toute la largeur. */
 @media (max-width: 700px) {
   body.discord-page .fleur-lys-decoration {
-    width: 62% !important;
-    height: 68% !important;
-    opacity: .10 !important;
-  }
-
-  body.discord-page .fleur-lys-decoration iframe {
-    transform: scale(.74) !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: .11 !important;
   }
 }
