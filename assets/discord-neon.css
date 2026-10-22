@@ -959,3 +959,69 @@ body.discord-page .section:nth-of-type(2) .feature > div:first-child > :not(.fle
     opacity: .8;
   }
 }
+
+
+/* OCKSYNE_FLEUR_TRANSPARENT_V2 */
+
+/* Texte et fleur dans des couches distinctes. */
+body.discord-page .section:nth-of-type(2) .feature > div:first-child {
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+/* Grande fleur doree en arriere-plan. */
+body.discord-page .fleur-lys-decoration {
+  position: absolute !important;
+  z-index: 0 !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 100% !important;
+  height: 115% !important;
+  max-width: none !important;
+  transform: translate(-50%, -50%) !important;
+  opacity: .16 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Pas de rectangle visible autour de la fleur. */
+body.discord-page .fleur-lys-decoration iframe {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 1 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color-scheme: dark;
+  pointer-events: none !important;
+}
+
+/* Les paragraphes restent devant la decoration. */
+body.discord-page .section:nth-of-type(2)
+.feature > div:first-child > :not(.fleur-lys-decoration) {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+@media (max-width: 700px) {
+  body.discord-page .fleur-lys-decoration {
+    width: 115% !important;
+    height: 110% !important;
+    opacity: .10 !important;
+  }
+}
