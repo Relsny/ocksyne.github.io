@@ -448,12 +448,66 @@ items.forEach(b=>b.addEventListener('click',()=>{
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 if(!reduce){
   /* Parallaxe souris : chaque couche bouge selon sa profondeur */
-  const layers=[...document.querySelectorAll('.layer')];
-  addEventListener('pointermove',e=>{
-    const x=e.clientX/innerWidth-.5,y=e.clientY/innerHeight-.5;
-    layers.forEach(l=>{const d=+l.dataset.depth;
-      l.style.setProperty('--mx',(-x*d)+'px');l.style.setProperty('--my',(-y*d)+'px')});
+  /* OCKSYNE_POINTER_STABILITY_V7 */
+  const layers = [...document.querySelectorAll(".layer")];
+  const front = document.querySelector(".layer.front");
+  const scene = document.getElementById("scene");
+
+  // Déplacement doux et limité : les boutons restent stables.
+  let px = 0, py = 0;
+  let active = false;
+  let locked = false;
+  let frame = 0;
+
+  const updateParallax = () => {
+    frame = 0;
+    layers.forEach(layer => {
+      const originalDepth = Number(layer.dataset.depth) || 0;
+      const depth = layer === front ? 2 : originalDepth * 0.45;
+      const x = layer === front && locked ? 0 : -px * depth;
+      const y = layer === front && locked ? 0 : -py * depth;
+      layer.style.setProperty("--mx", x.toFixed(2) + "px");
+      layer.style.setProperty("--my", y.toFixed(2) + "px");
+    });
+  };
+
+  const schedule = () => {
+    if (!frame) frame = requestAnimationFrame(updateParallax);
+  };
+
+  window.addEventListener("pointermove", event => {
+    if (event.pointerType === "touch") return;
+    const rect = document.documentElement.getBoundingClientRect();
+    const w = Math.max(rect.width, 1);
+    const h = Math.max(rect.height, 1);
+    px = Math.max(-0.5, Math.min(0.5, event.clientX / w - 0.5));
+    py = Math.max(-0.5, Math.min(0.5, event.clientY / h - 0.5));
+    active = true;
+    schedule();
+  }, {passive: true});
+
+  // Sur les boutons, la parallaxe du panneau se stabilise.
+  items.forEach(button => {
+    button.addEventListener("pointerenter", () => {
+      locked = true;
+      schedule();
+    });
+    button.addEventListener("pointerleave", () => {
+      locked = false;
+      schedule();
+    });
   });
+
+  const resetParallax = () => {
+    px = 0;
+    py = 0;
+    locked = false;
+    active = false;
+    schedule();
+  };
+
+  document.addEventListener("pointerleave", resetParallax);
+  window.addEventListener("blur", resetParallax);
 
   /* Particules lumineuses */
   const c=document.getElementById('fx'),g=c.getContext('2d');let W,H;
