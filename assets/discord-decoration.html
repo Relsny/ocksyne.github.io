@@ -404,6 +404,104 @@ canvas#fx {
 }
 </style>
 
+
+<style>
+/* OCKSYNE_DISCORD_ACCUEIL_V8 */
+
+/* En-tete de categorie style Discord. */
+.scene .front .discord-category-title {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 5px !important;
+  margin-bottom: 9px !important;
+  font-size: clamp(11px, 1.05vw, 15px) !important;
+  font-weight: 750 !important;
+  white-space: nowrap !important;
+}
+
+.scene .front .category-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scene .front .category-chevron {
+  width: 15px !important;
+  height: 15px !important;
+  flex: 0 0 15px;
+  opacity: .85;
+}
+
+/* Icônes SVG de salons Discord. */
+.scene .front .channel-icon {
+  display: block;
+  width: 17px !important;
+  height: 17px !important;
+  min-width: 17px !important;
+  flex: 0 0 17px;
+  color: #aeb5d9;
+}
+
+.scene .front .ch {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 5px !important;
+  padding: 4px 6px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  font-size: clamp(10px, 1vw, 13px) !important;
+}
+
+.scene .front .channel-emoji {
+  display: inline-block !important;
+  flex: 0 0 auto;
+  font-size: 15px !important;
+  opacity: 1 !important;
+  line-height: 1 !important;
+}
+
+.scene .front .channel-separator {
+  flex: 0 0 auto;
+  opacity: .65;
+  font-size: 14px !important;
+}
+
+.scene .front .channel-name {
+  display: inline-block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: inherit !important;
+  opacity: 1 !important;
+}
+
+.scene .front .ch:hover .channel-icon,
+.scene .front .ch.sel .channel-icon {
+  color: #fff;
+}
+
+@media (max-width: 700px) {
+  .scene .front .discord-category-title {
+    font-size: 10px !important;
+  }
+  .scene .front .ch {
+    font-size: 10px !important;
+    gap: 3px !important;
+    padding: 3px 4px !important;
+  }
+  .scene .front .channel-icon {
+    width: 13px !important;
+    height: 13px !important;
+    min-width: 13px !important;
+    flex-basis: 13px;
+  }
+  .scene .front .channel-emoji {
+    font-size: 12px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <canvas id="fx" aria-hidden="true"></canvas>
@@ -423,17 +521,17 @@ canvas#fx {
   </div></div></div>
 
   <div class="layer front" data-depth="40"><div class="panel">
-    <div class="title">
-      <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-4 3-6 7-6s7 2 7 6z"/><circle cx="17.5" cy="9" r="2.5" opacity=".7"/></svg>
-      Salons
-    </div>
-    <div id="list" role="listbox" aria-label="Salons">
-      <button class="ch sel" role="option" aria-selected="true"><span>#</span>général</button>
-      <button class="ch" role="option" aria-selected="false"><span>#</span>annonces</button>
-      <button class="ch" role="option" aria-selected="false"><span>#</span>événements</button>
-      <button class="ch" role="option" aria-selected="false"><span>#</span>staff</button>
-      <button class="ch" role="option" aria-selected="false"><span>#</span>entraide</button>
-    </div>
+    <div class="title discord-category-title">
+  <span class="category-label">👋 | ACCUEIL</span>
+  <svg class="category-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</div>
+<div id="list" role="listbox" aria-label="Salons ACCUEIL">
+<button class="ch sel" type="button" role="option" aria-selected="true"><svg class="channel-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3 6.5 21M17.5 3 15 21M3 9h18M2 16h18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/></svg><span class="channel-emoji">🛬</span><span class="channel-separator">|</span><span class="channel-name">bienvenue</span></button>
+<button class="ch" type="button" role="option" aria-selected="false"><svg class="channel-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2.5" fill="currentColor"/><path d="m8 11 2.6 2.6L16 8.5M8 17h8" fill="none" stroke="#25294f" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="channel-emoji">📜</span><span class="channel-separator">|</span><span class="channel-name">règlement</span></button>
+<button class="ch" type="button" role="option" aria-selected="false"><svg class="channel-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4a2 2 0 0 0 2 2h2l2 4h3l-2-4h1L21 20V4l-9 4H6a2 2 0 0 0-2 2Z" fill="currentColor"/><path d="M2 10v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="channel-emoji">📢</span><span class="channel-separator">|</span><span class="channel-name">annonces</span></button>
+<button class="ch" type="button" role="option" aria-selected="false"><svg class="channel-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4a2 2 0 0 0 2 2h2l2 4h3l-2-4h1L21 20V4l-9 4H6a2 2 0 0 0-2 2Z" fill="currentColor"/><path d="M2 10v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="channel-emoji">📊</span><span class="channel-separator">|</span><span class="channel-name">giveaways</span></button>
+<button class="ch" type="button" role="option" aria-selected="false"><svg class="channel-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3 6.5 21M17.5 3 15 21M3 9h18M2 16h18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/></svg><span class="channel-emoji">💎</span><span class="channel-separator">|</span><span class="channel-name">boosts</span></button>
+</div>
   </div></div>
 </div>
 
