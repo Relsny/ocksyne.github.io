@@ -847,279 +847,61 @@ body.discord-page .discord-neon-chips {
 }
 
 
-/* OCKSYNE_DISCORD_FULL_HERO_STARS_V1 */
+/* OCKSYNE_CLAUDE_FULL_CANVAS_V5 */
 
-/* Grande atmosphère lumineuse sur toute la bannière. */
+/* Le document original de Claude occupe tout le hero. */
 body.discord-page .discord-neon-hero {
   position: relative;
   isolation: isolate;
   overflow: hidden;
 }
 
-/* Étoiles réparties sur toute la largeur. */
-body.discord-page .discord-neon-hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
+/* Le canvas nest plus limite au rectangle de droite. */
+body.discord-page .discord-right-decoration {
+  position: absolute !important;
+  inset: 0 !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: none !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  border-radius: inherit !important;
+  box-shadow: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  z-index: 1 !important;
+  pointer-events: auto;
+}
+
+body.discord-page .discord-right-decoration iframe {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  opacity: 1 !important;
+}
+
+/* Le vrai logo et les textes restent devant le canvas. */
+body.discord-page .discord-neon-art {
+  z-index: 2 !important;
   pointer-events: none;
-  opacity: .85;
-  background-image:
-    radial-gradient(circle, #D9DDFF 1.3px, transparent 2px),
-    radial-gradient(circle, #8995FF 1px, transparent 2px),
-    radial-gradient(circle, #FFFFFF 1px, transparent 2px);
-  background-size:
-    83px 91px,
-    137px 123px,
-    191px 167px;
-  background-position:
-    11px 19px,
-    45px 61px,
-    92px 38px;
-  mask-image: none;
-  -webkit-mask-image: none;
-  animation: ock-discord-starfield 16s linear infinite;
 }
 
-/* Reflets bleu-violet sur toute la bannière. */
-body.discord-page .discord-neon-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  background:
-    radial-gradient(
-      ellipse 45% 85% at 8% 50%,
-      rgba(88,101,242,.35),
-      transparent 80%
-    ),
-    radial-gradient(
-      ellipse 42% 75% at 92% 50%,
-      rgba(120,92,255,.37),
-      transparent 80%
-    ),
-    radial-gradient(
-      ellipse 60% 40% at 50% 100%,
-      rgba(88,101,242,.16),
-      transparent 80%
-    ),
-    linear-gradient(120deg,#080B20,#10133A,#080B20);
-  background-size: 100% 100%;
-  animation: ock-discord-ambient-glow 9s ease-in-out infinite alternate;
-}
-
-/* Les textes restent devant les étoiles. */
 body.discord-page .discord-neon-hero > .kicker,
 body.discord-page .discord-neon-hero > h1,
 body.discord-page .discord-neon-hero > p,
 body.discord-page .discord-neon-chips {
   position: relative;
-  z-index: 3;
+  z-index: 3 !important;
 }
 
-/* Les décorations originales restent interactives. */
-body.discord-page .discord-neon-art {
-  z-index: 1;
-}
-
-body.discord-page .discord-right-decoration {
-  z-index: 2;
-}
-
-/* Léger mouvement continu des étoiles. */
-@keyframes ock-discord-starfield {
-  from {
-    background-position:
-      11px 19px,
-      45px 61px,
-      92px 38px;
-  }
-  to {
-    background-position:
-      94px 110px,
-      -92px 184px,
-      283px 205px;
-  }
-}
-
-/* Reflets animés sans déplacement des éléments. */
-@keyframes ock-discord-ambient-glow {
-  from {
-    opacity: .75;
-    filter: brightness(.9);
-  }
-  to {
-    opacity: 1;
-    filter: brightness(1.2);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  body.discord-page .discord-neon-hero::after,
-  body.discord-page .discord-neon-hero::before {
-    animation: none;
-  }
-}
-
-
-/* OCKSYNE_DISCORD_FULL_SCENE_V2 */
-
-/* Une couche qui occupe réellement 100 % du hero. */
-body.discord-page .discord-neon-hero {
-  position: relative !important;
-  isolation: isolate;
-  overflow: hidden;
-}
-
-body.discord-page .discord-full-atmosphere {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  z-index: 2 !important;
-  overflow: hidden;
-  pointer-events: none !important;
-  border-radius: inherit;
-}
-
-body.discord-page .discord-full-stars {
-  position: absolute;
-  inset: -40%;
-  pointer-events: none;
-  background-repeat: repeat;
-  will-change: transform, opacity;
-}
-
-body.discord-page .discord-stars-one {
-  opacity: .85;
-  background-image:
-    radial-gradient(circle, #ffffff 1.4px, transparent 2.4px),
-    radial-gradient(circle, #b8c0ff 1px, transparent 2px);
-  background-size: 97px 101px, 163px 173px;
-  background-position: 17px 27px, 70px 88px;
-  filter: drop-shadow(0 0 4px #8791ff);
-  animation: discord-full-drift-a 24s linear infinite;
-}
-
-body.discord-page .discord-stars-two {
-  opacity: .65;
-  background-image:
-    radial-gradient(circle, #92a2ff 1.8px, transparent 3.5px),
-    radial-gradient(circle, #ffffff 1px, transparent 2px);
-  background-size: 211px 179px, 137px 149px;
-  background-position: 35px 62px, 93px 23px;
-  filter: drop-shadow(0 0 6px #5865f2);
-  animation: discord-full-drift-b 32s linear infinite;
-}
-
-body.discord-page .discord-stars-three {
-  opacity: .48;
-  background-image:
-    radial-gradient(circle, #a3aaff 2px, transparent 5px);
-  background-size: 269px 231px;
-  background-position: 88px 73px;
-  filter: blur(.6px) drop-shadow(0 0 8px #5865f2);
-  animation: discord-full-twinkle 6s ease-in-out infinite alternate;
-}
-
-body.discord-page .discord-full-glow {
-  position: absolute;
-  pointer-events: none;
-  border-radius: 50%;
-  filter: blur(35px);
-  animation: discord-full-breathe 8s ease-in-out infinite alternate;
-}
-
-body.discord-page .discord-glow-left {
-  width: 55%;
-  height: 105%;
-  top: -5%;
-  left: -18%;
-  background: radial-gradient(
-    ellipse,
-    rgba(88,101,242,.37),
-    rgba(88,101,242,.12) 42%,
-    transparent 72%
-  );
-}
-
-body.discord-page .discord-glow-right {
-  width: 58%;
-  height: 120%;
-  top: -10%;
-  right: -20%;
-  background: radial-gradient(
-    ellipse,
-    rgba(120,93,255,.33),
-    rgba(88,101,242,.12) 45%,
-    transparent 75%
-  );
-  animation-delay: -4s;
-}
-
-body.discord-page .discord-glow-bottom {
-  width: 75%;
-  height: 55%;
-  bottom: -30%;
-  left: 13%;
-  background: radial-gradient(
-    ellipse,
-    rgba(108,116,255,.25),
-    transparent 72%
-  );
-  animation-delay: -2s;
-}
-
-/* Logo et salons restent visibles et cliquables. */
-body.discord-page .discord-neon-hero
-.discord-neon-art {
-  z-index: 3;
-}
-
-body.discord-page .discord-neon-hero
-.discord-right-decoration {
-  z-index: 4;
-  pointer-events: auto;
-}
-
-body.discord-page .discord-neon-hero > .kicker,
-body.discord-page .discord-neon-hero > h1,
-body.discord-page .discord-neon-hero > p,
-body.discord-page .discord-neon-hero
-.discord-neon-chips {
-  position: relative;
-  z-index: 5;
-}
-
-@keyframes discord-full-drift-a {
-  from { transform: translate3d(0,0,0); }
-  to { transform: translate3d(70px,-65px,0); }
-}
-
-@keyframes discord-full-drift-b {
-  from { transform: translate3d(0,0,0); }
-  to { transform: translate3d(-80px,75px,0); }
-}
-
-@keyframes discord-full-twinkle {
-  from { opacity: .25; }
-  to { opacity: .8; }
-}
-
-@keyframes discord-full-breathe {
-  from {
-    opacity: .58;
-    transform: scale(.93);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1.1);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  body.discord-page .discord-full-atmosphere * {
-    animation: none !important;
-  }
+/* Aucun faux champ etoile ajoute sur le hero. */
+body.discord-page .discord-neon-hero::after {
+  content: none !important;
 }

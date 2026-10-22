@@ -232,6 +232,76 @@ body {
 }
 </style>
 
+
+<style>
+/* OCKSYNE_CLAUDE_FULL_CANVAS_V5 */
+
+/* Transparence pour integrer le vrai canvas au hero. */
+html,
+body {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  overflow: hidden !important;
+}
+
+/* Etendre le reflet original de Claude a tout le canvas. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -10%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at 56% 50%,
+      var(--glow),
+      transparent 66%
+    );
+  opacity: .16;
+  filter: blur(40px);
+}
+
+.scene::before {
+  display: none !important;
+}
+
+/* La scene 3D reste localisee sur la droite. */
+.scene {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  left: auto !important;
+  width: clamp(290px,31%,460px) !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  aspect-ratio: auto !important;
+  perspective: 1200px !important;
+  transform-style: preserve-3d !important;
+}
+
+/* Les vraies particules de Claude occupent toute la page. */
+canvas#fx {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 700px) {
+  .scene {
+    top: auto !important;
+    bottom: 0 !important;
+    width: 70% !important;
+    height: 46% !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <canvas id="fx" aria-hidden="true"></canvas>
