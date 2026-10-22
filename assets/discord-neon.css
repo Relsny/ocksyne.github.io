@@ -1079,3 +1079,9 @@ body.discord-page .section:nth-of-type(2)
     opacity: .11 !important;
   }
 }
+
+
+/* OCKSYNE_FLEUR_UP_V5 */
+body.discord-page .fleur-lys-decoration {
+  top: calc(50% - 45px) !important;
+}
