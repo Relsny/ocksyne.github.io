@@ -708,3 +708,103 @@ body.discord-page .discord-right-decoration iframe {
     filter: none;
   }
 }
+
+
+/* OCKSYNE_DISCORD_RIGHT_SCENE_FIX_V2 */
+
+/* Animation entièrement contenue dans la partie droite. */
+body.discord-page .discord-neon-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+body.discord-page .discord-right-decoration {
+  position: absolute;
+  z-index: 1;
+  right: 12px;
+  top: 50%;
+  width: 27%;
+  height: 330px;
+  transform: translateY(-50%);
+  overflow: hidden;
+  border-radius: 20px;
+  background: #0b0d21;
+  box-shadow: none;
+  filter: none;
+}
+
+body.discord-page .discord-right-decoration iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 20px;
+  background: #0b0d21;
+  color-scheme: dark;
+}
+
+/* Le titre reste devant les décorations. */
+body.discord-page .discord-neon-hero .kicker,
+body.discord-page .discord-neon-hero h1,
+body.discord-page .discord-neon-hero > p,
+body.discord-page .discord-neon-chips {
+  position: relative;
+  z-index: 3;
+}
+
+@media (min-width: 1051px) {
+  body.discord-page .discord-neon-hero h1 {
+    font-size: clamp(54px, 6vw, 84px);
+    max-width: 62%;
+  }
+
+  body.discord-page .discord-neon-hero > p {
+    max-width: 53%;
+  }
+
+  body.discord-page .discord-neon-chips {
+    max-width: 58%;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1050px) {
+  body.discord-page .discord-right-decoration {
+    right: 5px;
+    width: 25%;
+    height: 270px;
+    opacity: .75;
+  }
+
+  body.discord-page .discord-neon-hero h1 {
+    font-size: clamp(42px, 6vw, 68px);
+    max-width: 65%;
+  }
+
+  body.discord-page .discord-neon-hero > p {
+    max-width: 57%;
+  }
+}
+
+@media (max-width: 700px) {
+  body.discord-page .discord-neon-hero {
+    min-height: 500px;
+    padding-bottom: 220px;
+  }
+
+  body.discord-page .discord-right-decoration {
+    top: auto;
+    bottom: 10px;
+    right: 10px;
+    width: 65%;
+    height: 205px;
+    transform: none;
+    opacity: .9;
+  }
+
+  body.discord-page .discord-neon-hero h1,
+  body.discord-page .discord-neon-hero > p,
+  body.discord-page .discord-neon-chips {
+    max-width: 100%;
+  }
+}
