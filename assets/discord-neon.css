@@ -845,3 +845,119 @@ body.discord-page .discord-neon-chips {
     opacity: 1;
   }
 }
+
+
+/* OCKSYNE_DISCORD_FULL_HERO_STARS_V1 */
+
+/* Grande atmosphère lumineuse sur toute la bannière. */
+body.discord-page .discord-neon-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Étoiles réparties sur toute la largeur. */
+body.discord-page .discord-neon-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .85;
+  background-image:
+    radial-gradient(circle, #D9DDFF 1.3px, transparent 2px),
+    radial-gradient(circle, #8995FF 1px, transparent 2px),
+    radial-gradient(circle, #FFFFFF 1px, transparent 2px);
+  background-size:
+    83px 91px,
+    137px 123px,
+    191px 167px;
+  background-position:
+    11px 19px,
+    45px 61px,
+    92px 38px;
+  mask-image: none;
+  -webkit-mask-image: none;
+  animation: ock-discord-starfield 16s linear infinite;
+}
+
+/* Reflets bleu-violet sur toute la bannière. */
+body.discord-page .discord-neon-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      ellipse 45% 85% at 8% 50%,
+      rgba(88,101,242,.35),
+      transparent 80%
+    ),
+    radial-gradient(
+      ellipse 42% 75% at 92% 50%,
+      rgba(120,92,255,.37),
+      transparent 80%
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 50% 100%,
+      rgba(88,101,242,.16),
+      transparent 80%
+    ),
+    linear-gradient(120deg,#080B20,#10133A,#080B20);
+  background-size: 100% 100%;
+  animation: ock-discord-ambient-glow 9s ease-in-out infinite alternate;
+}
+
+/* Les textes restent devant les étoiles. */
+body.discord-page .discord-neon-hero > .kicker,
+body.discord-page .discord-neon-hero > h1,
+body.discord-page .discord-neon-hero > p,
+body.discord-page .discord-neon-chips {
+  position: relative;
+  z-index: 3;
+}
+
+/* Les décorations originales restent interactives. */
+body.discord-page .discord-neon-art {
+  z-index: 1;
+}
+
+body.discord-page .discord-right-decoration {
+  z-index: 2;
+}
+
+/* Léger mouvement continu des étoiles. */
+@keyframes ock-discord-starfield {
+  from {
+    background-position:
+      11px 19px,
+      45px 61px,
+      92px 38px;
+  }
+  to {
+    background-position:
+      94px 110px,
+      -92px 184px,
+      283px 205px;
+  }
+}
+
+/* Reflets animés sans déplacement des éléments. */
+@keyframes ock-discord-ambient-glow {
+  from {
+    opacity: .75;
+    filter: brightness(.9);
+  }
+  to {
+    opacity: 1;
+    filter: brightness(1.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.discord-page .discord-neon-hero::after,
+  body.discord-page .discord-neon-hero::before {
+    animation: none;
+  }
+}
