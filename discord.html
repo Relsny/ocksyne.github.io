@@ -8,7 +8,62 @@
 <title>Discord | Ocksyne</title>
 <link rel="stylesheet" href="assets/v3.css">
 <script src="assets/v3.js" defer></script>
-<link rel="stylesheet" href="assets/motion.css"><link rel="stylesheet" href="assets/premium-interactions.css"><link rel="stylesheet" href="assets/oasis-sunset.css"></head>
+<link rel="stylesheet" href="assets/motion.css"><link rel="stylesheet" href="assets/premium-interactions.css"><link rel="stylesheet" href="assets/oasis-sunset.css">
+<style>
+/* OCKSYNE_DISCORD_CV_IMAGE_V1 */
+
+body .discord-cv-showcase {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  overflow: hidden !important;
+  padding: 12px !important;
+  box-sizing: border-box !important;
+  border-radius: 18px !important;
+  background: #140c08 !important;
+  border: 1px solid rgba(220,120,30,.30) !important;
+}
+
+body .discord-cv-showcase::before,
+body .discord-cv-showcase::after {
+  display: none !important;
+}
+
+body .discord-cv-showcase .discord-cv-image {
+  display: block !important;
+  position: static !important;
+  width: 100% !important;
+  max-width: 850px !important;
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+  object-fit: contain !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+  margin: 0 auto !important;
+  border-radius: 8px !important;
+}
+
+@media (max-width: 600px) {
+  body .discord-cv-showcase {
+    padding: 5px !important;
+  }
+
+  body .discord-cv-showcase .discord-cv-image {
+    border-radius: 4px !important;
+  }
+}
+</style>
+
+</head>
 <body>
 <nav aria-label="Navigation principale"><a class="brand" href="index.html">OCKSYNE<span>.</span></a><div class="navlinks"><a href="index.html">Accueil</a><a href="apropos.html">À propos</a><a href="discord.html" class="active">Discord</a><a href="dcas.html">DCAS</a><a href="palmares.html">Palmarès</a><a href="projets.html">Projets</a><a href="galerie.html">Galerie</a><a href="reseaux.html">Réseaux</a></div></nav>
 <main class="wrap"><header class="page-hero"><div class="kicker">02 / OCKSYNE WORLD</div><h1>DISCORD<em>.</em></h1><p>Mon expérience dans la création et la gestion de communautés.</p></header>
@@ -22,8 +77,8 @@
 <section class="section"><div class="section-title">CODE PÉNAL DISCORD</div><div class="panel"><h2>Mon référentiel de modération</h2>
 <p>Jai conçu un document consacré aux règles et aux sanctions afin de structurer la modération Discord.</p>
 <a class="action" target="_blank" rel="noopener noreferrer" href="https://docs.google.com/document/d/1xjjL-Vo-REYzxGaM4Um5rgCMW8Ho8p0Hf-iQJQfWO-g/edit?usp=drivesdk">Consulter mon document ↗</a></div></section>
-<section class="section"><div class="section-title">MON CV DISCORD</div><div class="panel"><h2>Mon parcours en image</h2><p>Cette zone affichera le CV Discord que je choisirai de publier.</p>
-<div class="media cv"><span>CV DISCORD</span><img class="user-image" src="assets/images/cv-discord.png" alt="CV Discord"></div></div></section>
+<section class="section"><div class="section-title">MON CV DISCORD</div><div class="panel"><h2>Mon parcours en image</h2><p>Découvrez mon parcours, mes compétences et mes expériences sur Discord.</p>
+<div class="media cv discord-cv-showcase"><img class="user-image discord-cv-image" src="assets/images/cv-discord.png?v=20261022130400" alt="CV Discord de Sir Ocksyne" loading="lazy"></div></div></section>
 </main>
 <footer class="wrap"><span>© Ocksyne · Personal Website</span><span>Designed in black &amp; white ✧</span></footer>
 <script src="assets/motion.js" defer></script><script src="assets/premium-interactions.js" defer></script></body></html>
