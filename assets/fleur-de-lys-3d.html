@@ -61,6 +61,31 @@ body {
 }
 </style>
 
+
+<style>
+/* OCKSYNE_FLEUR_BOTTOM_FIX_V10 */
+
+/* Réserver une marge verticale pour les extrémités du logo. */
+.stage {
+  width: min(94vw, 94vh, 650px) !important;
+  aspect-ratio: 3 / 4 !important;
+  max-height: 86vh !important;
+  margin: auto !important;
+  overflow: visible !important;
+}
+
+/* Une réduction verticale légère, sans changement de largeur. */
+.stage > .obj {
+  transform-origin: center center !important;
+  scale: 1 .86;
+}
+
+/* Garder les extrémités SVG visibles. */
+.stage svg {
+  overflow: visible !important;
+}
+</style>
+
 </head>
 <body>
 
