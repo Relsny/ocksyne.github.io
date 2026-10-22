@@ -961,3 +961,165 @@ body.discord-page .discord-right-decoration {
     animation: none;
   }
 }
+
+
+/* OCKSYNE_DISCORD_FULL_SCENE_V2 */
+
+/* Une couche qui occupe réellement 100 % du hero. */
+body.discord-page .discord-neon-hero {
+  position: relative !important;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+body.discord-page .discord-full-atmosphere {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 2 !important;
+  overflow: hidden;
+  pointer-events: none !important;
+  border-radius: inherit;
+}
+
+body.discord-page .discord-full-stars {
+  position: absolute;
+  inset: -40%;
+  pointer-events: none;
+  background-repeat: repeat;
+  will-change: transform, opacity;
+}
+
+body.discord-page .discord-stars-one {
+  opacity: .85;
+  background-image:
+    radial-gradient(circle, #ffffff 1.4px, transparent 2.4px),
+    radial-gradient(circle, #b8c0ff 1px, transparent 2px);
+  background-size: 97px 101px, 163px 173px;
+  background-position: 17px 27px, 70px 88px;
+  filter: drop-shadow(0 0 4px #8791ff);
+  animation: discord-full-drift-a 24s linear infinite;
+}
+
+body.discord-page .discord-stars-two {
+  opacity: .65;
+  background-image:
+    radial-gradient(circle, #92a2ff 1.8px, transparent 3.5px),
+    radial-gradient(circle, #ffffff 1px, transparent 2px);
+  background-size: 211px 179px, 137px 149px;
+  background-position: 35px 62px, 93px 23px;
+  filter: drop-shadow(0 0 6px #5865f2);
+  animation: discord-full-drift-b 32s linear infinite;
+}
+
+body.discord-page .discord-stars-three {
+  opacity: .48;
+  background-image:
+    radial-gradient(circle, #a3aaff 2px, transparent 5px);
+  background-size: 269px 231px;
+  background-position: 88px 73px;
+  filter: blur(.6px) drop-shadow(0 0 8px #5865f2);
+  animation: discord-full-twinkle 6s ease-in-out infinite alternate;
+}
+
+body.discord-page .discord-full-glow {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(35px);
+  animation: discord-full-breathe 8s ease-in-out infinite alternate;
+}
+
+body.discord-page .discord-glow-left {
+  width: 55%;
+  height: 105%;
+  top: -5%;
+  left: -18%;
+  background: radial-gradient(
+    ellipse,
+    rgba(88,101,242,.37),
+    rgba(88,101,242,.12) 42%,
+    transparent 72%
+  );
+}
+
+body.discord-page .discord-glow-right {
+  width: 58%;
+  height: 120%;
+  top: -10%;
+  right: -20%;
+  background: radial-gradient(
+    ellipse,
+    rgba(120,93,255,.33),
+    rgba(88,101,242,.12) 45%,
+    transparent 75%
+  );
+  animation-delay: -4s;
+}
+
+body.discord-page .discord-glow-bottom {
+  width: 75%;
+  height: 55%;
+  bottom: -30%;
+  left: 13%;
+  background: radial-gradient(
+    ellipse,
+    rgba(108,116,255,.25),
+    transparent 72%
+  );
+  animation-delay: -2s;
+}
+
+/* Logo et salons restent visibles et cliquables. */
+body.discord-page .discord-neon-hero
+.discord-neon-art {
+  z-index: 3;
+}
+
+body.discord-page .discord-neon-hero
+.discord-right-decoration {
+  z-index: 4;
+  pointer-events: auto;
+}
+
+body.discord-page .discord-neon-hero > .kicker,
+body.discord-page .discord-neon-hero > h1,
+body.discord-page .discord-neon-hero > p,
+body.discord-page .discord-neon-hero
+.discord-neon-chips {
+  position: relative;
+  z-index: 5;
+}
+
+@keyframes discord-full-drift-a {
+  from { transform: translate3d(0,0,0); }
+  to { transform: translate3d(70px,-65px,0); }
+}
+
+@keyframes discord-full-drift-b {
+  from { transform: translate3d(0,0,0); }
+  to { transform: translate3d(-80px,75px,0); }
+}
+
+@keyframes discord-full-twinkle {
+  from { opacity: .25; }
+  to { opacity: .8; }
+}
+
+@keyframes discord-full-breathe {
+  from {
+    opacity: .58;
+    transform: scale(.93);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.discord-page .discord-full-atmosphere * {
+    animation: none !important;
+  }
+}
