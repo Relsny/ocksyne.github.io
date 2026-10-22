@@ -116,6 +116,122 @@ html, body {
 }
 </style>
 
+
+<style>
+/* OCKSYNE_SALONS_CORRECTION_V4 */
+
+/* Toute la hauteur de la zone animee est exploitee. */
+html,
+body {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  color-scheme: dark;
+}
+
+/* Conserver le fond sombre et les effets de Claude. */
+body {
+  display: grid !important;
+  place-items: center !important;
+}
+
+/* La scene occupe le cadre entier. */
+.scene {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  aspect-ratio: auto !important;
+  perspective: 1200px !important;
+  transform-style: preserve-3d !important;
+}
+
+/* Panneau principal assez haut pour les cinq salons. */
+.scene > .layer.front {
+  left: 16% !important;
+  top: 3% !important;
+  width: 79% !important;
+  height: 94% !important;
+  z-index: 5 !important;
+}
+
+/* La rotation et le flottement originaux sont conserves. */
+.scene > .layer.front > .panel {
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 15px 12px !important;
+  overflow: hidden !important;
+  background: rgba(45,52,135,.75) !important;
+  border: 1px solid rgba(153,162,255,.50) !important;
+}
+
+/* Titre du panneau. */
+.scene .front .title {
+  flex: 0 0 auto !important;
+  margin: 0 0 9px !important;
+  font-size: 14px !important;
+}
+
+/* Repartition des cinq salons sur toute la hauteur. */
+.scene .front #list {
+  display: grid !important;
+  grid-template-rows: repeat(5,minmax(0,1fr)) !important;
+  gap: 4px !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+/* Chaque salon reste entier et cliquable. */
+.scene .front .ch {
+  display: flex !important;
+  align-items: center !important;
+  position: relative !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 5px 10px !important;
+  font-family: inherit !important;
+  font-size: clamp(11px,1.1vw,15px) !important;
+  line-height: 1.2 !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+}
+
+/* Selection lumineuse sans modifier le script original. */
+.scene .front .ch.sel,
+.scene .front .ch[aria-selected="true"] {
+  background: rgba(130,145,255,.23) !important;
+  border-color: rgba(181,191,255,.72) !important;
+  box-shadow: 0 0 17px rgba(88,101,242,.33) !important;
+  color: white !important;
+}
+
+/* Les decorations du fond ne bloquent pas les clics. */
+.scene > .layer:not(.front) {
+  pointer-events: none !important;
+}
+
+/* Plus de place pour les reflets de la scene. */
+.scene::before {
+  inset: -6% !important;
+  opacity: .32 !important;
+}
+
+/* Ne pas immobiliser les panneaux flottants. */
+@media (prefers-reduced-motion: reduce) {
+  .scene .panel {
+    animation: none !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <canvas id="fx" aria-hidden="true"></canvas>
