@@ -594,3 +594,117 @@ body.discord-page .section:first-of-type
     opacity: .25;
   }
 }
+
+
+/* OCKSYNE_DISCORD_RIGHT_SCENE_V1 */
+
+/* Panneaux Discord animes sur la droite du hero. */
+body.discord-page .discord-neon-hero {
+  min-height: 425px;
+}
+
+body.discord-page .discord-right-decoration {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: -6px;
+  width: 34%;
+  height: 370px;
+  transform: translateY(-50%);
+  pointer-events: auto;
+  overflow: visible;
+  filter: drop-shadow(0 0 24px rgba(88,101,242,.25));
+}
+
+body.discord-page .discord-right-decoration iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  border-radius: 20px;
+}
+
+/* Le texte reste lisible entre les deux decorations. */
+@media (min-width: 1051px) {
+  body.discord-page .discord-neon-hero h1 {
+    font-size: clamp(60px, 7vw, 93px);
+  }
+
+  body.discord-page .discord-neon-hero .kicker,
+  body.discord-page .discord-neon-hero h1,
+  body.discord-page .discord-neon-hero > p,
+  body.discord-page .discord-neon-chips {
+    max-width: 58%;
+  }
+
+  body.discord-page .discord-neon-art {
+    left: 12px;
+    width: 245px;
+    height: 245px;
+  }
+}
+
+/* Tablettes : panneaux plus discrets. */
+@media (min-width: 701px) and (max-width: 1050px) {
+  body.discord-page .discord-right-decoration {
+    width: 36%;
+    height: 300px;
+    right: -4px;
+    opacity: .72;
+  }
+
+  body.discord-page .discord-neon-hero h1 {
+    font-size: clamp(55px, 8vw, 90px);
+  }
+
+  body.discord-page .discord-neon-art {
+    width: 190px;
+    height: 190px;
+    left: 4px;
+  }
+}
+
+/* Telephones : decoration maintenue sans masquer le texte. */
+@media (max-width: 700px) {
+  body.discord-page .discord-neon-hero {
+    min-height: 460px;
+    justify-content: flex-start;
+    padding-top: 46px;
+    padding-bottom: 205px;
+  }
+
+  body.discord-page .discord-right-decoration {
+    top: auto;
+    bottom: 4px;
+    right: 0;
+    width: 70%;
+    height: 220px;
+    transform: none;
+    opacity: .78;
+  }
+
+  body.discord-page .discord-neon-art {
+    top: auto;
+    bottom: 18px;
+    left: -25px;
+    width: 155px;
+    height: 155px;
+    transform: none;
+    opacity: .5;
+  }
+
+  body.discord-page .discord-neon-hero h1 {
+    font-size: clamp(47px, 10vw, 75px);
+  }
+
+  body.discord-page .discord-neon-chips {
+    margin-top: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.discord-page .discord-right-decoration {
+    filter: none;
+  }
+}
