@@ -548,3 +548,49 @@ body.discord-page footer {
     transition: none;
   }
 }
+
+
+/* OCKSYNE_DISCORD_FIX_EDGES_CARDS_V1 */
+
+/* Logo Discord entier, sans découpage à gauche. */
+@media (min-width: 851px) {
+  body.discord-page .discord-neon-art {
+    left: 18px;
+    width: 280px;
+    height: 280px;
+    opacity: 1;
+  }
+}
+
+/* Suppression des blocs décoratifs sur les six cartes. */
+body.discord-page .section:first-of-type
+.cards .panel::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Cartes : conserver les animations existantes. */
+body.discord-page .section:first-of-type
+.cards .panel {
+  min-height: 130px;
+}
+
+/* Adaptation sur tablette. */
+@media (min-width: 551px) and (max-width: 850px) {
+  body.discord-page .discord-neon-art {
+    left: 8px;
+    width: 200px;
+    height: 200px;
+    opacity: .45;
+  }
+}
+
+/* Adaptation sur téléphone. */
+@media (max-width: 550px) {
+  body.discord-page .discord-neon-art {
+    left: 5px;
+    width: 145px;
+    height: 145px;
+    opacity: .25;
+  }
+}
