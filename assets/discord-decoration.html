@@ -302,6 +302,108 @@ canvas#fx {
 }
 </style>
 
+
+<style>
+/* OCKSYNE_DISCORD_POSITION_FIX_V6 */
+
+/* Scene Claude sur toute la banniere :
+   les particules et la parallaxe sont conservees. */
+.scene {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  aspect-ratio: auto !important;
+  perspective: 1200px !important;
+  transform-style: preserve-3d !important;
+}
+
+/* Bloc Salons reduit et decale vers interieur. */
+.scene > .layer.front {
+  left: 73% !important;
+  top: 9% !important;
+  width: 22% !important;
+  height: 79% !important;
+  z-index: 5 !important;
+}
+
+/* Reflets et panneaux flous de Claude
+   repositionnes dans la zone du logo Discord. */
+.scene > .layer:nth-child(1) {
+  left: 12% !important;
+  top: 28% !important;
+  width: 12% !important;
+  height: 52% !important;
+  pointer-events: none !important;
+}
+
+.scene > .layer:nth-child(2) {
+  left: 21% !important;
+  top: 17% !important;
+  width: 13% !important;
+  height: 62% !important;
+  pointer-events: none !important;
+}
+
+.scene > .layer:nth-child(3) {
+  left: 17% !important;
+  top: 66% !important;
+  width: 11% !important;
+  height: 23% !important;
+  pointer-events: none !important;
+}
+
+/* Chaque reflet occupe son conteneur.
+   Le flou et le mouvement sont preserves. */
+.scene > .layer:nth-child(1) > .back1,
+.scene > .layer:nth-child(2) > .back2,
+.scene > .layer:nth-child(3) > .back3 {
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Conserver les clics sur les cinq salons. */
+.scene > .layer.front {
+  pointer-events: auto !important;
+}
+
+@media (max-width: 1050px) and (min-width: 701px) {
+  .scene > .layer.front {
+    left: 68% !important;
+    top: 13% !important;
+    width: 27% !important;
+    height: 73% !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .scene > .layer.front {
+    left: 42% !important;
+    top: 55% !important;
+    width: 53% !important;
+    height: 40% !important;
+  }
+
+  .scene > .layer:nth-child(1) {
+    left: 8% !important;
+    top: 57% !important;
+  }
+
+  .scene > .layer:nth-child(2) {
+    left: 19% !important;
+    top: 58% !important;
+  }
+
+  .scene > .layer:nth-child(3) {
+    left: 12% !important;
+    top: 76% !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <canvas id="fx" aria-hidden="true"></canvas>
