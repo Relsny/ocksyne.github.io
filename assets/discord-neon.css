@@ -1085,3 +1085,69 @@ body.discord-page .section:nth-of-type(2)
 body.discord-page .fleur-lys-decoration {
   top: calc(50% - 30px) !important;
 }
+
+
+/* OCKSYNE_FLEUR_FREE_LAYER_V7 */
+
+/* Grand cadre Belfort : reference du calque. */
+body.discord-page .section:nth-of-type(2) .feature {
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+}
+
+/* Fleur libre de la hauteur des paragraphes. */
+body.discord-page .section:nth-of-type(2)
+.feature > .fleur-lys-decoration {
+  position: absolute !important;
+  inset: 0 auto 0 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 52% !important;
+  height: 100% !important;
+  max-width: none !important;
+  transform: none !important;
+  z-index: 0 !important;
+  opacity: .15 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+}
+
+body.discord-page .section:nth-of-type(2)
+.feature > .fleur-lys-decoration iframe {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: none !important;
+  border: 0 !important;
+  background: transparent !important;
+  pointer-events: none !important;
+}
+
+/* Priorité au texte et à la photo. */
+body.discord-page .section:nth-of-type(2)
+.feature > .belfort-copy {
+  position: relative !important;
+  z-index: 2 !important;
+  overflow: visible !important;
+  isolation: auto !important;
+  background: transparent !important;
+}
+
+body.discord-page .section:nth-of-type(2)
+.feature > .media {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+@media (max-width: 700px) {
+  body.discord-page .section:nth-of-type(2)
+  .feature > .fleur-lys-decoration {
+    width: 100% !important;
+    height: 48% !important;
+    opacity: .10 !important;
+  }
+}
