@@ -393,3 +393,63 @@ html body.projets-green-page {
   --oasis-flame: #238b53;
   --oasis-amber: #a3edbd;
 }
+
+
+/* OCKSYNE_PROJETS_HERO_CLEAN_V3 */
+
+/* Espace sous la navigation : la bannière ne colle plus au menu. */
+html body.projets-green-page main.wrap > .page-hero {
+  margin-top: 38px !important;
+  margin-bottom: 42px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+
+  /* Fond vert profond sans quadrillage dans le cadre. */
+  background:
+    radial-gradient(
+      ellipse at 78% 24%,
+      rgba(54,145,85,.25),
+      transparent 57%
+    ),
+    radial-gradient(
+      ellipse at 12% 90%,
+      rgba(33,108,65,.18),
+      transparent 60%
+    ),
+    linear-gradient(
+      135deg,
+      #102e1e 0%,
+      #0b2417 52%,
+      #07180f 100%
+    ) !important;
+}
+
+/* Supprimer uniquement les carreaux de la bannière. */
+html body.projets-green-page main.wrap > .page-hero::before {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+
+/* Conserver le texte bien au-dessus du décor. */
+html body.projets-green-page main.wrap > .page-hero
+.kicker,
+html body.projets-green-page main.wrap > .page-hero h1,
+html body.projets-green-page main.wrap > .page-hero p {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* Conserver le quadrillage diagonal sur le reste de la page. */
+html body.projets-green-page::after {
+  display: block;
+}
+
+/* Espacement adapté aux écrans plus petits. */
+@media (max-width: 700px) {
+  html body.projets-green-page main.wrap > .page-hero {
+    margin-top: 24px !important;
+    margin-bottom: 30px !important;
+  }
+}
