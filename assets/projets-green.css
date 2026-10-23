@@ -354,3 +354,42 @@ body.projets-green-page .deadly-screenshot-container
     transition:none;
   }
 }
+
+
+/* OCKSYNE_PROJETS_CURSOR_GREEN_V2 */
+
+/* Halo principal qui suit la souris. */
+html body.projets-green-page::before {
+  background: radial-gradient(
+    450px circle at var(--mx, 50vw) var(--my, 50vh),
+    rgba(52, 190, 104, .28) 0%,
+    rgba(35, 142, 77, .14) 36%,
+    rgba(18, 100, 51, .06) 55%,
+    transparent 76%
+  ) !important;
+}
+
+/* Halo interactif a interieur des cartes. */
+html body.projets-green-page .panel::before {
+  background: radial-gradient(
+    390px circle at var(--px, 50%) var(--py, 50%),
+    rgba(75, 218, 121, .22) 0%,
+    rgba(38, 150, 83, .10) 40%,
+    transparent 73%
+  ) !important;
+}
+
+/* Contours des cartes au survol. */
+html body.projets-green-page .panel:hover {
+  border-color: rgba(110, 225, 149, .7) !important;
+  box-shadow:
+    0 16px 45px rgba(24, 123, 60, .18),
+    inset 0 1px rgba(202, 255, 217, .09) !important;
+}
+
+/* Neutraliser les anciens reflets orange du curseur. */
+html body.projets-green-page {
+  --oasis-orange: #45b978;
+  --oasis-flame: #238b53;
+  --oasis-amber: #a3edbd;
+}
