@@ -1,0 +1,185 @@
+/* OCKSYNE_PROJETS_GREEN_V1 */
+
+/* Palette forestiere, sans modifier les autres pages. */
+body.projets-green-page {
+  --oasis-night: #07140e;
+  --oasis-coal: #10251a;
+  --oasis-panel: #122e20;
+  --oasis-orange: #63b885;
+  --oasis-flame: #26784e;
+  --oasis-amber: #a1e8bb;
+  --oasis-copper: #4e9871;
+  --oasis-sand: #bedfcb;
+  --oasis-white: #eefcf2;
+  color: #eaf8ee;
+  background-color: #07140e !important;
+  background-image:
+    radial-gradient(ellipse at 82% 12%,rgba(52,137,80,.23),transparent 43%),
+    radial-gradient(ellipse at 12% 63%,rgba(21,86,51,.18),transparent 50%),
+    linear-gradient(140deg,#07140e,#0d2016 55%,#07140e) !important;
+}
+
+/* Grille diagonale transparente sur tout le fond. */
+body.projets-green-page::after {
+  content: "";
+  position: fixed;
+  inset: -50vmax;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right,rgba(153,232,169,.095) 1px,transparent 1px),
+    linear-gradient(to bottom,rgba(153,232,169,.095) 1px,transparent 1px);
+  background-size: 68px 68px;
+  transform: rotate(45deg);
+  opacity: .65;
+}
+
+/* Garder tout le contenu devant le quadrillage. */
+body.projets-green-page > nav,
+body.projets-green-page > main,
+body.projets-green-page > footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* Navigation vert fonce. */
+body.projets-green-page nav {
+  background: rgba(9,29,18,.93) !important;
+  border-color: rgba(112,193,137,.25) !important;
+  box-shadow: 0 15px 50px rgba(0,0,0,.32) !important;
+}
+
+body.projets-green-page .brand span {
+  color: #82d6a0 !important;
+}
+
+body.projets-green-page .navlinks a.active,
+body.projets-green-page .navlinks a:hover {
+  color: #b4f4c7 !important;
+  background: rgba(65,150,95,.16) !important;
+}
+
+/* Grande banniere avec carreaux diagonaux subtils. */
+body.projets-green-page .page-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(110,201,140,.34) !important;
+  border-radius: 26px;
+  background:
+    radial-gradient(ellipse at 84% 28%,rgba(66,159,96,.25),transparent 50%),
+    radial-gradient(ellipse at 18% 88%,rgba(25,94,54,.19),transparent 48%),
+    linear-gradient(125deg,#102e1e,#081a11 75%) !important;
+  box-shadow:
+    0 25px 75px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(209,255,220,.09),
+    0 0 45px rgba(40,125,74,.08) !important;
+}
+
+/* Losanges transparents, vraiment en diagonale. */
+body.projets-green-page .page-hero::before {
+  content: "";
+  position: absolute;
+  inset: -65%;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right,rgba(142,223,163,.15) 1px,transparent 1px),
+    linear-gradient(to bottom,rgba(142,223,163,.15) 1px,transparent 1px);
+  background-size: 57px 57px;
+  transform: rotate(45deg);
+  opacity: .8;
+}
+
+/* Le titre reste entierement lisible. */
+body.projets-green-page .page-hero .kicker,
+body.projets-green-page .page-hero h1,
+body.projets-green-page .page-hero p {
+  position: relative;
+  z-index: 2;
+}
+
+body.projets-green-page .page-hero h1 {
+  color: #f2fff5 !important;
+  text-shadow: 0 8px 36px rgba(0,0,0,.3);
+}
+
+body.projets-green-page .page-hero h1 em {
+  color: #69ca8d !important;
+}
+
+body.projets-green-page .page-hero p {
+  color: #bfdbca !important;
+}
+
+/* Accents verts pour toutes les sections. */
+body.projets-green-page .kicker,
+body.projets-green-page .section-title {
+  color: #9ce0b4 !important;
+}
+
+body.projets-green-page .section-title::after,
+body.projets-green-page .page-hero::after {
+  background: linear-gradient(90deg,rgba(112,210,146,.65),transparent) !important;
+}
+
+/* Cartes forestieres avec reflets doux. */
+body.projets-green-page .panel {
+  border: 1px solid rgba(111,194,139,.26) !important;
+  background:
+    radial-gradient(ellipse at 0 0,rgba(55,143,82,.13),transparent 64%),
+    linear-gradient(145deg,#132f20,#0b1b12 86%) !important;
+  box-shadow:
+    inset 0 1px rgba(202,255,217,.06),
+    0 14px 32px rgba(0,0,0,.15) !important;
+}
+
+body.projets-green-page .panel:hover {
+  border-color: rgba(145,231,168,.65) !important;
+  box-shadow:
+    0 15px 45px rgba(21,100,52,.17),
+    inset 0 1px rgba(202,255,217,.09) !important;
+}
+
+body.projets-green-page .panel h2,
+body.projets-green-page .panel h3 {
+  color: #f0fff4 !important;
+}
+
+body.projets-green-page .panel p,
+body.projets-green-page .note,
+body.projets-green-page footer {
+  color: #bfd6c7 !important;
+}
+
+body.projets-green-page .deadly-preview {
+  border: 1px solid rgba(110,207,146,.36);
+  box-shadow: 0 0 28px rgba(51,155,89,.12);
+}
+
+/* Halo de souris assorti au nouveau theme. */
+body.projets-green-page::before {
+  background: radial-gradient(
+    450px circle at var(--mx,50vw) var(--my,50vh),
+    rgba(65,159,94,.18),
+    transparent 75%
+  ) !important;
+}
+
+@media (max-width: 700px) {
+  body.projets-green-page .page-hero {
+    border-radius: 19px;
+  }
+  body.projets-green-page .page-hero::before {
+    background-size: 45px 45px;
+  }
+  body.projets-green-page::after {
+    background-size: 52px 52px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.projets-green-page .panel {
+    transition: none !important;
+  }
+}
