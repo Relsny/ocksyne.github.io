@@ -425,3 +425,14 @@ body.reseaux-special-page .network-card:nth-child(3) .network-logo {
         transition: none;
     }
 }
+
+
+/* OCKSYNE_DISCORD_PSEUDO_V1 */
+body.reseaux-special-page .network-discord-static {
+  cursor: default;
+}
+
+body.reseaux-special-page .network-discord-static
+.network-card-heading {
+  gap: 0;
+}
