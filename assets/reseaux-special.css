@@ -380,8 +380,8 @@ body.reseaux-special-page {
 /* OCKSYNE_RESEAUX_LOGOS_V2 */
 
 body.reseaux-special-page .network-logo {
-    width: 88px;
-    height: 88px;
+    width: 54px;
+    height: 54px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -415,8 +415,8 @@ body.reseaux-special-page .network-card:hover .network-logo img {
 }
 
 body.reseaux-special-page .network-card:nth-child(3) .network-logo {
-    width: 105px;
-    height: 105px;
+    width: 60px;
+    height: 60px;
     margin-bottom: 7px;
 }
 
