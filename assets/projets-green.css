@@ -183,3 +183,174 @@ body.projets-green-page::before {
     transition: none !important;
   }
 }
+
+
+/* OCKSYNE_DEADLY_DCAS_PRESENTATION_V1 */
+
+body.projets-green-page .deadly-identity-grid {
+  display:grid;
+  grid-template-columns:1.04fr 1fr;
+  gap:26px;
+  align-items:stretch;
+}
+
+body.projets-green-page .deadly-identity-card,
+body.projets-green-page .deadly-presentation-card {
+  min-width:0;
+  border:1px solid rgba(109,202,141,.30);
+  border-radius:24px;
+  background:
+    radial-gradient(ellipse at 50% 90%,
+      rgba(64,158,87,.12),transparent 70%),
+    linear-gradient(145deg,#142d1e,#09160f 90%);
+  box-shadow:0 18px 46px rgba(0,0,0,.17);
+}
+
+body.projets-green-page .deadly-identity-card {
+  display:flex;
+  padding:16px;
+}
+
+body.projets-green-page .deadly-identity-inner {
+  display:flex;
+  flex:1;
+  min-height:435px;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:34px 22px 24px;
+  border:1px solid rgba(127,207,148,.22);
+  border-radius:17px;
+  background:
+    radial-gradient(ellipse at 50% 60%,
+      rgba(53,139,72,.13),transparent 64%);
+  overflow:hidden;
+}
+
+body.projets-green-page .deadly-identity-eyebrow,
+body.projets-green-page .deadly-identity-caption,
+body.projets-green-page .deadly-screenshot-label {
+  color:#aeddbc;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.20em;
+  text-align:center;
+}
+
+body.projets-green-page .deadly-logo-stage {
+  position:relative;
+  width:min(100%,360px);
+  aspect-ratio:1;
+  display:grid;
+  place-items:center;
+  margin:26px 0 19px;
+  isolation:isolate;
+}
+
+body.projets-green-page .deadly-logo-stage::before {
+  content:"";
+  position:absolute;
+  inset:8%;
+  z-index:-1;
+  border-radius:50%;
+  background:radial-gradient(circle,
+    rgba(64,172,87,.24),
+    rgba(197,169,42,.08) 35%,
+    transparent 73%);
+  filter:blur(28px);
+  animation:deadly-identity-glow 6s ease-in-out infinite alternate;
+}
+
+body.projets-green-page .deadly-original-logo {
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  filter:drop-shadow(0 10px 24px rgba(0,0,0,.28));
+  transition:transform .45s ease,filter .45s ease;
+}
+
+body.projets-green-page .deadly-identity-card:hover
+.deadly-original-logo {
+  transform:scale(1.035);
+  filter:
+    drop-shadow(0 12px 25px rgba(0,0,0,.30))
+    drop-shadow(0 0 12px rgba(82,196,103,.17));
+}
+
+body.projets-green-page .deadly-presentation-card {
+  display:flex;
+  flex-direction:column;
+  padding:clamp(25px,3.3vw,44px);
+}
+
+body.projets-green-page .deadly-presentation-card .kicker {
+  margin-bottom:25px;
+  color:#a3d7b4;
+}
+
+body.projets-green-page .deadly-presentation-card h2 {
+  font-size:clamp(35px,3.7vw,50px);
+  line-height:1.12;
+  letter-spacing:-.04em;
+  color:#f2fff5;
+}
+
+body.projets-green-page .deadly-presentation-body {
+  margin-top:20px;
+}
+
+body.projets-green-page .deadly-presentation-body p {
+  line-height:1.8;
+  color:#c2d9c9;
+}
+
+body.projets-green-page .deadly-screenshot-label {
+  margin:25px 0 13px;
+  text-align:left;
+}
+
+body.projets-green-page .deadly-screenshot-container {
+  margin-top:auto;
+}
+
+body.projets-green-page .deadly-screenshot-container
+.deadly-preview {
+  position:relative;
+  height:170px;
+  overflow:hidden;
+  border-radius:13px;
+}
+
+body.projets-green-page .deadly-screenshot-container
+.deadly-preview img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+@keyframes deadly-identity-glow {
+  from {opacity:.52;transform:scale(.93)}
+  to {opacity:1;transform:scale(1.06)}
+}
+
+@media (max-width:850px) {
+  body.projets-green-page .deadly-identity-grid {
+    grid-template-columns:1fr;
+  }
+  body.projets-green-page .deadly-identity-inner {
+    min-height:340px;
+  }
+  body.projets-green-page .deadly-logo-stage {
+    width:min(75%,310px);
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  body.projets-green-page .deadly-logo-stage::before {
+    animation:none;
+  }
+  body.projets-green-page .deadly-original-logo {
+    transition:none;
+  }
+}
