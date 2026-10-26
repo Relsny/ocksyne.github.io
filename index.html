@@ -201,7 +201,7 @@
   <iframe
     id="ock-fusion-frame"
     title="Introduction animée OCKSYNE"
-    src="preview-oasis-5.html?v=20261026190216"
+    src="preview-oasis-5.html?v=20261026190710"
     loading="eager"
     scrolling="no"
   ></iframe>
@@ -422,5 +422,48 @@
 })();
 </script>
 
+
+
+<script id="ock-fps-frame-controller-v1">
+(() => {
+  "use strict";
+
+  const frame = document.getElementById("ock-fusion-frame");
+
+  if (!frame) return;
+
+  let visible = true;
+
+  function sync() {
+    if (!frame.contentWindow) return;
+
+    frame.contentWindow.postMessage({
+      type: "OCKSYNE_FPS_VISIBILITY",
+      visible: visible && !document.hidden
+    }, location.origin);
+  }
+
+  const observer = new IntersectionObserver(entries => {
+    visible = entries[0].isIntersecting;
+    sync();
+  }, {threshold: 0.01});
+
+  observer.observe(frame);
+
+  frame.addEventListener("load", sync);
+
+  window.addEventListener("message", event => {
+    if (event.origin !== location.origin) return;
+    if (event.source !== frame.contentWindow) return;
+
+    if (event.data &&
+        event.data.type === "OCKSYNE_FPS_REQUEST_VISIBILITY") {
+      sync();
+    }
+  });
+
+  document.addEventListener("visibilitychange", sync);
+})();
+</script>
 
 </body></html>

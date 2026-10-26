@@ -681,6 +681,59 @@ html, body {
 }
 
 </style>
+
+<style id="ock-fps-sun-v1">
+/* OCKSYNE FPS OPTIMIZATION V1 */
+
+/* Le halo et les dégradés restent visibles.
+   On supprime le filtre global coûteux qui
+   était recalculé pendant les interactions. */
+.hero .sun {
+  filter: none !important;
+}
+
+/* Garder une rotation principale, rendre statiques
+   les couches secondaires. */
+.hero .sun .rays.a {
+  will-change: transform;
+}
+
+.hero .sun .rays.b {
+  animation: none !important;
+}
+
+.hero .sun .tex {
+  animation: none !important;
+}
+
+/* Garder le halo, avec une animation douce. */
+.hero .sun .halo {
+  animation-duration: 10s !important;
+}
+
+/* Éviter de préparer en permanence des couches
+   graphiques supplémentaires inutiles. */
+.hero .sun .sunin {
+  will-change: auto !important;
+}
+
+/* Suspendre toute animation dans l'introduction
+   lorsque celle-ci est hors écran. */
+html.ock-fps-paused *,
+html.ock-fps-paused *::before,
+html.ock-fps-paused *::after {
+  animation-play-state: paused !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero .sun .rays.a,
+  .hero .sun .halo {
+    animation: none !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <script>document.documentElement.classList.add('js')</script>
@@ -1086,6 +1139,43 @@ html, body {
     subtree: true,
     childList: true,
     characterData: true
+  });
+})();
+</script>
+
+
+<script id="ock-fps-frame-receiver-v1">
+(() => {
+  "use strict";
+
+  function setPaused(paused) {
+    document.documentElement.classList.toggle(
+      "ock-fps-paused",
+      paused || document.hidden
+    );
+  }
+
+  window.addEventListener("message", event => {
+    if (event.origin !== location.origin) return;
+    if (!event.data ||
+        event.data.type !== "OCKSYNE_FPS_VISIBILITY") return;
+
+    setPaused(!event.data.visible);
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      setPaused(true);
+    } else {
+      try {
+        parent.postMessage(
+          {type: "OCKSYNE_FPS_REQUEST_VISIBILITY"},
+          location.origin
+        );
+      } catch (_) {
+        setPaused(false);
+      }
+    }
   });
 })();
 </script>
