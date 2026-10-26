@@ -792,6 +792,61 @@ html {
 }
 </style>
 
+
+<script id="ock-mouse-fps-v1">
+(() => {
+  "use strict";
+
+  function blockMouseAnimation(event) {
+    event.stopImmediatePropagation();
+  }
+
+  window.addEventListener(
+    "pointermove",
+    blockMouseAnimation,
+    {capture: true, passive: true}
+  );
+
+  window.addEventListener(
+    "mousemove",
+    blockMouseAnimation,
+    {capture: true, passive: true}
+  );
+
+  console.info(
+    "OCKSYNE FPS: effets graphiques liés à la souris désactivés"
+  );
+})();
+</script>
+
+
+<style id="ock-mouse-fps-style-v1">
+/* Garder l'apparence orange sans réaction au mouvement */
+
+.hero .sun,
+.hero .sun .sunin,
+.hero .sun .halo,
+.hero .sun .rays {
+  transition: none !important;
+}
+
+.hero .sun .sunin {
+  translate: 0 0 !important;
+  transform: none !important;
+}
+
+.hero .sun {
+  filter: none !important;
+}
+
+/* Empêcher les décorations du soleil de capter
+   les événements, sans bloquer les boutons. */
+.hero .sun,
+.hero .sun * {
+  pointer-events: none !important;
+}
+</style>
+
 </head>
 <body>
 <script>document.documentElement.classList.add('js')</script>
