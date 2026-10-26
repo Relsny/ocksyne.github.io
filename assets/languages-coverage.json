@@ -1,0 +1,22 @@
+{
+  "version": 3,
+  "generated": "20261026184918",
+  "pages": [
+    "index.html",
+    "apropos.html",
+    "discord.html",
+    "dcas.html",
+    "projets.html",
+    "galerie.html",
+    "reseaux.html"
+  ],
+  "static_and_candidate_texts": 347,
+  "dynamic_text_candidates": 36,
+  "english_coverage": 347,
+  "polish_coverage": 347,
+  "remaining_missing": {
+    "en": [],
+    "pl": []
+  },
+  "note": "100% des textes extraits et candidats recensés. Les états dynamiques non recensés nécessitent une vérification."
+}
