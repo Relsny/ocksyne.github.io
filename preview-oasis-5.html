@@ -734,6 +734,64 @@ html.ock-fps-paused *::after {
 }
 </style>
 
+
+<style id="ock-fps-strong-v1">
+/* MODE PERFORMANCE RENFORCÉ */
+
+/* Soleil statique, lumineux et visible */
+.hero .sun {
+  filter: none !important;
+  transition: none !important;
+}
+
+.hero .sun .sunin {
+  transform: none !important;
+  translate: 0 0 !important;
+  transition: none !important;
+}
+
+.hero .sun .rays,
+.hero .sun .ring,
+.hero .sun .halo,
+.hero .sun .tex {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Conserver le halo sans animation permanente */
+.hero .sun .halo {
+  opacity: .8 !important;
+}
+
+/* Alléger les effets d'aurore */
+.sky #ock-aurora-canvas {
+  display: none !important;
+}
+
+.au, .sf, .gl, .shoot {
+  animation: none !important;
+}
+
+.shoot {
+  display: none !important;
+}
+
+/* Réduire les filtres graphiques */
+.nav {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+h1 {
+  filter: none !important;
+}
+
+/* Stabiliser le défilement */
+html {
+  scroll-behavior: auto !important;
+}
+</style>
+
 </head>
 <body>
 <script>document.documentElement.classList.add('js')</script>
@@ -939,7 +997,7 @@ html.ock-fps-paused *::after {
 <script src="assets/ock-meteors.js" defer></script>
 
 
-<script id="ock-sun-interaction">
+<script type="application/x-ocksyne-disabled" id="ock-sun-interaction">
 (() => {
   "use strict";
 
