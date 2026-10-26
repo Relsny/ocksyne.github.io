@@ -974,5 +974,121 @@ html, body {
 </script>
 
 
+
+<script>
+/* OCKSYNE_IFRAME_HOME_FIX_V1 */
+(() => {
+  "use strict";
+
+  const messages = {
+    en: "Welcome to my website! Explore the different pages to discover my profile, my journey, my projects and my creations. Feel free to browse the site to learn more about me and my world!",
+    pl: "Witaj na mojej stronie! Odkryj poszczególne podstrony, aby poznać mój profil, moją drogę, projekty i twórczość. Zapraszam do zwiedzania strony i poznawania mojego świata!"
+  };
+
+  const normalize = value =>
+    String(value || "").replace(/\s+/g, " ").trim();
+
+  function getLanguage() {
+    try {
+      const value = localStorage.getItem("ocksyne-language");
+      return ["fr", "en", "pl"].includes(value) ? value : "fr";
+    } catch (_) {
+      return "fr";
+    }
+  }
+
+  function removeButtons() {
+    document.querySelectorAll("a, button, [role=button]").forEach(el => {
+      const text = normalize(el.textContent)
+        .replace(/[↗→➜➔➝➞➤]+$/g, "")
+        .trim();
+
+      if (
+        /^Voir Deadly\.io$/i.test(text) ||
+        /^Mon parcours$/i.test(text)
+      ) {
+        el.remove();
+      }
+    });
+  }
+
+  function isWelcome(text) {
+    const value = normalize(text);
+    return value.startsWith("Bienvenue sur mon site") &&
+           value.includes("mon univers");
+  }
+
+  function translateWelcome() {
+    const lang = getLanguage();
+    if (lang === "fr") return;
+
+    const translation = messages[lang];
+
+    // Repérer le bloc contenant la phrase complète, même si
+    // son texte est réparti entre plusieurs éléments HTML.
+    const candidates = [...document.querySelectorAll(
+      "p, blockquote, h1, h2, h3, div"
+    )].filter(el => {
+      if (el.closest("script, style, nav")) return false;
+      return isWelcome(el.textContent);
+    });
+
+    // Cibler le bloc le plus profond pour préserver la page.
+    const target = candidates.find(el =>
+      ![...el.children].some(child => isWelcome(child.textContent))
+    );
+
+    if (target) {
+      if (normalize(target.textContent) !== translation) {
+        target.textContent = translation;
+      }
+      return;
+    }
+
+    // Cas alternatif : phrase contenue dans un seul nœud texte.
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT
+    );
+
+    let node;
+    while ((node = walker.nextNode())) {
+      if (isWelcome(node.nodeValue)) {
+        node.nodeValue = translation;
+        return;
+      }
+    }
+  }
+
+  let busy = false;
+
+  function applyFix() {
+    if (busy) return;
+    busy = true;
+
+    try {
+      removeButtons();
+      translateWelcome();
+    } finally {
+      busy = false;
+    }
+  }
+
+  // Exécution immédiate dans la vraie page de l'animation.
+  applyFix();
+
+  // Surveiller les contenus ajoutés par les animations.
+  const observer = new MutationObserver(() => {
+    applyFix();
+  });
+
+  observer.observe(document.body, {
+    subtree: true,
+    childList: true,
+    characterData: true
+  });
+})();
+</script>
+
 </body>
 </html>
