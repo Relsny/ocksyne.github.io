@@ -1,0 +1,85 @@
+
+/* OCKSYNE_LANGUAGES_V2 */
+.ock-language {
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  margin-left:12px;
+  margin-right:auto;
+  flex-shrink:0;
+  z-index:1000;
+  font-family:system-ui,sans-serif;
+}
+
+.ock-language-current {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-height:37px;
+  padding:8px 11px;
+  background:rgba(110,110,110,.14);
+  color:#fff;
+  border:1px solid rgba(190,190,190,.3);
+  border-radius:11px;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.ock-language-current:hover {
+  background:rgba(140,140,140,.23);
+}
+
+.ock-language-flag {
+  font-size:20px;
+  line-height:1;
+}
+
+.ock-language-chevron {
+  font-size:16px;
+  opacity:.7;
+}
+
+.ock-language-options {
+  position:absolute;
+  top:calc(100% + 9px);
+  left:0;
+  min-width:158px;
+  padding:6px;
+  background:#161616;
+  border:1px solid rgba(200,200,200,.3);
+  border-radius:13px;
+  box-shadow:0 15px 35px rgba(0,0,0,.4);
+  z-index:1001;
+}
+
+.ock-language-options[hidden] {
+  display:none!important;
+}
+
+.ock-language-options button {
+  display:block;
+  width:100%;
+  padding:11px;
+  color:#fff;
+  background:transparent;
+  border:0;
+  border-radius:8px;
+  font-size:13px;
+  text-align:left;
+  cursor:pointer;
+}
+
+.ock-language-options button:hover,
+.ock-language-options button[aria-current="true"] {
+  background:rgba(170,170,170,.2);
+}
+
+@media(max-width:700px) {
+  .ock-language {
+    margin-left:6px;
+  }
+  .ock-language-code {
+    display:none;
+  }
+}
