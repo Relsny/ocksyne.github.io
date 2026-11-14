@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amour — Encyclopédie libre</title>
+<style>
+:root {
+  --blue: #0645ad;
+  --purple: #5a3696;
+  --border: #a7d7f9;
+  --background: #f8f9fa;
+  --text: #202122;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+}
+
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+header {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  padding: 10px 28px;
+  border-bottom: 1px solid #c8ccd1;
+  background: #fff;
+}
+
+.logo {
+  font-family: Georgia, serif;
+  font-size: 31px;
+  color: #202122;
+  letter-spacing: -1px;
+}
+
+.logo span { color: #72777d; font-size: 12px; display: block; letter-spacing: 2px; }
+
+.top-links {
+  margin-left: auto;
+  display: flex;
+  gap: 20px;
+  font-size: 13px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  max-width: 1320px;
+  margin: auto;
+  min-height: calc(100vh - 76px);
+}
+
+aside {
+  padding: 28px 18px;
+  border-right: 1px solid #c8ccd1;
+  background: #f8f9fa;
+  font-size: 13px;
+}
+
+.side-title {
+  color: #54595d;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 23px 0 9px;
+  border-bottom: 1px solid #c8ccd1;
+  padding-bottom: 5px;
+}
+
+aside a { display: block; padding: 5px 0; }
+
+main {
+  background: white;
+  padding: 30px 42px 70px;
+  min-width: 0;
+}
+
+h1 {
+  font-family: Georgia, serif;
+  font-weight: normal;
+  font-size: 32px;
+  border-bottom: 1px solid #a2a9b1;
+  padding-bottom: 9px;
+  margin: 0 0 8px;
+}
+
+.subtitle { color: #72777d; font-size: 12px; margin-bottom: 25px; }
+
+.tabs {
+  display: flex;
+  gap: 18px;
+  border-bottom: 1px solid #a2a9b1;
+  padding-bottom: 10px;
+  margin-bottom: 24px;
+  font-size: 13px;
+}
+
+.tabs a:first-child {
+  color: #202122;
+  border-bottom: 2px solid #202122;
+  padding-bottom: 10px;
+  margin-bottom: -11px;
+}
+
+.notice {
+  border: 1px solid #a7d7f9;
+  background: #f1f8fc;
+  padding: 12px 15px;
+  margin: 18px 0;
+  font-size: 13px;
+}
+
+h2 {
+  font-family: Georgia, serif;
+  font-size: 22px;
+  font-weight: normal;
+  border-bottom: 1px solid #a2a9b1;
+  padding-bottom: 6px;
+  margin-top: 28px;
+}
+
+p { line-height: 1.7; }
+
+.infobox {
+  float: right;
+  width: 245px;
+  border: 1px solid #a2a9b1;
+  background: #f8f9fa;
+  margin: 0 0 20px 24px;
+  padding: 12px;
+  font-size: 12px;
+}
+
+.infobox h3 {
+  text-align: center;
+  font-family: Georgia, serif;
+  font-size: 18px;
+  font-weight: normal;
+  margin: 4px 0 12px;
+}
+
+.infobox .placeholder {
+  height: 115px;
+  background: #eaecf0;
+  border: 1px solid #c8ccd1;
+  display: grid;
+  place-items: center;
+  color: #72777d;
+  font-family: Georgia, serif;
+  font-size: 25px;
+}
+
+.infobox p { margin: 9px 0; line-height: 1.5; }
+
+.contents {
+  display: inline-block;
+  border: 1px solid #a2a9b1;
+  background: #f8f9fa;
+  padding: 12px 20px;
+  min-width: 230px;
+  margin: 12px 0;
+}
+
+.contents strong { display: block; margin-bottom: 8px; }
+.contents ol { margin: 0; padding-left: 20px; line-height: 1.8; }
+
+.quote {
+  border-left: 3px solid #a2a9b1;
+  margin: 20px 0;
+  padding: 8px 18px;
+  color: #54595d;
+  font-family: Georgia, serif;
+  font-style: italic;
+}
+
+footer {
+  border-top: 1px solid #c8ccd1;
+  color: #72777d;
+  font-size: 11px;
+  padding: 20px 0;
+  margin-top: 45px;
+}
+
+@media(max-width: 720px) {
+  .layout { grid-template-columns: 1fr; }
+  aside { display: none; }
+  main { padding: 24px 18px; }
+  header { padding: 10px 18px; }
+  .top-links { gap: 10px; }
+  .infobox { float: none; width: 100%; margin: 18px 0; }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="logo">Amour <span>ENCYCLOPÉDIE LIBRE</span></div>
+  <nav class="top-links">
+    <a href="#accueil">Accueil</a>
+    <a href="#archives">Archives</a>
+    <a href="#apropos">À propos</a>
+  </nav>
+</header>
+
+<div class="layout">
+<aside>
+  <div class="side-title">Navigation</div>
+  <a href="#accueil">Page principale</a>
+  <a href="#portail">Portails thématiques</a>
+  <a href="#hasard">Article au hasard</a>
+
+  <div class="side-title">Explorer</div>
+  <a href="#archives">Archives</a>
+  <a href="#documents">Documents</a>
+  <a href="#chronologie">Chronologie</a>
+
+  <div class="side-title">Communauté</div>
+  <a href="#apropos">À propos</a>
+  <a href="#contact">Nous contacter</a>
+</aside>
+
+<main id="accueil">
+  <h1>Amour</h1>
+  <div class="subtitle">Un espace de connaissance — Article principal</div>
+
+  <div class="tabs">
+    <a href="#accueil">Article</a>
+    <a href="#discussion">Discussion</a>
+    <a href="#archives">Historique</a>
+  </div>
+
+  <div class="notice">
+    <strong>Bienvenue sur Amour.</strong>
+    Cette encyclopédie rassemble des articles, des documents et des fragments
+    consacrés à des sujets parfois oubliés.
+  </div>
+
+  <div class="infobox">
+    <h3>Amour</h3>
+    <div class="placeholder">A.</div>
+    <p><strong>Type :</strong> Encyclopédie indépendante</p>
+    <p><strong>Fondation :</strong> Date inconnue</p>
+    <p><strong>Statut :</strong> Archives consultables</p>
+    <p><strong>Dernière révision :</strong> Non documentée</p>
+  </div>
+
+  <p>
+    <strong>Amour</strong> est un projet encyclopédique indépendant dont
+    l'objectif est de conserver et de documenter des informations,
+    des récits et des traces numériques.
+  </p>
+
+  <p>
+    Certains documents présents dans ces archives sont incomplets.
+    D'autres ont été retrouvés sans contexte, parfois accompagnés
+    d'informations contradictoires.
+  </p>
+
+  <div class="contents">
+    <strong>Sommaire</strong>
+    <ol>
+      <li><a href="#presentation">Présentation</a></li>
+      <li><a href="#histoire">Historique</a></li>
+      <li><a href="#archives">Les archives</a></li>
+      <li><a href="#documents">Documents associés</a></li>
+      <li><a href="#notes">Notes et références</a></li>
+    </ol>
+  </div>
+
+  <h2 id="presentation">Présentation</h2>
+  <p>
+    Le projet se présente comme un catalogue de connaissances.
+    Chaque page constitue une entrée indépendante, susceptible
+    d'être complétée, corrigée ou mise à jour.
+  </p>
+
+  <div class="quote">
+    « Tout document mérite d'être conservé, même lorsque son origine
+    n'est plus connue. »
+  </div>
+
+  <h2 id="histoire">Historique</h2>
+  <p>
+    Les premières traces du projet sont fragmentaires. Plusieurs
+    éléments semblent provenir d'anciennes versions du site.
+    Leur chronologie reste à établir.
+  </p>
+
+  <h2 id="archives">Les archives</h2>
+  <p>
+    Les archives regroupent les pages conservées, les versions
+    précédentes et les documents dont l'origine reste à vérifier.
+  </p>
+  <ul>
+    <li><a href="#documents">Documents retrouvés</a></li>
+    <li><a href="#chronologie">Chronologie des modifications</a></li>
+    <li><a href="#notes">Notes de conservation</a></li>
+  </ul>
+
+  <h2 id="documents">Documents associés</h2>
+  <p>
+    Aucun document supplémentaire n'est actuellement répertorié.
+    Cette section sera enrichie au fil des découvertes.
+  </p>
+
+  <h2 id="notes">Notes et références</h2>
+  <p>
+    <small>Cette page est une création fictive. Les informations
+    présentées constituent l'univers narratif du projet.</small>
+  </p>
+
+  <footer id="apropos">
+    Dernière modification : 14 novembre 2026 ·
+    Amour — Encyclopédie libre ·
+    <a href="#accueil">Retour en haut</a>
+  </footer>
+</main>
+</div>
+</body>
+</html>
