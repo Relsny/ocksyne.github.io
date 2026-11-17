@@ -1,0 +1,20 @@
+{
+  "name": "dcas-bot",
+  "version": "1.0.0",
+  "description": "Bot Discord DCAS — modules au choix, discord.js v14",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "deploy": "node src/deploy-commands.js",
+    "smoke": "node src/smoke.js"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.28.1",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2"
+  }
+}

@@ -1,0 +1,20 @@
+# ⬇️ COLLE TON TOKEN DISCORD APRÈS LE SIGNE = (sans espace, sans guillemets) ⬇️
+DISCORD_TOKEN=colle_ton_token_ici
+
+# ID de l'application (onglet General Information, aussi appelé Application ID)
+DISCORD_CLIENT_ID=ton_id_application
+
+# Optionnel : ID du serveur de test. Si renseigné, les commandes slash
+# sont déployées uniquement sur ce serveur (instantané). Sinon, déploiement global (jusqu'à 1 h).
+DISCORD_GUILD_ID=
+
+# Identifiants OAuth osu! API v2 (https://osu.ppy.sh/home/account/edit#oauth)
+# Uniquement pour le module Stats osu!.
+OSU_CLIENT_ID=
+OSU_CLIENT_SECRET=
+
+# Identifiants d'application Twitch (https://dev.twitch.tv/console/apps)
+# Uniquement pour les annonces de live du module Twitch / YouTube.
+# YouTube n'a pas besoin de clé : le bot lit le flux RSS public de la chaîne.
+TWITCH_CLIENT_ID=
+TWITCH_CLIENT_SECRET=

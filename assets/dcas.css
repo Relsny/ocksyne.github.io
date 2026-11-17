@@ -263,6 +263,13 @@ footer.foot a{color:var(--muted)}footer.foot a:hover{color:var(--text)}
 
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#fff;font-weight:700;padding:12px 20px;border-radius:12px;transition:.3s;z-index:99}
 .toast.on{transform:translateX(-50%) translateY(0)}
+.flag-phare{display:inline-block;margin-left:8px;background:rgba(88,101,242,.2);color:#c7cbff;border-radius:99px;padding:2px 8px;font-size:12px;font-weight:800;letter-spacing:.2px}
+.price-note{display:block;margin-top:6px;color:var(--yellow);font-size:12.5px;font-weight:600}
+.host-grid{display:grid;gap:14px}
+.host-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.host-card h3{margin:0 0 8px}
+.host-card ol{margin:8px 0 0;padding-left:18px}
+.host-card a{color:#c7cbff}
 
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
 .reveal.in{opacity:1;transform:none}

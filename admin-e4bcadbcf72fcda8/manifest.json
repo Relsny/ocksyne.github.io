@@ -1,0 +1,191 @@
+{
+  "base": [
+    ".gitignore",
+    "AI_NOTICE.md",
+    "LICENSE",
+    "README.md",
+    "data/.gitkeep",
+    "enabled.json",
+    "package-lock.json",
+    "package.json",
+    "src/commands/help.js",
+    "src/commands/ping.js",
+    "src/confirm.js",
+    "src/deploy-commands.js",
+    "src/events/interactionCreate.js",
+    "src/events/ready.js",
+    "src/index.js",
+    "src/load-modules.js",
+    "src/local-panel.js",
+    "src/smoke.js",
+    "src/store.js",
+    "src/text.js",
+    "👉 METS TON TOKEN ICI 👈.txt"
+  ],
+  "modules": {
+    "absences": [
+      "modules/absences/README.md",
+      "modules/absences/commands/absence.js",
+      "modules/absences/events/tick.js",
+      "modules/absences/module.js"
+    ],
+    "anniv": [
+      "modules/anniv/README.md",
+      "modules/anniv/commands/anniversaire.js",
+      "modules/anniv/events/daily.js",
+      "modules/anniv/module.js"
+    ],
+    "antidoublons": [
+      "modules/antidoublons/README.md",
+      "modules/antidoublons/commands/antidoublons.js",
+      "modules/antidoublons/dashboard.js",
+      "modules/antidoublons/engine.js",
+      "modules/antidoublons/events/watch.js",
+      "modules/antidoublons/module.js",
+      "modules/antidoublons/scan.js"
+    ],
+    "antiraid": [
+      "modules/antiraid/README.md",
+      "modules/antiraid/commands/antiraid.js",
+      "modules/antiraid/events/watch.js",
+      "modules/antiraid/module.js"
+    ],
+    "autorole": [
+      "modules/autorole/README.md",
+      "modules/autorole/commands/autorole.js",
+      "modules/autorole/events/join.js",
+      "modules/autorole/module.js"
+    ],
+    "autostart": [
+      "modules/autostart/README.md",
+      "modules/autostart/macos/fr.dcas.bot.plist",
+      "modules/autostart/module.js",
+      "modules/autostart/windows/demarrer-dcas.bat"
+    ],
+    "avatars": [
+      "modules/avatars/README.md",
+      "modules/avatars/commands/avatars.js",
+      "modules/avatars/events/watch.js",
+      "modules/avatars/module.js"
+    ],
+    "bienvenue": [
+      "modules/bienvenue/README.md",
+      "modules/bienvenue/commands/bienvenue.js",
+      "modules/bienvenue/events/members.js",
+      "modules/bienvenue/module.js"
+    ],
+    "boost": [
+      "modules/boost/README.md",
+      "modules/boost/commands/boost.js",
+      "modules/boost/events/boost.js",
+      "modules/boost/module.js"
+    ],
+    "candid": [
+      "modules/candid/README.md",
+      "modules/candid/commands/candidature.js",
+      "modules/candid/module.js"
+    ],
+    "compteurs": [
+      "modules/compteurs/README.md",
+      "modules/compteurs/commands/compteur.js",
+      "modules/compteurs/events/refresh.js",
+      "modules/compteurs/module.js"
+    ],
+    "custom": [
+      "modules/custom/README.md",
+      "modules/custom/commands/custom.js",
+      "modules/custom/events/prefix.js",
+      "modules/custom/module.js"
+    ],
+    "economie": [
+      "modules/economie/README.md",
+      "modules/economie/commands/economy.js",
+      "modules/economie/module.js"
+    ],
+    "embed": [
+      "modules/embed/README.md",
+      "modules/embed/commands/embed.js",
+      "modules/embed/module.js"
+    ],
+    "giveaways": [
+      "modules/giveaways/README.md",
+      "modules/giveaways/commands/giveaway.js",
+      "modules/giveaways/events/draw.js",
+      "modules/giveaways/module.js"
+    ],
+    "invites": [
+      "modules/invites/README.md",
+      "modules/invites/commands/invites.js",
+      "modules/invites/events/track.js",
+      "modules/invites/module.js"
+    ],
+    "logs": [
+      "modules/logs/README.md",
+      "modules/logs/commands/logs.js",
+      "modules/logs/events/watch.js",
+      "modules/logs/module.js"
+    ],
+    "moderation": [
+      "modules/moderation/README.md",
+      "modules/moderation/commands/actions.js",
+      "modules/moderation/module.js"
+    ],
+    "osu": [
+      "modules/osu/README.md",
+      "modules/osu/commands/osu.js",
+      "modules/osu/lib/osuApi.js",
+      "modules/osu/module.js"
+    ],
+    "rappels": [
+      "modules/rappels/README.md",
+      "modules/rappels/commands/rappel.js",
+      "modules/rappels/events/tick.js",
+      "modules/rappels/module.js"
+    ],
+    "reactroles": [
+      "modules/reactroles/README.md",
+      "modules/reactroles/commands/roles.js",
+      "modules/reactroles/module.js"
+    ],
+    "sondages": [
+      "modules/sondages/README.md",
+      "modules/sondages/commands/sondage.js",
+      "modules/sondages/events/expire.js",
+      "modules/sondages/module.js"
+    ],
+    "stream": [
+      "modules/stream/README.md",
+      "modules/stream/commands/stream.js",
+      "modules/stream/events/poll.js",
+      "modules/stream/module.js"
+    ],
+    "suggestions": [
+      "modules/suggestions/README.md",
+      "modules/suggestions/commands/suggest.js",
+      "modules/suggestions/module.js"
+    ],
+    "tickets": [
+      "modules/tickets/README.md",
+      "modules/tickets/commands/ticket.js",
+      "modules/tickets/module.js"
+    ],
+    "verif": [
+      "modules/verif/README.md",
+      "modules/verif/commands/verif.js",
+      "modules/verif/events/watch.js",
+      "modules/verif/module.js"
+    ],
+    "warns": [
+      "modules/warns/README.md",
+      "modules/warns/commands/warn.js",
+      "modules/warns/module.js"
+    ],
+    "xp": [
+      "modules/xp/README.md",
+      "modules/xp/commands/xp.js",
+      "modules/xp/events/messages.js",
+      "modules/xp/lib.js",
+      "modules/xp/module.js"
+    ]
+  }
+}

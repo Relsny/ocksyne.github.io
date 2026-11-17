@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>DCAS — panneau admin temporaire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/dcas.css">
+<link rel="stylesheet" href="panel.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="brand" href="#modules"><span class="brand-logo">⚡</span>DCAS</a>
+<nav class="nav">
+<a href="#modules">Modules</a>
+<a href="#generateur">Générateur</a>
+<a href="#tests">Prix</a>
+</nav>
+</div></header>
+<div class="admin-note"><p>Panneau temporaire, pour tester les modules et récupérer le code. Il n’y a pas de mot de passe : l’adresse suffit. À supprimer avant que le site serve à vendre.</p></div>
+<main class="wrap" style="padding-top:28px;padding-bottom:80px">
+<section class="sec" id="modules">
+<div class="kicker">Catalogue</div>
+<h2>Les modules du catalogue</h2>
+<p class="hint">Le texte et les prix viennent de la page publique. « Voir le code » affiche les fichiers du module. « Télécharger » donne un zip de ce seul dossier.</p>
+<div class="grid" id="module-grid"></div>
+</section>
+
+<section class="sec" id="generateur">
+<div class="kicker">Assemblage</div>
+<h2>Générateur de bot</h2>
+<p class="hint">Coche des modules, ou prends un pack. Le prix suit la même règle que le compositeur du site : à partir de 5 modules, moitié prix, arrondi à l’euro supérieur. Un pack garde son prix affiché.</p>
+<div class="jump" id="pack-buttons"></div>
+<div class="jump">
+<button class="btn btn-ghost btn-sm" type="button" id="check-all">Tout cocher</button>
+<button class="btn btn-ghost btn-sm" type="button" id="check-none">Tout vider</button>
+</div>
+<div class="checks" id="check-grid"></div>
+<div class="quote" id="quote"></div>
+<p class="hint" id="hint"></p>
+<button class="btn btn-main" type="button" id="download-bot">Télécharger le bot</button>
+</section>
+
+<section class="sec" id="tests">
+<div class="kicker">Contrôle</div>
+<h2>Tous les prix</h2>
+<p class="formula">total = nombre ≥ 5 ? Math.ceil(somme × 0,5) : somme<br>remise = Math.round((somme − total) × 100) / 100</p>
+<p class="hint">Pour un pack, le client paie le prix du pack, pas le calcul du compositeur. Les deux chiffres sont côte à côte.</p>
+<div style="overflow-x:auto"><table class="prices" id="price-table"></table></div>
+</section>
+</main>
+
+<dialog id="viewer">
+<div class="dlg">
+<header>
+<strong id="viewer-title">Code</strong>
+<div class="row-actions">
+<button class="btn btn-ghost btn-sm" type="button" id="viewer-copy">Copier</button>
+<button class="btn btn-main btn-sm" type="button" id="viewer-close">Fermer</button>
+</div>
+</header>
+<div class="tabs" id="viewer-tabs"></div>
+<pre class="codebox"><code id="viewer-code"></code></pre>
+</div>
+</dialog>
+<div class="toast" id="toast"></div>
+<script src="vendor/jszip.min.js"></script>
+<script src="pricing.js"></script>
+<script src="panel.js"></script>
+</body>
+</html>
