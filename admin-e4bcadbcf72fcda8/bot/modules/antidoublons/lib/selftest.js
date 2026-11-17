@@ -35,6 +35,8 @@ for (const [input, source, canonical] of samples) {
 const rules = { sources: defaultSources(), domains: ['exemple.com'] };
 assert(!('paheal' in defaultSources()), 'paheal n’est plus proposé');
 assert(normalizeLink('https://rule34.paheal.net/post/view/12').source === 'paheal', 'ancien lien paheal encore reconnu');
+assert(defaultSources().discord === false, 'discord coupé par défaut');
+assert(!sourceEnabled(normalizeLink('https://cdn.discordapp.com/attachments/1/2/file.png'), rules), 'cdn discord inactif');
 assert(sourceEnabled(normalizeLink('https://youtu.be/abcdefghijk'), rules), 'youtube actif');
 assert(!sourceEnabled(normalizeLink('https://e621.net/posts/1'), rules), 'e621 coupé par défaut');
 rules.sources.custom = true;
