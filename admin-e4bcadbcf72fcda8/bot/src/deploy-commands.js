@@ -4,15 +4,18 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { REST, Routes } = require('discord.js');
 const { loadModules, ROOT } = require('./load-modules');
+const { loadToken } = require('./token');
 
-require('dotenv').config({ path: path.join(ROOT, '👉 METS TON TOKEN ICI 👈.txt') });
-
-const token = process.env.DISCORD_TOKEN;
-const clientId = process.env.DISCORD_CLIENT_ID;
-const guildId = process.env.DISCORD_GUILD_ID;
-
-if (!token || token === 'colle_ton_token_ici' || !clientId || clientId === 'ton_id_application') {
-  console.error('DISCORD_TOKEN et DISCORD_CLIENT_ID sont requis dans « 👉 METS TON TOKEN ICI 👈.txt ».');
+let token;
+let clientId;
+let guildId;
+try {
+  const loaded = loadToken(ROOT);
+  token = loaded.values.DISCORD_TOKEN;
+  clientId = loaded.values.DISCORD_CLIENT_ID;
+  guildId = loaded.values.DISCORD_GUILD_ID;
+} catch (error) {
+  console.error(error.message);
   process.exit(1);
 }
 

@@ -25,7 +25,7 @@ function welcomeEmbed(config, member) {
   const embed = new EmbedBuilder()
     .setColor(colorOf(config.color))
     .setDescription(applyTemplate(config.message, member))
-    .setFooter({ text: `${member.guild.name} · arrivée` })
+    .setFooter({ text: `DCAS · Bienvenue · ${member.guild.name}` })
     .setTimestamp();
   if (config.image) embed.setImage(config.image);
   return embed;

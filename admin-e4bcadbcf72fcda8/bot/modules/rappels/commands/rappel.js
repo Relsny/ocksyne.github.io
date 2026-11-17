@@ -22,6 +22,7 @@ function nextStamp(hour, minute) {
 function render(item) {
   const embed = new EmbedBuilder().setColor(colorOf(item.color)).setTitle(item.name).setDescription(item.text);
   if (item.image) embed.setImage(item.image);
+  embed.setFooter({ text: 'DCAS · Rappel' });
   return embed;
 }
 

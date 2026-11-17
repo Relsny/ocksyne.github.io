@@ -16,7 +16,7 @@ function render(item) {
     .setColor(colors[item.status])
     .setTitle(`Suggestion · ${titles[item.status]}`)
     .setDescription(item.text)
-    .setFooter({ text: `👍 ${up} · 👎 ${down} · ${item.authorTag}` });
+    .setFooter({ text: `DCAS · Suggestions · 👍 ${up} · 👎 ${down} · ${item.authorTag}` });
 }
 
 function row(disabled) {

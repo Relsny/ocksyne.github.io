@@ -53,12 +53,36 @@
     setTimeout(() => URL.revokeObjectURL(link.href), 1500);
   }
 
-  async function zipOf(files, name, mapPath) {
-    const zip = new JSZip();
-    await Promise.all(files.map(async (path) => {
-      zip.file(mapPath(path), await fetchText(path));
+  async function fetchBytes(url) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`${url} (${response.status})`);
+    return response.arrayBuffer();
+  }
+
+  function keptCodePath(path) {
+    if (path.includes('METS TON TOKEN')) return false;
+    if (path === 'enabled.json') return false;
+    return true;
+  }
+
+  async function premiumZip(slugs, filename) {
+    const names = Object.fromEntries(catalog.modules.map((mod) => [mod.id, mod.name]));
+    const readmes = {};
+    await Promise.all(slugs.map(async (slug) => {
+      const readme = (manifest.modules[slug] || []).find((path) => path.endsWith('README.md'));
+      if (readme) readmes[slug] = await fetchText(readme);
     }));
-    saveBlob(await zip.generateAsync({ type: 'blob' }), name);
+    const paths = manifest.base.filter(keptCodePath);
+    slugs.forEach((slug) => paths.push(...(manifest.modules[slug] || [])));
+    const codeFiles = await Promise.all(paths.map(async (path) => ({ path, text: await fetchText(path) })));
+    const logoBytes = new Uint8Array(await fetchBytes('logo.png'));
+    const entries = DCASPack.entries({ slugs, names, readmes, logoBytes, codeFiles });
+    const zip = new JSZip();
+    for (const entry of entries) {
+      const options = entry.exec ? { unixPermissions: 0o755 } : {};
+      zip.file(entry.path, entry.bytes || entry.text, options);
+    }
+    saveBlob(await zip.generateAsync({ type: 'blob', platform: 'UNIX' }), filename);
   }
 
   function parseSite(html) {
@@ -157,12 +181,13 @@
   }
 
   function renderCards() {
+    const tree = DCASPack.TREE.map((line) => `<li>${escapeHtml(line)}</li>`).join('');
     $('#module-grid').innerHTML = catalog.modules.map((mod) => `
       <article class="acard">
-        <div class="price-tag">${euro(mod.price)}</div>
-        <h3>${escapeHtml(mod.name)}</h3>
+        <div class="card-top"><img src="logo.png" alt=""><div><div class="price-tag">${euro(mod.price)}</div><h3>${escapeHtml(mod.name)}</h3></div></div>
         <p>${escapeHtml(mod.description)}</p>
         <ul>${mod.features.map((feature) => `<li>${escapeHtml(feature)}</li>`).join('')}</ul>
+        <ol class="layout">${tree}</ol>
         <div class="row-actions">
           <button class="btn btn-ghost btn-sm" type="button" data-view="${mod.id}">Voir le code</button>
           <button class="btn btn-main btn-sm" type="button" data-zip="${mod.id}">Télécharger</button>
@@ -221,8 +246,7 @@
   async function downloadModule(slug) {
     try {
       toast('Préparation du zip…');
-      const files = manifest.modules[slug];
-      await zipOf(files, `dcas-${slug}.zip`, (path) => path.split('/').slice(1).join('/'));
+      await premiumZip([slug], `dcas-${slug}.zip`);
     } catch (error) {
       toast(error.message);
     }
@@ -237,26 +261,7 @@
     try {
       toast('Préparation du bot…');
       const pack = activePack();
-      const quoted = DCASPricing.composer(siteData, ids);
-      const files = [...manifest.base];
-      ids.forEach((id) => files.push(...manifest.modules[id]));
-      const zip = new JSZip();
-      await Promise.all(files.filter((path) => path !== 'enabled.json').map(async (path) => {
-        zip.file(`dcas-bot/${path}`, await fetchText(path));
-      }));
-      zip.file('dcas-bot/enabled.json', `${JSON.stringify(ids, null, 2)}\n`);
-      const names = ids.map((id) => `- ${siteData.modules[id].name} (${euro(siteData.modules[id].price)})`).join('\n');
-      zip.file('dcas-bot/COMMANDE.txt', [
-        pack ? `Pack : ${pack.name}` : 'Sélection libre',
-        `Prix payé : ${euro(pack ? pack.price : quoted.total)}`,
-        `Somme des modules : ${euro(quoted.sum)}`,
-        `Prix compositeur : ${euro(quoted.total)}${quoted.libre ? ' (Pack Libre −50 %)' : ''}`,
-        '',
-        'Modules :',
-        names,
-        '',
-      ].join('\n'));
-      saveBlob(await zip.generateAsync({ type: 'blob' }), pack ? `dcas-bot-${pack.id}.zip` : 'dcas-bot.zip');
+      await premiumZip(ids, pack ? `dcas-bot-${pack.id}.zip` : 'dcas-bot.zip');
     } catch (error) {
       toast(error.message);
     }

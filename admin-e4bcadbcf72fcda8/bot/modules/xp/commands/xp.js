@@ -23,7 +23,8 @@ function card(member, record) {
   return new EmbedBuilder()
     .setColor(0x5865f2)
     .setTitle(`${member.displayName || member.user.username}`)
-    .setDescription(`Niveau **${level}**\n${'█'.repeat(progress)}${'░'.repeat(10 - progress)}\n${record.xp || 0} / ${next} XP`);
+    .setDescription(`Niveau **${level}**\n${'█'.repeat(progress)}${'░'.repeat(10 - progress)}\n${record.xp || 0} / ${next} XP`)
+    .setFooter({ text: 'DCAS · Niveaux' });
 }
 
 const rank = {

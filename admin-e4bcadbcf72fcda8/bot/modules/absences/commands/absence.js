@@ -20,7 +20,8 @@ function card(item, back) {
     .setColor(back ? 0x23a55a : 0xed4245)
     .setAuthor({ name: item.name, iconURL: item.avatar || undefined })
     .setTitle(back ? 'De retour' : 'Absent')
-    .setDescription(`**${item.subject}**\n${item.description}\nRetour ${back ? 'effectué' : `<t:${Math.floor(item.returnAt / 1000)}:R>`}`);
+    .setDescription(`**${item.subject}**\n${item.description}\nRetour ${back ? 'effectué' : `<t:${Math.floor(item.returnAt / 1000)}:R>`}`)
+    .setFooter({ text: 'DCAS · Absences' });
 }
 
 module.exports = {

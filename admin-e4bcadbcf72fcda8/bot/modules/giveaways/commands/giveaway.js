@@ -48,7 +48,7 @@ function render(item) {
     .setColor(item.ended ? 0x6b7086 : 0xeb459e)
     .setTitle(item.prize)
     .setDescription(`${item.entries.length} participant(s) · ${item.winners} gagnant(s)\n${end}\nGagnants : ${winners}`)
-    .setFooter({ text: [item.requiredRoleId ? 'Rôle requis' : null, item.minLevel ? `Niveau ${item.minLevel}` : null].filter(Boolean).join(' · ') || 'Ouvert à tous' });
+    .setFooter({ text: `DCAS · Giveaways · ${[item.requiredRoleId ? 'Rôle requis' : null, item.minLevel ? `Niveau ${item.minLevel}` : null].filter(Boolean).join(' · ') || 'Ouvert à tous'}` });
 }
 
 function row(disabled) {

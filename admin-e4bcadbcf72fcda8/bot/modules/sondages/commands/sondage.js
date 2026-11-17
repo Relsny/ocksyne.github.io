@@ -28,7 +28,8 @@ function render(poll) {
   return new EmbedBuilder()
     .setColor(poll.closed ? 0x6b7086 : 0x5865f2)
     .setTitle(poll.question)
-    .setDescription(`${lines.join('\n')}\n\n${total} participant(s) · ${poll.multiple ? 'plusieurs choix' : 'un seul choix'} · ${end}`);
+    .setDescription(`${lines.join('\n')}\n\n${total} participant(s) · ${poll.multiple ? 'plusieurs choix' : 'un seul choix'} · ${end}`)
+    .setFooter({ text: 'DCAS · Sondages' });
 }
 
 function buttonRows(poll, disabled) {
