@@ -236,7 +236,7 @@ module.exports = {
       createdAt: message.createdTimestamp,
       ...await (async () => {
         if (!rules.images) return { fileHashes: [], visualHashes: [] };
-        const media = await fileHashes(message, { visual: rules.imageMode === 'strong' });
+        const media = await fileHashes(message, { visual: rules.imageMode === 'strong' || rules.imageMode === 'advanced' });
         const remote = await rule34Fingerprints(message.content, config);
         return { fileHashes: media.hashes.concat(remote), visualHashes: media.visualHashes };
       })(),

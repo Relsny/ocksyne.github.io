@@ -114,7 +114,7 @@ function consider(record, hashes, rules) {
       const hit = see(hashes, `file:${fileHash}`, record);
       if (hit) hits.push({ ...hit, kind: 'image' });
     }
-    if (rules.imageMode === 'strong') {
+    if (rules.imageMode === 'strong' || rules.imageMode === 'advanced') {
       const limit = Number(rules.imageThreshold) || 10;
       for (const visual of record.visualHashes || []) {
         for (const [key, previous] of Object.entries(hashes)) {

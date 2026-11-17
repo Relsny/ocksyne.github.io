@@ -27,10 +27,10 @@ function page() {
     if (name.endsWith('.png')) {
       const id = name.replace(/\.png$/, '');
       const b64 = fs.readFileSync(path.join(iconDir, name)).toString('base64');
-      icons[id] = `<img alt="" src="data:image/png;base64,${b64}">`;
+      icons[id] = `data:image/png;base64,${b64}`;
       continue;
     }
-    if (!name.endsWith('.svg')) continue;
+    if (!name.endsWith('.svg') || name === 'discord.svg') continue;
     const id = name.replace(/\.svg$/, '');
     const brand = {
       youtube: '#FF0000', instagram: '#E1306C', x: '#F5F5F5', tiktok: '#FE2C55', twitch: '#9146FF',

@@ -34,7 +34,7 @@ async function fileHashes(message, { visual = false } = {}) {
 async function rule34Fingerprints(content, config) {
   const rules = config.rules || {};
   const auth = config.rule34 || {};
-  if (rules.imageMode !== 'strong' || !auth.apiKey || !auth.userId) return [];
+  if ((rules.imageMode !== 'strong' && rules.imageMode !== 'advanced') || !auth.apiKey || !auth.userId) return [];
   if (rules.sources && rules.sources.rule34 === false) return [];
   const extras = [];
   for (const raw of extractUrls(content || '')) {
@@ -78,7 +78,7 @@ async function walkChannel(channel, config, hashes, progress, stop) {
         createdAt: message.createdTimestamp,
         ...await (async () => {
           if (!config.rules.images) return { fileHashes: [], visualHashes: [] };
-          const media = await fileHashes(message, { visual: config.rules.imageMode === 'strong' });
+          const media = await fileHashes(message, { visual: config.rules.imageMode === 'strong' || config.rules.imageMode === 'advanced' });
           const remote = await rule34Fingerprints(message.content, config);
           return { fileHashes: media.hashes.concat(remote), visualHashes: media.visualHashes };
         })(),

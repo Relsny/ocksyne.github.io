@@ -30,7 +30,7 @@ function getConfig() {
     for (const id of rules.ignoredChannels || []) ignoredChannels.add(String(id));
     for (const id of rules.ignoredUsers || []) ignoredUsers.add(String(id));
     if (Number(rules.deleteDelayMs) > 0) deleteDelay = Number(rules.deleteDelayMs);
-    if (rules.imageMode === 'strong') fingerprint = true;
+    if (rules.imageMode === 'strong' || rules.imageMode === 'advanced') fingerprint = true;
   }
   return {
     enabled,
