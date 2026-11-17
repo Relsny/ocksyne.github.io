@@ -57,6 +57,20 @@ function resolves(fromFile, spec) {
   return candidates.some((candidate) => fs.existsSync(candidate));
 }
 
+function assertNoRule34(text, label) {
+  if (/RULE34/i.test(text)) throw new Error(`${label} contient encore RULE34`);
+}
+
+function tokenFileIn(dest) {
+  for (const name of fs.readdirSync(dest)) {
+    const abs = path.join(dest, name);
+    if (!fs.statSync(abs).isDirectory() || !name.includes('TOKEN')) continue;
+    const inner = path.join(abs, 'token.txt');
+    if (fs.existsSync(inner)) return inner;
+  }
+  return null;
+}
+
 function checkTree(dest, slugs) {
   const top = fs.readdirSync(dest);
   const codeName = top.find((name) => name.includes('fichiers-du-bot'));
@@ -100,6 +114,9 @@ function checkTree(dest, slugs) {
       throw new Error(`module ${slug} absent`);
     }
   }
+  const tokenFile = tokenFileIn(dest);
+  if (!tokenFile) throw new Error('token.txt absent du zip');
+  assertNoRule34(fs.readFileSync(tokenFile, 'utf8'), tokenFile);
 }
 
 async function main() {
@@ -112,6 +129,14 @@ async function main() {
     if (!saved.base.includes(file)) throw new Error(`${file} manque dans manifest.json`);
   }
   const slugs = Object.keys(saved.modules).sort();
+  const legacyName = fs.readdirSync(botDir).find((name) => name.includes('TOKEN') && name.endsWith('.txt'));
+  if (!legacyName) throw new Error('modèle de jeton introuvable dans bot/');
+  assertNoRule34(fs.readFileSync(path.join(botDir, legacyName), 'utf8'), `bot/${legacyName}`);
+  for (const selection of [[], ...slugs.map((slug) => [slug]), slugs]) {
+    const label = selection.join(',') || 'vide';
+    assertNoRule34(pack.tokenTxt(selection), `tokenTxt(${label})`);
+    for (const [key] of pack.keysFor(selection)) assertNoRule34(key, `keysFor(${label})`);
+  }
   const jobs = [...slugs.map((slug) => [slug]), slugs];
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'dcas-zips-'));
   for (const selection of jobs) {

@@ -1,4 +1,10 @@
 (function () {
+  const BUILD = (document.currentScript && new URL(document.currentScript.src, location.href).searchParams.get('v')) || 'dev';
+  function bust(url) {
+    const target = new URL(url, location.href);
+    target.searchParams.set('v', BUILD);
+    return target.toString();
+  }
   const $ = (selector, root = document) => root.querySelector(selector);
   const toast = (text) => {
     const el = $('#toast');
@@ -36,7 +42,7 @@
   const cache = new Map();
   async function fetchText(path) {
     if (cache.has(path)) return cache.get(path);
-    const response = await fetch(fileUrl(path));
+    const response = await fetch(bust(fileUrl(path)));
     if (!response.ok) throw new Error(`${path} (${response.status})`);
     const text = await response.text();
     cache.set(path, text);
@@ -54,7 +60,7 @@
   }
 
   async function fetchBytes(url) {
-    const response = await fetch(url);
+    const response = await fetch(bust(url));
     if (!response.ok) throw new Error(`${url} (${response.status})`);
     return response.arrayBuffer();
   }
@@ -301,11 +307,11 @@
 
   async function boot() {
     const [siteHtml, manifestJson] = await Promise.all([
-      fetch('../index.html').then((response) => {
+      fetch(bust('../index.html')).then((response) => {
         if (!response.ok) throw new Error('page publique introuvable');
         return response.text();
       }),
-      fetch('manifest.json').then((response) => {
+      fetch(bust('manifest.json')).then((response) => {
         if (!response.ok) throw new Error('manifest introuvable');
         return response.json();
       }),
