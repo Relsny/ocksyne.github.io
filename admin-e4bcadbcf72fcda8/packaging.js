@@ -43,10 +43,6 @@
       keys.push(['OSU_CLIENT_ID', 'ton_osu_client_id', 'Identifiant OAuth osu. Uniquement pour le module Stats osu.']);
       keys.push(['OSU_CLIENT_SECRET', 'ton_osu_client_secret', 'Secret OAuth osu. Uniquement pour le module Stats osu.']);
     }
-    if (slugs.includes('antidoublons')) {
-      keys.push(['RULE34_API_KEY', 'colle_ta_cle_rule34', 'Cle API Rule34, facultative. Compte Rule34, My Account, Options.']);
-      keys.push(['RULE34_USER_ID', 'colle_ton_id_rule34', 'Identifiant utilisateur Rule34, facultatif, a cote de la cle.']);
-    }
     if (slugs.includes('stream')) {
       keys.push(['TWITCH_CLIENT_ID', 'ton_twitch_client_id', 'Identifiant de l application Twitch. Uniquement pour les annonces de live.']);
       keys.push(['TWITCH_CLIENT_SECRET', 'ton_twitch_client_secret', 'Secret de l application Twitch. YouTube n a pas besoin de clé.']);
@@ -213,8 +209,9 @@
 <li>Dans Discord, tape /antidoublons panel. Seul toi vois la réponse.</li>
 <li>Le lien commence par http://127.0.0.1 . Ouvre-le sur le même ordinateur que le bot.</li>
 <li>Coche un salon, plusieurs salons, ou une catégorie. Plus tu en coches, plus l analyse dure.</li>
-<li>Choisis les textes, les liens (tous les sites, ou une liste de domaines) et les images.</li>
-<li>Les images et les GIF sont comparés par empreinte exacte. Une image seulement ressemblante n est pas un doublon.</li>
+<li>Choisis les textes, les liens et les images. Les applications sont des tuiles. La section Mature (18+) est repliée.</li>
+<li>Exact compare une empreinte identique. Puissant ajoute la ressemblance si sharp est installé, et des images de vidéo si ffmpeg est installé.</li>
+<li>Rule34.xxx se coche dans Mature. Le panneau demande RULE34_API_KEY et RULE34_USER_ID. Elles sont enregistrées dans data/antidoublons.json, sur cet ordinateur seulement. Elles ne vont pas dans token.txt. La clé se crée sur <a href="https://rule34.xxx/index.php?page=account&amp;s=options">la page Options du compte Rule34</a>.</li>
 <li>Clique sur Activer. Le panneau demande : Êtes-vous sûr de vouloir activer le système d anti-doublons ? Lorsque le bot détecte un doublon, le plus récent sera supprimé.</li>
 <li>Le tableau affiche les messages lus et les doublons mis de côté. À la fin, les plus récents sont supprimés.</li>
 <li>Le bouton rouge STOP arrête tout de suite.</li>

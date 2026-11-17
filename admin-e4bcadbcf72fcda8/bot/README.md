@@ -45,4 +45,4 @@ Ce contrôle charge tous les modules présents, sans se connecter à Discord.
 
 ## Données
 
-Les réglages de chaque serveur sont des fichiers JSON dans `data/`, créés au premier usage. Ils ne sont pas versionnés.
+Les réglages de chaque serveur sont des fichiers JSON dans `data/`, créés au premier usage. Ils ne sont pas versionnés. Les clés Rule34 de l’anti-doublons, si tu les saisis dans le panneau, sont dans `data/antidoublons.json` et pas dans le fichier du jeton.

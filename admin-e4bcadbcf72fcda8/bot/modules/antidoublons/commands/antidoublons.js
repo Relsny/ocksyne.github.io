@@ -3,7 +3,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 const { createStore } = require('../../../src/store');
 const { openDashboard } = require('../dashboard');
-const { runScan, targetChannels, fileHashes, warnAndDelete } = require('../scan');
+const { runScan, targetChannels, fileHashes, rule34Fingerprints, warnAndDelete } = require('../scan');
 const { consider } = require('../engine');
 const { defaultSources } = require('../lib/normalizer');
 
@@ -25,6 +25,7 @@ const store = createStore('antidoublons.json', () => ({
   },
   hashes: {},
   cursor: {},
+  rule34: { apiKey: '', userId: '' },
 }));
 
 const jobs = new Map();
@@ -53,7 +54,15 @@ function defaultState(guild) {
       }
     }
   }
-  return { categories, channels, rules: config?.rules || { text: true, links: true, images: true, linkMode: 'all', domains: [] } };
+  const rules = { ...(config?.rules || { text: true, links: true, images: true, linkMode: 'all', domains: [] }) };
+  delete rules.rule34;
+  const saved = config?.rule34 || {};
+  return {
+    categories,
+    channels,
+    rules,
+    rule34Configured: Boolean(saved.apiKey && saved.userId),
+  };
 }
 
 async function openFor(interaction) {
@@ -62,12 +71,31 @@ async function openFor(interaction) {
     guildId: guild.id,
     getState: () => defaultState(guild),
     saveConfig: (body) => {
+      const incoming = { ...(body.rules || {}) };
+      delete incoming.rule34;
+      delete incoming.rule34ApiKey;
+      delete incoming.rule34UserId;
       store.set(guild.id, {
         channelIds: body.channelIds || [],
         categoryIds: body.categoryIds || [],
-        rules: { ...store.get(guild.id).rules, ...(body.rules || {}) },
+        rules: { ...store.get(guild.id).rules, ...incoming },
       });
       return { ok: true };
+    },
+    saveRule34: (body) => {
+      if (body.clear) {
+        const current = store.get(guild.id);
+        const sources = { ...(current.rules.sources || {}), rule34: false };
+        store.set(guild.id, { rule34: { apiKey: '', userId: '' }, rules: { ...current.rules, sources } });
+        return { ok: true, configured: false };
+      }
+      const apiKey = String(body.apiKey || '').trim();
+      const userId = String(body.userId || '').trim();
+      if (!apiKey || !userId) return { ok: false, configured: false };
+      const current = store.get(guild.id);
+      const sources = { ...(current.rules.sources || {}), rule34: true };
+      store.set(guild.id, { rule34: { apiKey, userId }, rules: { ...current.rules, sources } });
+      return { ok: true, configured: true };
     },
     activate: async () => {
       const progress = jobFor(guild.id);
@@ -146,7 +174,8 @@ module.exports = {
       ...await (async () => {
         if (!rules.images) return { fileHashes: [], visualHashes: [] };
         const media = await fileHashes(message, { visual: rules.imageMode === 'strong' });
-        return { fileHashes: media.hashes, visualHashes: media.visualHashes };
+        const remote = await rule34Fingerprints(message.content, config);
+        return { fileHashes: media.hashes.concat(remote), visualHashes: media.visualHashes };
       })(),
     };
     const hits = consider(record, config.hashes, config.rules);

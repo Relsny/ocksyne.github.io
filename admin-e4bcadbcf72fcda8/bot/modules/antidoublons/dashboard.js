@@ -44,6 +44,7 @@ async function openDashboard(context) {
     routes: [
       { method: 'get', path: '/api/state', handler: (_req, res) => res.json(context.getState()) },
       { method: 'post', path: '/api/config', handler: (req, res) => res.json(context.saveConfig(req.body || {})) },
+      { method: 'post', path: '/api/rule34', handler: (req, res) => res.json(context.saveRule34 ? context.saveRule34(req.body || {}) : { ok: false }) },
       { method: 'post', path: '/api/activate', handler: async (_req, res) => res.json(await context.activate()) },
       { method: 'post', path: '/api/stop', handler: (_req, res) => res.json(context.stop()) },
       { method: 'get', path: '/api/progress', handler: (_req, res) => res.json(context.progress()) },

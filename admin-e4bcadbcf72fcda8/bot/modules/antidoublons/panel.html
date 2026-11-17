@@ -20,7 +20,16 @@ h2{margin:0 0 12px;font-size:16px}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px}
 .tile{display:flex;align-items:center;gap:8px;padding:10px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03);cursor:pointer}
 .tile.on{border-color:rgba(88,101,242,.8);background:rgba(88,101,242,.16)}
+.tile.configured{border-color:rgba(35,165,90,.85)}
+.tile span{display:flex;flex-direction:column;min-width:0}
+.tile small,.tile .ok{font-size:11px;font-weight:600;line-height:1.3}
+.tile small{color:var(--muted)}
+.tile .ok{color:var(--green);font-style:normal}
 .tile svg{width:22px;height:22px;flex:none}
+.r34-actions{margin:6px 0 0}
+.r34-actions button{font:inherit;font-size:12px;background:transparent;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:4px 8px;cursor:pointer}
+#rule34-modal input{width:100%;margin:6px 0 12px;background:#101118;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px}
+#rule34-modal a{color:#c7cbff}
 .badge{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:9px;font-weight:800;background:#2a2d38}
 details.mature{margin-top:14px;border:1px solid var(--line);border-radius:16px;padding:8px 12px;background:rgba(0,0,0,.18)}
 details.mature summary{cursor:pointer;font-weight:700}
@@ -87,6 +96,14 @@ input[type=range]{width:100%}
 <p>Êtes-vous sûr de vouloir activer le système d'anti-doublons ? Lorsque le bot détecte un doublon, le plus récent sera supprimé.</p>
 <button class="primary" id="yes" type="button">Oui, activer</button>
 <button class="ghost" id="no" type="button">Annuler</button></div></div>
+<div class="modal" id="rule34-modal"><div class="card"><h2>Rule34.xxx</h2>
+<p class="sub">Ces valeurs restent dans data/antidoublons.json sur cet ordinateur. Elles ne partent pas dans token.txt, ni ailleurs. Cette page ne les réaffiche pas.</p>
+<label>RULE34_API_KEY<input id="r34-key" type="password" autocomplete="off" spellcheck="false"></label>
+<label>RULE34_USER_ID<input id="r34-user" type="text" autocomplete="off" spellcheck="false"></label>
+<p class="sub">La clé se génère dans le compte, page Options. <a href="https://rule34.xxx/index.php?page=account&s=options" target="_blank" rel="noopener">Ouvrir la page Options</a></p>
+<button class="primary" id="r34-save" type="button">Enregistrer</button>
+<button class="ghost" id="r34-cancel" type="button">Annuler</button>
+<button class="ghost" id="r34-clear" type="button" hidden>Effacer</button></div></div>
 <div class="toast" id="toast"></div>
 <script>
 const ICONS = {{ICONS}};
@@ -98,12 +115,45 @@ document.getElementById('logo').src = '{{LOGO}}';
 let mode = 'exact';
 function tile(id, label, adult) {
   const icon = ICONS[id] ? ICONS[id] : '<span class="badge">'+(adult?label.slice(0,2).toUpperCase():'•')+'</span>';
-  return '<label class="tile" data-id="'+id+'"><input type="checkbox" id="src-'+id+'" hidden>'+icon+'<span>'+label+'</span></label>';
+  const caption = id === 'rule34' ? '<small>(nécessite RULE34_API_KEY + RULE34_USER_ID)</small>' : '';
+  const actions = id === 'rule34' ? '<div class="r34-actions"><button type="button" id="r34-edit" hidden>Modifier</button></div>' : '';
+  return '<div class="tile-wrap"><label class="tile" data-id="'+id+'"><input type="checkbox" id="src-'+id+'" hidden>'+icon+'<span>'+label+caption+'</span></label>'+actions+'</div>';
 }
 document.getElementById('apps').innerHTML = APPS.map(([id,label])=>tile(id,label,false)).join('');
 document.getElementById('mature').innerHTML = MATURE.map(([id,label])=>tile(id,label,true)).join('');
+let rule34Configured = false;
+let rule34Enabling = false;
 function paint(){ document.querySelectorAll('.tile').forEach(el=>{ const box=el.querySelector('input'); el.classList.toggle('on', box.checked); }); }
-document.body.addEventListener('change', (event)=>{ if(event.target.closest('.tile')) paint(); });
+function markRule34(){
+  const tile=document.querySelector('.tile[data-id="rule34"]');
+  if(!tile) return;
+  tile.classList.toggle('configured', rule34Configured);
+  const host=tile.querySelector('span');
+  let tag=host.querySelector('.ok');
+  if(rule34Configured && !tag){ tag=document.createElement('em'); tag.className='ok'; tag.textContent='configuré'; host.appendChild(tag); }
+  if(!rule34Configured && tag) tag.remove();
+  const edit=document.getElementById('r34-edit');
+  if(edit) edit.hidden=!rule34Configured;
+}
+function openRule34(enabling){
+  rule34Enabling=enabling;
+  document.getElementById('r34-key').value='';
+  document.getElementById('r34-user').value='';
+  document.getElementById('r34-clear').hidden=!rule34Configured;
+  document.getElementById('rule34-modal').classList.add('on');
+}
+function closeRule34(){ document.getElementById('rule34-modal').classList.remove('on'); }
+document.body.addEventListener('change', (event)=>{
+  const tile=event.target.closest('.tile');
+  if(!tile) return;
+  if(tile.dataset.id==='rule34' && event.target.checked){
+    event.target.checked=false;
+    paint();
+    openRule34(true);
+    return;
+  }
+  paint();
+});
 document.getElementById('modes').onclick = (event)=>{ const button=event.target.closest('button'); if(!button) return; mode=button.dataset.mode; document.querySelectorAll('#modes button').forEach(el=>el.classList.toggle('on', el===button)); };
 document.getElementById('threshold').oninput = (event)=>{ document.getElementById('threshold-label').textContent=event.target.value; };
 function toast(text){ const el=document.getElementById('toast'); el.textContent=text; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),2200); }
@@ -126,7 +176,7 @@ function drawTree(state){
   document.getElementById('estimate').textContent=document.querySelectorAll('#tree input:checked').length+' zone(s). Plus il y en a, plus l’analyse dure.';
 }
 let cache=null;
-async function load(){ cache=await api('/api/state'); const rules=cache.rules||{}; document.getElementById('rule-text').checked=rules.text!==false; document.getElementById('rule-links').checked=rules.links!==false; document.getElementById('rule-images').checked=rules.images!==false; mode=rules.imageMode||'exact'; document.querySelectorAll('#modes button').forEach(el=>el.classList.toggle('on', el.dataset.mode===mode)); document.getElementById('threshold').value=rules.imageThreshold||10; document.getElementById('threshold-label').textContent=document.getElementById('threshold').value; document.getElementById('domains').value=(rules.domains||[]).join('\n'); document.getElementById('ignored-users').value=(rules.ignoredUsers||[]).join('\n'); document.getElementById('ignored-channels').value=(rules.ignoredChannels||[]).join('\n'); document.getElementById('src-custom').checked=!!(rules.sources&&rules.sources.custom); document.querySelectorAll('.tile input').forEach(box=>{ const id=box.id.replace('src-',''); const value=rules.sources?rules.sources[id]:undefined; box.checked=value===undefined?box.closest('#apps')!==null:!!value; }); paint(); drawTree(cache); }
+async function load(){ cache=await api('/api/state'); const rules=cache.rules||{}; rule34Configured=!!cache.rule34Configured; document.getElementById('rule-text').checked=rules.text!==false; document.getElementById('rule-links').checked=rules.links!==false; document.getElementById('rule-images').checked=rules.images!==false; mode=rules.imageMode||'exact'; document.querySelectorAll('#modes button').forEach(el=>el.classList.toggle('on', el.dataset.mode===mode)); document.getElementById('threshold').value=rules.imageThreshold||10; document.getElementById('threshold-label').textContent=document.getElementById('threshold').value; document.getElementById('domains').value=(rules.domains||[]).join('\n'); document.getElementById('ignored-users').value=(rules.ignoredUsers||[]).join('\n'); document.getElementById('ignored-channels').value=(rules.ignoredChannels||[]).join('\n'); document.getElementById('src-custom').checked=!!(rules.sources&&rules.sources.custom); document.querySelectorAll('.tile input').forEach(box=>{ const id=box.id.replace('src-',''); const value=rules.sources?rules.sources[id]:undefined; box.checked=value===undefined?box.closest('#apps')!==null:!!value; if(id==='rule34' && !rule34Configured) box.checked=false; }); paint(); markRule34(); drawTree(cache); }
 document.getElementById('search').oninput=()=>cache&&drawTree(cache);
 document.getElementById('tree').addEventListener('change', ()=>document.getElementById('estimate').textContent=document.querySelectorAll('#tree input:checked').length+' zone(s). Plus il y en a, plus l’analyse dure.');
 document.getElementById('all').onclick=()=>{ document.querySelectorAll('#tree input').forEach(el=>el.checked=true); document.getElementById('estimate').textContent='Tout est coché.'; };
@@ -136,6 +186,28 @@ document.getElementById('arm').onclick=()=>{ document.getElementById('arm').clas
 document.getElementById('no').onclick=()=>document.getElementById('modal').classList.remove('on');
 document.getElementById('yes').onclick=async()=>{ document.getElementById('modal').classList.remove('on'); await api('/api/config',{method:'POST',body:JSON.stringify(payload())}); await api('/api/activate',{method:'POST',body:'{}'}); toast('Analyse lancée'); };
 document.getElementById('stop').onclick=async()=>{ await api('/api/stop',{method:'POST',body:'{}'}); toast('Arrêt demandé'); };
+document.getElementById('r34-edit').onclick=()=>openRule34(false);
+document.getElementById('r34-cancel').onclick=()=>{ if(rule34Enabling) document.getElementById('src-rule34').checked=false; closeRule34(); paint(); markRule34(); };
+document.getElementById('r34-save').onclick=async()=>{
+  const apiKey=document.getElementById('r34-key').value.trim();
+  const userId=document.getElementById('r34-user').value.trim();
+  if(!apiKey || !userId){ toast('Les deux champs sont nécessaires'); return; }
+  const saved=await api('/api/rule34',{method:'POST',body:JSON.stringify({ apiKey, userId })});
+  if(!saved.configured){ toast('Enregistrement refusé'); return; }
+  rule34Configured=true;
+  document.getElementById('src-rule34').checked=true;
+  document.getElementById('r34-key').value='';
+  document.getElementById('r34-user').value='';
+  closeRule34(); paint(); markRule34();
+  toast('Enregistré sur cet ordinateur');
+};
+document.getElementById('r34-clear').onclick=async()=>{
+  await api('/api/rule34',{method:'POST',body:JSON.stringify({ clear:true })});
+  rule34Configured=false;
+  document.getElementById('src-rule34').checked=false;
+  closeRule34(); paint(); markRule34();
+  toast('Clés effacées de cet ordinateur');
+};
 setInterval(async()=>{ const progress=await api('/api/progress'); document.getElementById('scanned').textContent=progress.scanned||0; document.getElementById('found').textContent=progress.found||0; document.getElementById('deleted').textContent=progress.deleted||0; document.getElementById('phase').textContent=progress.phase||''; document.getElementById('fill').style.width=Math.min(100, progress.percent||0)+'%'; document.getElementById('log').innerHTML=(progress.logs||[]).map(item=>'<div>'+item.line+'</div>').join(''); }, 1000);
 load();
 </script></body></html>

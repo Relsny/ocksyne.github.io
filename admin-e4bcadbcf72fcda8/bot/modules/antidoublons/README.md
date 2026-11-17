@@ -12,7 +12,11 @@ Surveille des salons ou des catégories entières. Le message le plus récent es
 
 ## Panneau
 
-Choix des salons et des catégories, sans plafond. Textes, liens (tous les domaines ou une liste), images et GIF. Le bouton Activer demande : « Êtes-vous sûr de vouloir activer le système d'anti-doublons ? Lorsque le bot détecte un doublon, le plus récent sera supprimé. » Puis un tableau suit l’analyse. STOP, en rouge, interrompt.
+Choix des salons et des catégories, sans plafond. Textes, liens et images. Les sites grand public sont des tuiles avec leur icône. La section Mature (18+) est repliée : e621, Rule34.xxx, RealBooru, paheal, Pornhub, avec un badge texte.
+
+Rule34.xxx affiche « (nécessite RULE34_API_KEY + RULE34_USER_ID) ». Cocher la tuile ouvre une fenêtre : la clé (champ masqué) et l’identifiant. La clé se génère sur [la page Options du compte](https://rule34.xxx/index.php?page=account&s=options). Enregistrer les écrit dans `data/antidoublons.json`, sur la machine du bot, et nulle part ailleurs. Annuler laisse la tuile décochée. Modifier et Effacer restent disponibles. Ces deux valeurs ne sont pas dans `token.txt`.
+
+Deux modes d’image : Exact (empreinte identique) ou Puissant (ressemblance, si `sharp` est installé). Le bouton Activer demande : « Êtes-vous sûr de vouloir activer le système d'anti-doublons ? Lorsque le bot détecte un doublon, le plus récent sera supprimé. » Puis un tableau suit l’analyse. STOP, en rouge, interrompt.
 
 Les messages de moins de 14 jours sont supprimés en lot. Les plus anciens partent un par un, avec une pause, à cause des limites de Discord.
 
@@ -30,4 +34,4 @@ Gérer les messages, Voir l’historique, Envoyer des messages, Intégrer des li
 
 `Guilds`, `GuildMessages`, `MessageContent` (privilégié).
 
-La configuration et les empreintes sont dans `data/antidoublons.json`.
+La configuration, les empreintes et, si tu les as saisies, `RULE34_API_KEY` et `RULE34_USER_ID` sont dans `data/antidoublons.json`. Ce fichier reste sur l’ordinateur qui lance le bot.

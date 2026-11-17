@@ -102,11 +102,18 @@ async function analyzeE621(canonical) {
   }
 }
 
-async function analyzeRule34(canonical) {
+function rule34Auth(credentials) {
+  const apiKey = String(credentials?.apiKey || '').trim();
+  const userId = String(credentials?.userId || '').trim();
+  if (!apiKey || !userId) return null;
+  return { apiKey, userId };
+}
+
+async function analyzeRule34(canonical, credentials) {
   const id = (canonical.match(/id=(\d+)/) || [])[1];
-  const apiKey = process.env.RULE34_API_KEY;
-  const userId = process.env.RULE34_USER_ID;
-  if (!id || !apiKey || !userId) return null;
+  const auth = rule34Auth(credentials);
+  if (!id || !auth) return null;
+  const { apiKey, userId } = auth;
   const url = `https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&json=1&id=${id}&api_key=${encodeURIComponent(apiKey)}&user_id=${encodeURIComponent(userId)}`;
   try {
     const { status, text } = await getText(url, { Accept: 'application/json' });
@@ -174,14 +181,15 @@ async function videoFrames(url, referer) {
   return frames;
 }
 
-async function analyzeLink(canonical, source, { visual } = {}) {
+async function analyzeLink(canonical, source, options = {}) {
+  const { visual } = options;
   if (source === 'x' || source === 'bluesky') return analyzeSocial(canonical, source);
   if (source === 'e621') {
     const found = await analyzeE621(canonical);
     if (visual && found?.contentMd5 == null) return found;
     return found;
   }
-  if (source === 'rule34') return analyzeRule34(canonical);
+  if (source === 'rule34') return analyzeRule34(canonical, options.rule34);
   if (source === 'paheal') return analyzePaheal(canonical);
   if (source === 'realbooru') return analyzeRealbooru(canonical);
   if (visual && (source === 'youtube' || source === 'tiktok')) {
@@ -191,4 +199,4 @@ async function analyzeLink(canonical, source, { visual } = {}) {
   return null;
 }
 
-module.exports = { analyzeLink, ffmpegAvailable, pace };
+module.exports = { analyzeLink, ffmpegAvailable, pace, rule34Auth };
