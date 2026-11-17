@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anti-doublons · DCAS</title>
+<style>
+:root{--bg:#07080d;--card:rgba(22,23,31,.78);--line:rgba(255,255,255,.08);--text:#f4f6fb;--muted:#9aa0b4;--accent:#5865F2;--red:#ed4245;--green:#23a55a}
+*{box-sizing:border-box}body{margin:0;color:var(--text);font:16px/1.5 Inter,Segoe UI,sans-serif;background:radial-gradient(900px 420px at 0% -10%,rgba(88,101,242,.35),transparent 55%),radial-gradient(700px 380px at 100% 0%,rgba(31,138,76,.22),transparent 50%),var(--bg)}
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;padding:14px 22px;backdrop-filter:blur(16px);background:rgba(7,8,13,.72);border-bottom:1px solid var(--line)}
+.top img{width:42px;height:42px;border-radius:12px}h1{font-size:20px;margin:0}.sub{color:var(--muted);font-size:13px}
+.stop{margin-left:auto;background:var(--red);color:#fff;border:0;border-radius:999px;padding:12px 22px;font-weight:800;letter-spacing:.08em;cursor:pointer;box-shadow:0 0 0 0 rgba(237,66,69,.7);animation:pulse 1.6s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 12px rgba(237,66,69,0)}100%{box-shadow:0 0 0 0 rgba(237,66,69,0)}}
+main{max-width:1100px;margin:0 auto;padding:22px 16px 70px;display:grid;gap:16px}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+h2{margin:0 0 12px;font-size:16px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;color:var(--muted)}
+.switch input{appearance:none;width:44px;height:26px;border-radius:99px;background:#2a2d38;position:relative;cursor:pointer}
+.switch input:checked{background:var(--accent)}
+.switch input:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.18s}
+.switch input:checked:after{transform:translateX(18px)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px}
+.tile{display:flex;align-items:center;gap:8px;padding:10px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03);cursor:pointer}
+.tile.on{border-color:rgba(88,101,242,.8);background:rgba(88,101,242,.16)}
+.tile svg{width:22px;height:22px;flex:none}
+.badge{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:9px;font-weight:800;background:#2a2d38}
+details.mature{margin-top:14px;border:1px solid var(--line);border-radius:16px;padding:8px 12px;background:rgba(0,0,0,.18)}
+details.mature summary{cursor:pointer;font-weight:700}
+.search{width:100%;margin-bottom:8px;background:#101118;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px}
+.tree{max-height:360px;overflow:auto}
+.cat{margin:8px 0;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.04em}
+.row{display:flex;align-items:center;gap:8px;padding:6px 4px}
+.modes{display:flex;gap:8px;flex-wrap:wrap}
+.modes button,.ghost,.primary{font:inherit;border-radius:12px;padding:10px 14px;cursor:pointer}
+.modes button{background:#171820;color:var(--text);border:1px solid var(--line)}
+.modes button.on{background:var(--accent);border-color:transparent}
+.primary{background:linear-gradient(135deg,#5865F2,#7b5cff);color:#fff;border:0;font-weight:800}
+.primary.go{animation:press .6s ease}
+@keyframes press{50%{transform:scale(1.04)}}
+.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+input[type=range]{width:100%}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:#101118;border-radius:14px;padding:12px}.stat b{display:block;font-size:26px}
+.bar{height:12px;background:#101118;border-radius:99px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#5865F2,#7dffb3);transition:width .3s}
+.log{max-height:180px;overflow:auto;font-size:13px;color:var(--muted)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;place-items:center;padding:18px}
+.modal.on{display:grid}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#fff;padding:12px 16px;border-radius:12px;transition:.25s}
+.toast.on{transform:translateX(-50%) translateY(0)}
+@media(max-width:860px){.grid,.stats{grid-template-columns:1fr}}
+</style></head><body>
+<header class="top"><img id="logo" alt="DCAS"><div><h1>Anti-doublons</h1><div class="sub">DCAS · le plus récent est supprimé</div></div><button class="stop" id="stop" type="button">STOP</button></header>
+<main>
+<section class="grid">
+<article class="card"><h2>Où chercher</h2>
+<input class="search" id="search" placeholder="Rechercher un salon">
+<div style="display:flex;gap:8px;margin-bottom:8px"><button class="ghost" id="all" type="button">Tout cocher</button><button class="ghost" id="none" type="button">Tout vider</button></div>
+<div class="tree" id="tree"></div>
+<p class="sub" id="estimate"></p>
+</article>
+<article class="card"><h2>Règles</h2>
+<label class="switch">Textes identiques<input id="rule-text" type="checkbox" checked></label>
+<label class="switch">Liens normalisés<input id="rule-links" type="checkbox" checked></label>
+<label class="switch">Images et GIF<input id="rule-images" type="checkbox" checked></label>
+<div class="modes" id="modes"><button type="button" data-mode="exact" class="on">Exact</button><button type="button" data-mode="strong">Puissant, comme Murrtopia</button></div>
+<label class="sub">Seuil de ressemblance <b id="threshold-label">10</b><input id="threshold" type="range" min="0" max="20" value="10"></label>
+<p class="sub">Exact compare l’empreinte identique. Puissant ajoute la ressemblance (sharp) et les images des vidéos (ffmpeg), s’ils sont installés.</p>
+</article>
+</section>
+<section class="card"><h2>Applications</h2><div class="tiles" id="apps"></div>
+<label class="switch" style="margin-top:10px">Domaine personnalisé<input id="src-custom" type="checkbox"></label>
+<textarea class="search" id="domains" rows="3" placeholder="exemple.com"></textarea>
+<details class="mature"><summary>Mature (18+)</summary><p class="sub">Replié par défaut. Icônes neutres, sans image explicite.</p><div class="tiles" id="mature"></div></details>
+</section>
+<section class="card"><h2>Ignorer</h2>
+<input class="search" id="ignored-users" placeholder="Identifiants de membres, un par ligne">
+<input class="search" id="ignored-channels" placeholder="Identifiants de salons à ignorer">
+<div style="display:flex;gap:8px"><button class="ghost" id="save" type="button">Enregistrer</button><button class="primary" id="arm" type="button">Activer</button></div>
+</section>
+<section class="card"><h2>Analyse en direct</h2>
+<div class="stats"><div class="stat"><span>Messages analysés</span><b id="scanned">0</b></div><div class="stat"><span>Doublons trouvés</span><b id="found">0</b></div><div class="stat"><span>Supprimés</span><b id="deleted">0</b></div></div>
+<div class="bar"><i id="fill"></i></div>
+<p class="sub" id="phase">en attente</p>
+<div class="log" id="log"></div>
+</section>
+</main>
+<div class="modal" id="modal"><div class="card"><h2>Confirmation</h2>
+<p>Êtes-vous sûr de vouloir activer le système d'anti-doublons ? Lorsque le bot détecte un doublon, le plus récent sera supprimé.</p>
+<button class="primary" id="yes" type="button">Oui, activer</button>
+<button class="ghost" id="no" type="button">Annuler</button></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const ICONS = {{ICONS}};
+const APPS = [['youtube','YouTube'],['instagram','Instagram'],['x','X / Twitter'],['tiktok','TikTok'],['twitch','Twitch'],['reddit','Reddit'],['facebook','Facebook'],['bluesky','Bluesky'],['pinterest','Pinterest'],['spotify','Spotify'],['soundcloud','SoundCloud'],['discord','Discord'],['imgur','Imgur'],['tenor','Tenor'],['giphy','Giphy']];
+const MATURE = [['e621','e621 / e926'],['rule34','Rule34.xxx'],['realbooru','RealBooru'],['paheal','paheal'],['pornhub','Pornhub']];
+const token = new URLSearchParams(location.search).get('token');
+const api = (path, options={}) => fetch(path+'?token='+encodeURIComponent(token), Object.assign({headers:{'Content-Type':'application/json'}}, options)).then(r=>r.json());
+document.getElementById('logo').src = '{{LOGO}}';
+let mode = 'exact';
+function tile(id, label, adult) {
+  const icon = ICONS[id] ? ICONS[id] : '<span class="badge">'+(adult?label.slice(0,2).toUpperCase():'•')+'</span>';
+  return '<label class="tile" data-id="'+id+'"><input type="checkbox" id="src-'+id+'" hidden>'+icon+'<span>'+label+'</span></label>';
+}
+document.getElementById('apps').innerHTML = APPS.map(([id,label])=>tile(id,label,false)).join('');
+document.getElementById('mature').innerHTML = MATURE.map(([id,label])=>tile(id,label,true)).join('');
+function paint(){ document.querySelectorAll('.tile').forEach(el=>{ const box=el.querySelector('input'); el.classList.toggle('on', box.checked); }); }
+document.body.addEventListener('change', (event)=>{ if(event.target.closest('.tile')) paint(); });
+document.getElementById('modes').onclick = (event)=>{ const button=event.target.closest('button'); if(!button) return; mode=button.dataset.mode; document.querySelectorAll('#modes button').forEach(el=>el.classList.toggle('on', el===button)); };
+document.getElementById('threshold').oninput = (event)=>{ document.getElementById('threshold-label').textContent=event.target.value; };
+function toast(text){ const el=document.getElementById('toast'); el.textContent=text; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),2200); }
+function sources(){ const out={custom:document.getElementById('src-custom').checked}; document.querySelectorAll('.tile input').forEach(box=>{ out[box.id.replace('src-','')]=box.checked; }); return out; }
+function lines(id){ return document.getElementById(id).value.split(/\n+/).map(s=>s.trim()).filter(Boolean); }
+function payload(){
+  const channelIds=[...document.querySelectorAll('[data-kind="channel"]:checked')].map(el=>el.value);
+  const categoryIds=[...document.querySelectorAll('[data-kind="category"]:checked')].map(el=>el.value);
+  return { channelIds, categoryIds, rules:{ text:document.getElementById('rule-text').checked, links:document.getElementById('rule-links').checked, images:document.getElementById('rule-images').checked, imageMode:mode, imageThreshold:Number(document.getElementById('threshold').value), sources:sources(), domains:lines('domains'), ignoredUsers:lines('ignored-users'), ignoredChannels:lines('ignored-channels') } };
+}
+function group(channels){ const map=new Map(); channels.forEach(ch=>{ const key=ch.parentName||'Sans catégorie'; if(!map.has(key)) map.set(key,[]); map.get(key).push(ch); }); return map; }
+function drawTree(state){
+  const q=document.getElementById('search').value.toLowerCase();
+  const tree=document.getElementById('tree');
+  const cats=(state.categories||[]).filter(c=>!q||c.name.toLowerCase().includes(q));
+  const groups=group((state.channels||[]).filter(c=>!q||c.name.toLowerCase().includes(q)));
+  let html=cats.map(c=>'<label class="row"><input data-kind="category" type="checkbox" value="'+c.id+'" '+(c.checked?'checked':'')+'> Catégorie · '+c.name+'</label>').join('');
+  groups.forEach((list,name)=>{ html+='<div class="cat">'+name+'</div>'+list.map(c=>'<label class="row"><input data-kind="channel" type="checkbox" value="'+c.id+'" '+(c.checked?'checked':'')+'> # '+c.name+'</label>').join(''); });
+  tree.innerHTML=html||'<p class="sub">Aucun salon.</p>';
+  document.getElementById('estimate').textContent=document.querySelectorAll('#tree input:checked').length+' zone(s). Plus il y en a, plus l’analyse dure.';
+}
+let cache=null;
+async function load(){ cache=await api('/api/state'); const rules=cache.rules||{}; document.getElementById('rule-text').checked=rules.text!==false; document.getElementById('rule-links').checked=rules.links!==false; document.getElementById('rule-images').checked=rules.images!==false; mode=rules.imageMode||'exact'; document.querySelectorAll('#modes button').forEach(el=>el.classList.toggle('on', el.dataset.mode===mode)); document.getElementById('threshold').value=rules.imageThreshold||10; document.getElementById('threshold-label').textContent=document.getElementById('threshold').value; document.getElementById('domains').value=(rules.domains||[]).join('\n'); document.getElementById('ignored-users').value=(rules.ignoredUsers||[]).join('\n'); document.getElementById('ignored-channels').value=(rules.ignoredChannels||[]).join('\n'); document.getElementById('src-custom').checked=!!(rules.sources&&rules.sources.custom); document.querySelectorAll('.tile input').forEach(box=>{ const id=box.id.replace('src-',''); const value=rules.sources?rules.sources[id]:undefined; box.checked=value===undefined?box.closest('#apps')!==null:!!value; }); paint(); drawTree(cache); }
+document.getElementById('search').oninput=()=>cache&&drawTree(cache);
+document.getElementById('tree').addEventListener('change', ()=>document.getElementById('estimate').textContent=document.querySelectorAll('#tree input:checked').length+' zone(s). Plus il y en a, plus l’analyse dure.');
+document.getElementById('all').onclick=()=>{ document.querySelectorAll('#tree input').forEach(el=>el.checked=true); document.getElementById('estimate').textContent='Tout est coché.'; };
+document.getElementById('none').onclick=()=>{ document.querySelectorAll('#tree input').forEach(el=>el.checked=false); };
+document.getElementById('save').onclick=async()=>{ await api('/api/config',{method:'POST',body:JSON.stringify(payload())}); toast('Enregistré'); };
+document.getElementById('arm').onclick=()=>{ document.getElementById('arm').classList.add('go'); document.getElementById('modal').classList.add('on'); };
+document.getElementById('no').onclick=()=>document.getElementById('modal').classList.remove('on');
+document.getElementById('yes').onclick=async()=>{ document.getElementById('modal').classList.remove('on'); await api('/api/config',{method:'POST',body:JSON.stringify(payload())}); await api('/api/activate',{method:'POST',body:'{}'}); toast('Analyse lancée'); };
+document.getElementById('stop').onclick=async()=>{ await api('/api/stop',{method:'POST',body:'{}'}); toast('Arrêt demandé'); };
+setInterval(async()=>{ const progress=await api('/api/progress'); document.getElementById('scanned').textContent=progress.scanned||0; document.getElementById('found').textContent=progress.found||0; document.getElementById('deleted').textContent=progress.deleted||0; document.getElementById('phase').textContent=progress.phase||''; document.getElementById('fill').style.width=Math.min(100, progress.percent||0)+'%'; document.getElementById('log').innerHTML=(progress.logs||[]).map(item=>'<div>'+item.line+'</div>').join(''); }, 1000);
+load();
+</script></body></html>

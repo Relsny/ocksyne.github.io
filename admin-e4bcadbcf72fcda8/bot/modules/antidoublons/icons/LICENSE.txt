@@ -1,0 +1,4 @@
+Icônes des applications grand public : simple-icons, licence CC0 1.0.
+https://github.com/simple-icons/simple-icons
+L’icône Tenor est un badge « GIF » dessiné pour DCAS, pas le logo de la marque.
+Les sites 18+ n’utilisent pas d’image : seulement un badge texte.

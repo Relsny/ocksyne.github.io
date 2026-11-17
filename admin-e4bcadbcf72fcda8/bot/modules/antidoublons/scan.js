@@ -3,6 +3,7 @@
 const { EmbedBuilder } = require('discord.js');
 const { stamp, withLogo } = require('../../src/brand');
 const { consider, sha256, isImageAttachment } = require('./engine');
+const { dHashBuffer } = require('./lib/fingerprint');
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const TWO_WEEKS = 14 * 24 * 60 * 60 * 1000;
@@ -11,16 +12,21 @@ function linkTo(guildId, channelId, messageId) {
   return `https://discord.com/channels/${guildId}/${channelId}/${messageId}`;
 }
 
-async function fileHashes(message) {
+async function fileHashes(message, { visual = false } = {}) {
   const hashes = [];
+  const visualHashes = [];
   for (const attachment of message.attachments.values()) {
     if (!isImageAttachment(attachment)) continue;
     const response = await fetch(attachment.url).catch(() => null);
     if (!response?.ok) continue;
     const bytes = Buffer.from(await response.arrayBuffer());
     hashes.push(sha256(bytes));
+    if (visual) {
+      const hash = await dHashBuffer(bytes).catch(() => null);
+      if (hash) visualHashes.push(hash);
+    }
   }
-  return hashes;
+  return { hashes, visualHashes };
 }
 
 async function targetChannels(guild, config) {
@@ -51,7 +57,11 @@ async function walkChannel(channel, config, hashes, progress, stop) {
         channelId: channel.id,
         content: message.content,
         createdAt: message.createdTimestamp,
-        fileHashes: config.rules.images ? await fileHashes(message) : [],
+        ...await (async () => {
+          if (!config.rules.images) return { fileHashes: [], visualHashes: [] };
+          const media = await fileHashes(message, { visual: config.rules.imageMode === 'strong' });
+          return { fileHashes: media.hashes, visualHashes: media.visualHashes };
+        })(),
       };
       const hits = consider(record, hashes, config.rules);
       for (const hit of hits) {
@@ -131,13 +141,13 @@ async function runScan(guild, config, progress, stop) {
   progress.pending = [];
 }
 
-async function warnAndDelete(message, hit) {
+async function warnAndDelete(message, hit, delay = 4000) {
   const embed = stamp(new EmbedBuilder()
     .setColor(0xed4245)
     .setTitle('Doublon détecté')
-    .setDescription(`Le message le plus récent a été retiré.\nOriginal : ${linkTo(message.guild.id, hit.originalChannel, hit.originalId)}`), 'Anti-doublons', { keepColor: true });
+    .setDescription(`Le message le plus récent sera retiré.\nOriginal : ${linkTo(message.guild.id, hit.originalChannel, hit.originalId)}`), 'Anti-doublons', { keepColor: true });
   await message.channel.send(withLogo(embed)).catch(() => {});
-  await message.delete().catch(() => {});
+  setTimeout(() => message.delete().catch(() => {}), delay);
 }
 
 module.exports = { targetChannels, fileHashes, runScan, warnAndDelete, linkTo };

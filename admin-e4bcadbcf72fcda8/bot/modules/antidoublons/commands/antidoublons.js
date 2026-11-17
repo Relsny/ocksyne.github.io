@@ -5,12 +5,24 @@ const { createStore } = require('../../../src/store');
 const { openDashboard } = require('../dashboard');
 const { runScan, targetChannels, fileHashes, warnAndDelete } = require('../scan');
 const { consider } = require('../engine');
+const { defaultSources } = require('../lib/normalizer');
 
 const store = createStore('antidoublons.json', () => ({
   active: false,
   channelIds: [],
   categoryIds: [],
-  rules: { text: true, links: true, images: true, linkMode: 'all', domains: [] },
+  rules: {
+    text: true,
+    links: true,
+    images: true,
+    imageMode: 'exact',
+    imageThreshold: 10,
+    deleteDelayMs: 4000,
+    sources: defaultSources(),
+    domains: [],
+    ignoredUsers: [],
+    ignoredChannels: [],
+  },
   hashes: {},
   cursor: {},
 }));
@@ -18,7 +30,7 @@ const store = createStore('antidoublons.json', () => ({
 const jobs = new Map();
 
 function jobFor(guildId) {
-  if (!jobs.has(guildId)) jobs.set(guildId, { scanned: 0, found: 0, phase: 'en attente', percent: 0, pending: [], stopped: false });
+  if (!jobs.has(guildId)) jobs.set(guildId, { scanned: 0, found: 0, deleted: 0, phase: 'en attente', percent: 0, pending: [], logs: [], stopped: false });
   return jobs.get(guildId);
 }
 
@@ -29,7 +41,16 @@ function defaultState(guild) {
   if (guild) {
     for (const channel of guild.channels.cache.values()) {
       if (channel.type === ChannelType.GuildCategory) categories.push({ id: channel.id, name: channel.name, checked: config.categoryIds.includes(channel.id) });
-      else if (channel.isTextBased?.()) channels.push({ id: channel.id, name: channel.name, checked: config.channelIds.includes(channel.id) });
+      else if (channel.isTextBased?.()) {
+        const parent = channel.parentId ? guild.channels.cache.get(channel.parentId) : null;
+        channels.push({
+          id: channel.id,
+          name: channel.name,
+          parentId: channel.parentId,
+          parentName: parent?.name || 'Sans catégorie',
+          checked: config.channelIds.includes(channel.id),
+        });
+      }
     }
   }
   return { categories, channels, rules: config?.rules || { text: true, links: true, images: true, linkMode: 'all', domains: [] } };
@@ -71,7 +92,14 @@ async function openFor(interaction) {
     },
     progress: () => {
       const progress = jobFor(guild.id);
-      return { scanned: progress.scanned, found: progress.found, phase: progress.phase, percent: progress.percent };
+      return {
+        scanned: progress.scanned,
+        found: progress.found,
+        deleted: progress.deleted || 0,
+        phase: progress.phase,
+        percent: progress.percent,
+        logs: progress.logs || [],
+      };
     },
   });
   return started;
@@ -105,6 +133,9 @@ module.exports = {
     if (!message.guild || message.author?.bot) return;
     const config = store.get(message.guild.id);
     if (!config.active) return;
+    const rules = config.rules || {};
+    if ((rules.ignoredUsers || []).includes(message.author.id)) return;
+    if ((rules.ignoredChannels || []).includes(message.channelId)) return;
     const channels = await targetChannels(message.guild, config);
     if (!channels.some((channel) => channel.id === message.channelId)) return;
     const record = {
@@ -112,14 +143,22 @@ module.exports = {
       channelId: message.channelId,
       content: message.content,
       createdAt: message.createdTimestamp,
-      fileHashes: config.rules.images ? await fileHashes(message) : [],
+      ...await (async () => {
+        if (!rules.images) return { fileHashes: [], visualHashes: [] };
+        const media = await fileHashes(message, { visual: rules.imageMode === 'strong' });
+        return { fileHashes: media.hashes, visualHashes: media.visualHashes };
+      })(),
     };
     const hits = consider(record, config.hashes, config.rules);
     if (!hits.length) {
       store.set(message.guild.id, { hashes: config.hashes, cursor: { ...config.cursor, [message.channelId]: message.id } });
       return;
     }
-    await warnAndDelete(message, hits[0]);
+    const job = jobFor(message.guild.id);
+    job.found += 1;
+    job.logs = [{ line: `Doublon en direct · ${hits[0].kind || 'lien'}` }, ...(job.logs || [])].slice(0, 30);
+    await warnAndDelete(message, hits[0], rules.deleteDelayMs || 4000);
+    job.deleted = (job.deleted || 0) + 1;
     store.set(message.guild.id, { hashes: config.hashes });
   },
 };

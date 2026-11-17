@@ -18,12 +18,20 @@ const sessions = new Map();
 function page() {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Avatars interdits</title>
 <style>
-body{margin:0;background:#0b0c10;color:#eef0f6;font:16px/1.5 Inter,Segoe UI,sans-serif}
-main{max-width:760px;margin:0 auto;padding:28px 16px} .card{background:#16171f;border:1px solid #262836;border-radius:16px;padding:16px;margin-top:14px}
-button{font:inherit;font-weight:700;border:0;border-radius:12px;padding:10px 14px;cursor:pointer;margin-right:8px}
-.primary{background:#5865F2;color:#fff}.stop{background:#ed4245;color:#fff} input,select{background:#111;color:#fff;border:1px solid #262836;border-radius:8px;padding:8px}
-</style></head><body><main>
-<button class="stop" id="stop" type="button">STOP</button>
+:root{--bg:#07080d;--card:rgba(22,23,31,.8);--line:rgba(255,255,255,.08);--text:#f4f6fb;--muted:#9aa0b4;--accent:#5865F2;--red:#ed4245}
+*{box-sizing:border-box}body{margin:0;color:var(--text);font:16px/1.5 Inter,Segoe UI,sans-serif;background:radial-gradient(800px 360px at 0% 0%,rgba(88,101,242,.35),transparent 55%),var(--bg)}
+.top{display:flex;align-items:center;gap:12px;padding:14px 20px;background:rgba(7,8,13,.75);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.stop{margin-left:auto;background:var(--red);color:#fff;border:0;border-radius:999px;padding:12px 18px;font-weight:800;animation:pulse 1.6s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 12px rgba(237,66,69,0)}}
+main{max-width:760px;margin:0 auto;padding:22px 16px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;margin-top:14px;backdrop-filter:blur(10px)}
+button,.primary{font:inherit;font-weight:700;border:0;border-radius:12px;padding:10px 14px;cursor:pointer;margin-right:8px}
+.primary{background:linear-gradient(135deg,#5865F2,#7b5cff);color:#fff}
+input,select{background:#101118;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px;width:100%;margin:6px 0}
+.sub{color:var(--muted)}
+</style></head><body>
+<header class="top"><div><b>DCAS</b><div class="sub">Avatars interdits</div></div><button class="stop" id="stop" type="button">STOP</button></header>
+<main>
 <h1>Avatars interdits</h1>
 <p>Empreinte exacte de l’image, pas une ressemblance. Le panneau reste sur cet ordinateur.</p>
 <section class="card"><h2>Référence</h2>

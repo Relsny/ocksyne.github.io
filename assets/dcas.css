@@ -264,6 +264,12 @@ footer.foot a{color:var(--muted)}footer.foot a:hover{color:var(--text)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#fff;font-weight:700;padding:12px 20px;border-radius:12px;transition:.3s;z-index:99}
 .toast.on{transform:translateX(-50%) translateY(0)}
 .flag-phare{display:inline-block;margin-left:8px;background:rgba(88,101,242,.2);color:#c7cbff;border-radius:99px;padding:2px 8px;font-size:12px;font-weight:800;letter-spacing:.2px}
+.ad-mock{margin-top:12px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#12131a}
+.ad-mock header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#0e0f14;font-weight:800}
+.ad-mock header b{margin-left:auto;background:#ed4245;color:#fff;border-radius:99px;padding:4px 8px;font-size:11px}
+.ad-tiles{display:flex;gap:6px;flex-wrap:wrap;padding:10px}
+.ad-tiles span{background:#1c1e28;border:1px solid #2e3142;border-radius:10px;padding:6px 8px;font-size:12px}
+.ad-tiles span.on{border-color:#5865F2;background:rgba(88,101,242,.2)}
 .price-note{display:block;margin-top:6px;color:var(--yellow);font-size:12.5px;font-weight:600}
 .host-grid{display:grid;gap:14px}
 .host-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}

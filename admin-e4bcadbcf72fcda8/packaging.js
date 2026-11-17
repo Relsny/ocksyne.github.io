@@ -43,6 +43,10 @@
       keys.push(['OSU_CLIENT_ID', 'ton_osu_client_id', 'Identifiant OAuth osu. Uniquement pour le module Stats osu.']);
       keys.push(['OSU_CLIENT_SECRET', 'ton_osu_client_secret', 'Secret OAuth osu. Uniquement pour le module Stats osu.']);
     }
+    if (slugs.includes('antidoublons')) {
+      keys.push(['RULE34_API_KEY', 'colle_ta_cle_rule34', 'Cle API Rule34, facultative. Compte Rule34, My Account, Options.']);
+      keys.push(['RULE34_USER_ID', 'colle_ton_id_rule34', 'Identifiant utilisateur Rule34, facultatif, a cote de la cle.']);
+    }
     if (slugs.includes('stream')) {
       keys.push(['TWITCH_CLIENT_ID', 'ton_twitch_client_id', 'Identifiant de l application Twitch. Uniquement pour les annonces de live.']);
       keys.push(['TWITCH_CLIENT_SECRET', 'ton_twitch_client_secret', 'Secret de l application Twitch. YouTube n a pas besoin de clé.']);
