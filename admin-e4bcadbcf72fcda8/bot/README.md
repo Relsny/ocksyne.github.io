@@ -46,3 +46,13 @@ Ce contrôle charge tous les modules présents, sans se connecter à Discord.
 ## Données
 
 Les réglages de chaque serveur sont des fichiers JSON dans `data/`, créés au premier usage. Ils ne sont pas versionnés. Les clés Rule34 de l’anti-doublons, si tu les saisis dans le panneau, sont dans `data/antidoublons.json` et pas dans le fichier du jeton.
+
+## Version du panneau admin
+
+Avant chaque commit qui change `manifest.json` ou un fichier de ce dossier, lancer depuis le dossier du panneau :
+
+```bash
+node scripts/bump-panel-version.js
+```
+
+Le script calcule un SHA-256 sur `manifest.json` et sur chaque fichier qu’il liste, en garde 12 caractères, et les écrit dans les `?v=` de `index.html`. Le panneau s’en sert pour recharger le manifeste et les fichiers du bot. Sans ce passage, le navigateur peut garder un zip périmé.
