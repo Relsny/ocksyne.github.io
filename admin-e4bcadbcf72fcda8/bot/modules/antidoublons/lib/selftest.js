@@ -15,7 +15,6 @@ const samples = [
   ['https://e926.net/posts/777', 'e621', 'https://e621.net/posts/777'],
   ['https://rule34.xxx/index.php?page=post&s=view&id=55', 'rule34', 'https://rule34.xxx/index.php?page=post&s=view&id=55'],
   ['https://realbooru.com/index.php?page=post&s=view&id=9', 'realbooru', 'https://realbooru.com/index.php?page=post&s=view&id=9'],
-  ['https://rule34.paheal.net/post/view/12', 'paheal', 'https://rule34.paheal.net/post/view/12'],
   ['https://fxbsky.app/profile/alice.bsky.social/post/abc', 'bluesky', 'https://bsky.app/profile/alice.bsky.social/post/abc'],
   ['https://youtu.be/dQw4w9WgXcQ?si=1', 'youtube', 'https://youtube.com/watch?v=dQw4w9WgXcQ'],
   ['https://youtube.com/shorts/abc123', 'youtube', 'https://youtube.com/watch?v=abc123'],
@@ -34,6 +33,8 @@ for (const [input, source, canonical] of samples) {
 }
 
 const rules = { sources: defaultSources(), domains: ['exemple.com'] };
+assert(!('paheal' in defaultSources()), 'paheal n’est plus proposé');
+assert(normalizeLink('https://rule34.paheal.net/post/view/12').source === 'paheal', 'ancien lien paheal encore reconnu');
 assert(sourceEnabled(normalizeLink('https://youtu.be/abcdefghijk'), rules), 'youtube actif');
 assert(!sourceEnabled(normalizeLink('https://e621.net/posts/1'), rules), 'e621 coupé par défaut');
 rules.sources.custom = true;

@@ -42,14 +42,17 @@ function defaultState(guild) {
   const channels = [];
   if (guild) {
     for (const channel of guild.channels.cache.values()) {
-      if (channel.type === ChannelType.GuildCategory) categories.push({ id: channel.id, name: channel.name, checked: config.categoryIds.includes(channel.id) });
-      else if (channel.isTextBased?.()) {
+      if (channel.type === ChannelType.GuildCategory) {
+        categories.push({ id: channel.id, name: channel.name, position: channel.rawPosition ?? 0, checked: config.categoryIds.includes(channel.id) });
+      } else if (channel.isTextBased?.() || channel.type === ChannelType.GuildVoice || channel.type === ChannelType.GuildStageVoice) {
         const parent = channel.parentId ? guild.channels.cache.get(channel.parentId) : null;
         channels.push({
           id: channel.id,
           name: channel.name,
           parentId: channel.parentId,
-          parentName: parent?.name || 'Sans catégorie',
+          parentName: parent?.name || 'Salons',
+          position: channel.rawPosition ?? 0,
+          kind: channelKind(channel),
           checked: config.channelIds.includes(channel.id),
         });
       }
@@ -62,11 +65,23 @@ function defaultState(guild) {
     categories,
     channels,
     rules,
+    guild: guild ? { name: guild.name, icon: guild.iconURL({ extension: 'png', size: 64 }) } : null,
+    members: guild ? [...guild.members.cache.values()].filter((member) => !member.user.bot).slice(0, 400).map((member) => ({
+      id: member.id,
+      name: member.displayName || member.user.username,
+    })) : [],
     permissions: permissionReport(guild, config),
     deletedCount: config?.deletedCount || 0,
     active: Boolean(config?.active),
     rule34Configured: Boolean(saved.apiKey && saved.userId),
   };
+}
+
+function channelKind(channel) {
+  if (channel.type === ChannelType.GuildVoice || channel.type === ChannelType.GuildStageVoice) return 'voice';
+  if (channel.type === ChannelType.GuildAnnouncement) return 'announcement';
+  if (channel.type === ChannelType.GuildForum || channel.type === ChannelType.GuildMedia) return 'forum';
+  return 'text';
 }
 
 const PERMISSION_LABELS = [

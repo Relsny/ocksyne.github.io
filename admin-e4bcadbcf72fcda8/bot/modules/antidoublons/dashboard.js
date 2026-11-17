@@ -24,6 +24,12 @@ function page() {
   const icons = {};
   const iconDir = path.join(__dirname, 'icons');
   for (const name of fs.readdirSync(iconDir)) {
+    if (name.endsWith('.png')) {
+      const id = name.replace(/\.png$/, '');
+      const b64 = fs.readFileSync(path.join(iconDir, name)).toString('base64');
+      icons[id] = `<img alt="" src="data:image/png;base64,${b64}">`;
+      continue;
+    }
     if (!name.endsWith('.svg')) continue;
     const id = name.replace(/\.svg$/, '');
     const brand = {

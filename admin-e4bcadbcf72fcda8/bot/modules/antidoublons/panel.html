@@ -26,10 +26,10 @@ h2{margin:0 0 12px;font-size:16px}
 .tile small,.tile .ok{font-size:11px;font-weight:600;line-height:1.3}
 .tile small{color:var(--muted)}
 .tile .ok{color:var(--green);font-style:normal}
-.tile svg{width:22px;height:22px;flex:none}
+.tile svg,.tile img{width:22px;height:22px;flex:none;border-radius:6px;object-fit:cover}
 .tile-wrap.rule34{grid-column:1 / -1}
-.tile-wrap.rule34 .tile{max-width:240px}
-.r34-meta{display:flex;align-items:center;gap:8px;margin-top:8px}
+.tile-wrap.rule34 .tile{max-width:280px}
+.r34-meta{display:flex;align-items:center;gap:8px;margin:0 0 8px}
 .r34-badge{font-size:12px;font-weight:800;color:var(--green)}
 .r34-meta button,.r34-eye{font:inherit;font-size:12px;background:#171820;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:6px 8px;cursor:pointer}
 .r34-drawer{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease}
@@ -53,9 +53,32 @@ details.mature summary{cursor:pointer;font-weight:700}
 .bad-perm{margin:6px 0;padding:8px 10px;border-radius:12px;background:rgba(237,66,69,.16);color:#ffb4b4;font-size:13px}
 .ok-perm{margin:6px 0;color:var(--green);font-size:13px}
 .foot{text-align:center;color:var(--muted);font-size:12px;padding:8px 0 4px}
-.tree{max-height:360px;overflow:auto}
-.cat{margin:8px 0;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.04em}
-.row{display:flex;align-items:center;gap:8px;padding:6px 4px}
+.dside{background:#2b2d31;border-radius:12px;padding:0 0 10px;border:1px solid #1e1f22}
+.dserver{display:flex;align-items:center;gap:10px;padding:12px;font-weight:800;border-bottom:1px solid #1e1f22;background:#2b2d31;border-radius:12px 12px 0 0}
+.dserver img,.dletter{width:32px;height:32px;border-radius:50%;object-fit:cover}
+.dletter{display:grid;place-items:center;background:#5865F2;font-size:14px}
+.dsearch{display:block;width:100%;margin:0 0 8px;background:#1e1f22;color:#dbdee1;border:0;border-radius:4px;padding:8px 10px;font:13px/1.3 Inter,Segoe UI,sans-serif}
+.dside .dsearch{width:calc(100% - 16px);margin:8px}
+.dsearch::placeholder{color:#949ba4}
+.dactions{display:flex;gap:6px;padding:0 8px 6px}
+.dactions button{font:12px/1 Inter,Segoe UI,sans-serif;font-weight:600;color:#dbdee1;background:#35373c;border:0;border-radius:4px;padding:6px 8px;cursor:pointer}
+.dactions button:hover{background:#404249}
+.tree{max-height:420px;overflow:auto;padding-bottom:6px}
+.dcat{display:flex;align-items:center;gap:4px;padding:14px 8px 2px;color:#949ba4;font-size:12px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;cursor:pointer}
+.dcat:hover{color:#dbdee1}
+.dcat .chev{width:14px;color:#949ba4;transition:transform .15s}
+.dcat.open .chev{transform:rotate(90deg)}
+.collapsed{display:none}
+.dcat input{margin-left:auto;accent-color:#5865F2}
+.drow{display:flex;align-items:center;gap:6px;margin:1px 8px;padding:6px 8px;border-radius:4px;color:#949ba4;cursor:pointer}
+.drow:hover{background:#35373c;color:#dbdee1}
+.drow.on{background:#5865F2;color:#fff}
+.drow svg{width:16px;height:16px;flex:none}
+.drow .tick{margin-left:auto;font-weight:800}
+.help{color:var(--muted);font-size:13px;margin:0 0 8px}
+.suggest{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.suggest button{font:13px/1 Inter,Segoe UI,sans-serif;background:#2b2d31;color:#dbdee1;border:0;border-radius:999px;padding:6px 10px;cursor:pointer}
+.custom-box{margin-top:14px}
 .modes{display:flex;gap:8px;flex-wrap:wrap}
 .modes button,.ghost,.primary{font:inherit;border-radius:12px;padding:10px 14px;cursor:pointer}
 .modes button{background:#171820;color:var(--text);border:1px solid var(--line)}
@@ -81,9 +104,12 @@ input[type=range]{width:100%}
 <main>
 <section class="grid">
 <article class="card"><h2>Où chercher</h2>
-<input class="search" id="search" placeholder="Rechercher un salon">
-<div style="display:flex;gap:8px;margin-bottom:8px"><button class="ghost" id="all" type="button">Tout cocher</button><button class="ghost" id="none" type="button">Tout vider</button></div>
+<div class="dside">
+<div class="dserver" id="server"><span class="dletter">D</span><span>Serveur</span></div>
+<input class="dsearch" id="search" placeholder="Rechercher un salon">
+<div class="dactions"><button id="all" type="button">Tout cocher</button><button id="none" type="button">Tout vider</button></div>
 <div class="tree" id="tree"></div>
+</div>
 <p class="sub" id="estimate"></p>
 <div id="perms"></div>
 </article>
@@ -97,13 +123,22 @@ input[type=range]{width:100%}
 </article>
 </section>
 <section class="card"><h2>Applications</h2><div class="tiles" id="apps"></div>
-<label class="switch" style="margin-top:10px">Domaine personnalisé<input id="src-custom" type="checkbox"></label>
+<details class="mature"><summary>Mature (18+)</summary><p class="sub">Replié par défaut. Favicons des sites, sans image explicite.</p><div class="tiles" id="mature"></div></details>
+<div class="custom-box">
+<label class="switch">Domaine personnalisé<input id="src-custom" type="checkbox"></label>
+<p class="help">Un domaine par ligne, par exemple exemple.com. Les tuiles du dessus couvrent déjà les sites connus.</p>
 <textarea class="search" id="domains" rows="3" placeholder="exemple.com"></textarea>
-<details class="mature"><summary>Mature (18+)</summary><p class="sub">Replié par défaut. Icônes neutres, sans image explicite.</p><div class="tiles" id="mature"></div></details>
+</div>
 </section>
 <section class="card"><h2>Ignorer</h2>
-<input class="search" id="ignored-users" placeholder="Identifiants de membres, un par ligne">
-<input class="search" id="ignored-channels" placeholder="Identifiants de salons à ignorer">
+<p class="help">Identifiant Discord du membre. Active le mode développeur : Paramètres, Avancés, Mode développeur. Puis clic droit sur le membre, Copier l’identifiant.</p>
+<input class="dsearch" id="member-search" placeholder="Rechercher un membre par son nom">
+<div class="suggest" id="member-suggest"></div>
+<textarea class="search" id="ignored-users" rows="3" placeholder="Un identifiant de membre par ligne"></textarea>
+<p class="help">Identifiant du salon, de la même façon : clic droit sur le salon, Copier l’identifiant.</p>
+<input class="dsearch" id="channel-search" placeholder="Rechercher un salon à ignorer">
+<div class="suggest" id="channel-suggest"></div>
+<textarea class="search" id="ignored-channels" rows="3" placeholder="Un identifiant de salon par ligne"></textarea>
 <div style="display:flex;gap:8px"><button class="ghost" id="save" type="button">Enregistrer</button><button class="primary" id="arm" type="button">Activer</button></div>
 </section>
 <section class="card"><h2>Analyse en direct</h2>
@@ -122,8 +157,8 @@ input[type=range]{width:100%}
 <script>
 const ICONS = {{ICONS}};
 const APPS = [['youtube','YouTube'],['instagram','Instagram'],['x','X / Twitter'],['tiktok','TikTok'],['twitch','Twitch'],['reddit','Reddit'],['facebook','Facebook'],['bluesky','Bluesky'],['pinterest','Pinterest'],['spotify','Spotify'],['soundcloud','SoundCloud'],['discord','Discord'],['imgur','Imgur'],['tenor','Tenor'],['giphy','Giphy']];
-const MATURE = [['e621','e621 / e926','#0055d4'],['rule34','Rule34.xxx','#8BC34A'],['realbooru','RealBooru','#E85D04'],['paheal','paheal','#9B5DE5'],['pornhub','Pornhub','#FF9000']];
-const BRAND = {youtube:'#FF0000',instagram:'#E1306C',x:'#F5F5F5',tiktok:'#FE2C55',twitch:'#9146FF',reddit:'#FF4500',facebook:'#0866FF',bluesky:'#1185FE',pinterest:'#E60023',spotify:'#1DB954',soundcloud:'#FF5500',discord:'#5865F2',imgur:'#1BB76E',giphy:'#FF6666',tenor:'#00B8FF',e621:'#0055d4',rule34:'#8BC34A',realbooru:'#E85D04',paheal:'#9B5DE5',pornhub:'#FF9000'};
+const MATURE = [['e621','e621 / e926'],['rule34','Rule34.xxx'],['realbooru','RealBooru'],['pornhub','Pornhub']];
+const BRAND = {youtube:'#FF0000',instagram:'#E1306C',x:'#F5F5F5',tiktok:'#FE2C55',twitch:'#9146FF',reddit:'#FF4500',facebook:'#0866FF',bluesky:'#1185FE',pinterest:'#E60023',spotify:'#1DB954',soundcloud:'#FF5500',discord:'#5865F2',imgur:'#1BB76E',giphy:'#FF6666',tenor:'#00B8FF',e621:'#1d4ed8',rule34:'#3d8c40',realbooru:'#c04040',pornhub:'#FF9000'};
 const token = new URLSearchParams(location.search).get('token');
 const api = (path, options={}) => fetch(path+'?token='+encodeURIComponent(token), Object.assign({headers:{'Content-Type':'application/json'}}, options)).then(r=>r.json());
 document.getElementById('logo').src = '{{LOGO}}';
@@ -135,8 +170,8 @@ function tile(id, label, adult) {
   const head = '<label class="tile" data-id="'+id+'" style="--brand:'+color+'"><input type="checkbox" id="src-'+id+'" hidden>'+icon+'<span>'+label+caption+'</span></label>';
   if (id !== 'rule34') return '<div class="tile-wrap">'+head+'</div>';
   return '<div class="tile-wrap rule34" id="rule34-wrap">'+head
-    + '<div class="r34-meta" id="r34-meta" hidden><span class="r34-badge">configuré ✓</span><button type="button" id="r34-edit">Modifier</button><button type="button" id="r34-clear">Effacer</button></div>'
     + '<div class="r34-drawer"><div class="r34-drawer-inner"><form class="r34-form" id="r34-form">'
+    + '<div class="r34-meta" id="r34-meta" hidden><span class="r34-badge">configuré ✓</span><button type="button" id="r34-edit">Modifier</button><button type="button" id="r34-clear">Effacer</button></div>'
     + '<p class="sub">Ces valeurs restent dans data/antidoublons.json sur cet ordinateur. Elles ne partent pas dans token.txt, ni ailleurs. Cette page ne les réaffiche pas.</p>'
     + '<label>RULE34_API_KEY<span class="r34-field"><input id="r34-key" type="password" autocomplete="off" spellcheck="false"><button class="r34-eye" id="r34-eye" type="button" aria-label="Afficher la clé" title="Afficher"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 5C7 5 2.7 8.1 1 12c1.7 3.9 6 7 11 7s9.3-3.1 11-7c-1.7-3.9-6-7-11-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg></button></span></label>'
     + '<label>RULE34_USER_ID<input id="r34-user" type="text" autocomplete="off" spellcheck="false"></label>'
@@ -181,23 +216,108 @@ function payload(){
   const categoryIds=[...document.querySelectorAll('[data-kind="category"]:checked')].map(el=>el.value);
   return { channelIds, categoryIds, rules:{ text:document.getElementById('rule-text').checked, links:document.getElementById('rule-links').checked, images:document.getElementById('rule-images').checked, imageMode:mode, imageThreshold:Number(document.getElementById('threshold').value), sources:sources(), domains:lines('domains'), ignoredUsers:lines('ignored-users'), ignoredChannels:lines('ignored-channels') } };
 }
-function group(channels){ const map=new Map(); channels.forEach(ch=>{ const key=ch.parentName||'Sans catégorie'; if(!map.has(key)) map.set(key,[]); map.get(key).push(ch); }); return map; }
+const collapsed=new Set();
+const MARK={
+  text:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M10 3h2.2l-.7 3.2H15v2h-3.8l-.9 4H14v2h-4.1L9.2 18H7l.7-3.8H4.2v-2h3.8l.9-4H5.5v-2h3.7L10 3zm6.2 0H18l-.7 3.2H21v2h-4l-.9 4H20v2h-4.3L15 18h-2.2l.7-3.8h-3.6v-2H14l.9-4h-3.4v-2h3.7L16.2 3z"/></svg>',
+  voice:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 9h3.2L12 4.2v15.6L7.2 15H4V9zm12.2 3a4 4 0 0 0-2-3.4v6.8a4 4 0 0 0 2-3.4z"/></svg>',
+  announcement:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 9v6h3l5 4V5L7 9H4zm11 1.2v3.6a3 3 0 0 0 0-3.6zM16 6v2.2a5 5 0 0 1 0 7.6V18a7 7 0 0 0 0-12z"/></svg>',
+  forum:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-4 3v-3H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>'
+};
+function esc(value){ return String(value||'').replace(/[&<>"']/g, (c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function drawServer(state){
+  const host=document.getElementById('server');
+  const name=state.guild&&state.guild.name||'Serveur';
+  const icon=state.guild&&state.guild.icon;
+  host.innerHTML=icon?'<img alt="" src="'+esc(icon)+'"><span>'+esc(name)+'</span>':'<span class="dletter">'+esc(name.slice(0,1).toUpperCase())+'</span><span>'+esc(name)+'</span>';
+}
 function drawTree(state){
   const q=document.getElementById('search').value.toLowerCase();
   const tree=document.getElementById('tree');
-  const cats=(state.categories||[]).filter(c=>!q||c.name.toLowerCase().includes(q));
-  const groups=group((state.channels||[]).filter(c=>!q||c.name.toLowerCase().includes(q)));
-  let html=cats.map(c=>'<label class="row"><input data-kind="category" type="checkbox" value="'+c.id+'" '+(c.checked?'checked':'')+'> Catégorie · '+c.name+'</label>').join('');
-  groups.forEach((list,name)=>{ html+='<div class="cat">'+name+'</div>'+list.map(c=>'<label class="row"><input data-kind="channel" type="checkbox" value="'+c.id+'" '+(c.checked?'checked':'')+'> # '+c.name+'</label>').join(''); });
-  tree.innerHTML=html||'<p class="sub">Aucun salon.</p>';
+  const cats=[...(state.categories||[])].sort((a,b)=>(a.position||0)-(b.position||0));
+  const channels=[...(state.channels||[])].sort((a,b)=>(a.position||0)-(b.position||0));
+  const byParent=new Map();
+  channels.forEach((channel)=>{
+    if(q && !channel.name.toLowerCase().includes(q)) return;
+    const key=channel.parentId||'loose';
+    if(!byParent.has(key)) byParent.set(key,[]);
+    byParent.get(key).push(channel);
+  });
+  function row(channel){
+    const on=channel.checked?'checked':'';
+    const cls=channel.checked?'drow on':'drow';
+    return '<label class="'+cls+'"><input data-kind="channel" data-parent="'+(channel.parentId||'')+'" type="checkbox" value="'+esc(channel.id)+'" '+on+' hidden>'+(MARK[channel.kind]||MARK.text)+'<span>'+esc(channel.name)+'</span>'+(channel.checked?'<span class="tick">✓</span>':'')+'</label>';
+  }
+  let html='';
+  cats.forEach((cat)=>{
+    const kids=byParent.get(cat.id)||[];
+    if(q && !kids.length && !cat.name.toLowerCase().includes(q)) return;
+    const open=!collapsed.has(cat.id);
+    html+='<div class="dcat'+(open?' open':'')+'"><span class="chev" data-toggle="'+esc(cat.id)+'">›</span><span data-toggle="'+esc(cat.id)+'">'+esc(cat.name)+'</span><input data-kind="category" type="checkbox" value="'+esc(cat.id)+'" '+(cat.checked?'checked':'')+'></div>';
+    html+='<div class="'+(open?'':'collapsed')+'">'+kids.map(row).join('')+'</div>';
+  });
+  const loose=byParent.get('loose')||[];
+  if(loose.length){
+    html+='<div class="dcat open"><span class="chev">›</span><span>Salons</span></div><div>'+loose.map(row).join('')+'</div>';
+  }
+  tree.innerHTML=html||'<p class="help" style="padding:8px">Aucun salon.</p>';
   document.getElementById('estimate').textContent=document.querySelectorAll('#tree input:checked').length+' zone(s). Plus il y en a, plus l’analyse dure.';
 }
+function paintRows(){
+  document.querySelectorAll('.drow').forEach((row)=>{
+    const box=row.querySelector('input');
+    row.classList.toggle('on', box.checked);
+    let tick=row.querySelector('.tick');
+    if(box.checked && !tick){ tick=document.createElement('span'); tick.className='tick'; tick.textContent='✓'; row.appendChild(tick); }
+    if(!box.checked && tick) tick.remove();
+  });
+}
 let cache=null;
-async function load(){ cache=await api('/api/state'); const rules=cache.rules||{}; rule34Configured=!!cache.rule34Configured; document.getElementById('rule-text').checked=rules.text!==false; document.getElementById('rule-links').checked=rules.links!==false; document.getElementById('rule-images').checked=rules.images!==false; mode=rules.imageMode||'exact'; document.querySelectorAll('#modes button').forEach(el=>el.classList.toggle('on', el.dataset.mode===mode)); document.getElementById('threshold').value=rules.imageThreshold||10; document.getElementById('threshold-label').textContent=document.getElementById('threshold').value; document.getElementById('domains').value=(rules.domains||[]).join('\n'); document.getElementById('ignored-users').value=(rules.ignoredUsers||[]).join('\n'); document.getElementById('ignored-channels').value=(rules.ignoredChannels||[]).join('\n'); document.getElementById('src-custom').checked=!!(rules.sources&&rules.sources.custom); document.querySelectorAll('.tile input').forEach(box=>{ const id=box.id.replace('src-',''); const value=rules.sources?rules.sources[id]:undefined; box.checked=value===undefined?box.closest('#apps')!==null:!!value; }); paint(); syncRule34(); drawTree(cache); drawPerms(cache.permissions); }
-document.getElementById('search').oninput=()=>cache&&drawTree(cache);
-document.getElementById('tree').addEventListener('change', ()=>document.getElementById('estimate').textContent=document.querySelectorAll('#tree input:checked').length+' zone(s). Plus il y en a, plus l’analyse dure.');
-document.getElementById('all').onclick=()=>{ document.querySelectorAll('#tree input').forEach(el=>el.checked=true); document.getElementById('estimate').textContent='Tout est coché.'; };
-document.getElementById('none').onclick=()=>{ document.querySelectorAll('#tree input').forEach(el=>el.checked=false); };
+async function load(){ cache=await api('/api/state'); const rules=cache.rules||{}; rule34Configured=!!cache.rule34Configured; document.getElementById('rule-text').checked=rules.text!==false; document.getElementById('rule-links').checked=rules.links!==false; document.getElementById('rule-images').checked=rules.images!==false; mode=rules.imageMode||'exact'; document.querySelectorAll('#modes button').forEach(el=>el.classList.toggle('on', el.dataset.mode===mode)); document.getElementById('threshold').value=rules.imageThreshold||10; document.getElementById('threshold-label').textContent=document.getElementById('threshold').value; document.getElementById('domains').value=(rules.domains||[]).join('\n'); document.getElementById('ignored-users').value=(rules.ignoredUsers||[]).join('\n'); document.getElementById('ignored-channels').value=(rules.ignoredChannels||[]).join('\n'); document.getElementById('src-custom').checked=!!(rules.sources&&rules.sources.custom); document.querySelectorAll('.tile input').forEach(box=>{ const id=box.id.replace('src-',''); const value=rules.sources?rules.sources[id]:undefined; box.checked=value===undefined?box.closest('#apps')!==null:!!value; }); paint(); syncRule34(); drawServer(cache); drawTree(cache); drawPerms(cache.permissions); suggestMembers(''); suggestChannels(''); }
+document.getElementById('search').oninput=()=>{
+  if(!cache) return;
+  const channels=new Set([...document.querySelectorAll('[data-kind="channel"]:checked')].map(el=>el.value));
+  const cats=new Set([...document.querySelectorAll('[data-kind="category"]:checked')].map(el=>el.value));
+  (cache.channels||[]).forEach(c=>{ c.checked=channels.has(c.id); });
+  (cache.categories||[]).forEach(c=>{ c.checked=cats.has(c.id); });
+  drawTree(cache);
+};
+document.getElementById('tree').addEventListener('click', (event)=>{
+  const toggle=event.target.closest('[data-toggle]');
+  if(!toggle || event.target.matches('input')) return;
+  const id=toggle.dataset.toggle;
+  collapsed.has(id)?collapsed.delete(id):collapsed.add(id);
+  if(cache) drawTree(cache);
+});
+document.getElementById('tree').addEventListener('change', (event)=>{
+  const input=event.target;
+  if(input.dataset.kind==='category'){
+    document.querySelectorAll('[data-parent="'+input.value+'"]').forEach((box)=>{ box.checked=input.checked; });
+  }
+  if(input.dataset.kind==='channel' && input.dataset.parent){
+    const kids=[...document.querySelectorAll('[data-parent="'+input.dataset.parent+'"]')];
+    const cat=document.querySelector('[data-kind="category"][value="'+input.dataset.parent+'"]');
+    if(cat) cat.checked=kids.length>0 && kids.every((box)=>box.checked);
+  }
+  paintRows();
+  document.getElementById('estimate').textContent=document.querySelectorAll('#tree input:checked').length+' zone(s). Plus il y en a, plus l’analyse dure.';
+});
+document.getElementById('all').onclick=()=>{ document.querySelectorAll('#tree input').forEach(el=>el.checked=true); paintRows(); document.getElementById('estimate').textContent='Tout est coché.'; };
+document.getElementById('none').onclick=()=>{ document.querySelectorAll('#tree input').forEach(el=>el.checked=false); paintRows(); document.getElementById('estimate').textContent='0 zone.'; };
+function addId(area, id){ const have=new Set(lines(area)); if(!have.has(id)) document.getElementById(area).value=(document.getElementById(area).value.trim()?document.getElementById(area).value.replace(/\s*$/,'\n'):'')+id; }
+function suggestMembers(q){
+  const host=document.getElementById('member-suggest');
+  const list=(cache&&cache.members||[]).filter(m=>!q||m.name.toLowerCase().includes(q.toLowerCase())).slice(0,8);
+  host.innerHTML=list.map(m=>'<button type="button" data-add-user="'+esc(m.id)+'">'+esc(m.name)+'</button>').join('');
+}
+function suggestChannels(q){
+  const host=document.getElementById('channel-suggest');
+  const list=(cache&&cache.channels||[]).filter(c=>!q||c.name.toLowerCase().includes(q.toLowerCase())).slice(0,8);
+  host.innerHTML=list.map(c=>'<button type="button" data-add-channel="'+esc(c.id)+'">#'+esc(c.name)+'</button>').join('');
+}
+document.getElementById('member-search').oninput=(event)=>suggestMembers(event.target.value);
+document.getElementById('channel-search').oninput=(event)=>suggestChannels(event.target.value);
+document.getElementById('member-suggest').onclick=(event)=>{ const id=event.target.dataset.addUser; if(id) addId('ignored-users', id); };
+document.getElementById('channel-suggest').onclick=(event)=>{ const id=event.target.dataset.addChannel; if(id) addId('ignored-channels', id); };
 document.getElementById('save').onclick=async()=>{ await api('/api/config',{method:'POST',body:JSON.stringify(payload())}); toast('Enregistré'); };
 document.getElementById('arm').onclick=()=>{ document.getElementById('arm').classList.add('go'); document.getElementById('modal').classList.add('on'); };
 document.getElementById('no').onclick=()=>document.getElementById('modal').classList.remove('on');
