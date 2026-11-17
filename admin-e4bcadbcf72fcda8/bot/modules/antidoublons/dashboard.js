@@ -25,9 +25,20 @@ function page() {
   const iconDir = path.join(__dirname, 'icons');
   for (const name of fs.readdirSync(iconDir)) {
     if (!name.endsWith('.svg')) continue;
+    const id = name.replace(/\.svg$/, '');
+    const brand = {
+      youtube: '#FF0000', instagram: '#E1306C', x: '#F5F5F5', tiktok: '#FE2C55', twitch: '#9146FF',
+      reddit: '#FF4500', facebook: '#0866FF', bluesky: '#1185FE', pinterest: '#E60023', spotify: '#1DB954',
+      soundcloud: '#FF5500', discord: '#5865F2', imgur: '#1BB76E', giphy: '#FF6666', tenor: '#00B8FF',
+    }[id] || '#C7CBFF';
     let svg = fs.readFileSync(path.join(iconDir, name), 'utf8');
-    svg = svg.replace(/<title>[\s\S]*?<\/title>/, '').replace('<svg ', '<svg fill="currentColor" ');
-    icons[name.replace(/\.svg$/, '')] = svg;
+    svg = svg.replace(/<title>[\s\S]*?<\/title>/, '');
+    if (id === 'instagram') {
+      svg = svg.replace('<svg ', '<svg fill="url(#ig)" ').replace('>', '><defs><linearGradient id="ig" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f9ce34"/><stop offset="0.5" stop-color="#ee2a7b"/><stop offset="1" stop-color="#6228d7"/></linearGradient></defs>');
+    } else {
+      svg = svg.replace('<svg ', `<svg fill="${brand}" `);
+    }
+    icons[id] = svg;
   }
   const logoFile = findLogo();
   const logo = logoFile ? `data:image/png;base64,${fs.readFileSync(logoFile).toString('base64')}` : '';

@@ -15,6 +15,7 @@ module.exports = {
     const embed = stamp(new EmbedBuilder()
       .setTitle('Guide DCAS')
       .setDescription((lines.join('\n') || 'Aucun module.').slice(0, 4000)), 'Aide');
+    embed.setFooter({ text: 'Chaque réponse du bot reste éphémère : seul toi la vois.' });
     if (focus?.guide) embed.addFields({ name: 'Anti-doublons, pas à pas', value: focus.guide.join('\n').slice(0, 1024) });
     await interaction.reply({ ...withLogo(embed), ephemeral: true });
   },

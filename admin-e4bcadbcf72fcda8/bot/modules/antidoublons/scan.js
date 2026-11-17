@@ -115,11 +115,19 @@ async function deletePending(guild, pending, stop) {
     for (let index = 0; index < ids.length; index += 100) {
       if (stop()) return;
       const slice = ids.slice(index, index + 100);
-      await channel.bulkDelete(slice, true).catch(async () => {
+      await channel.bulkDelete(slice, true).catch(async (error) => {
+        console.error('Anti-doublons lot :', error?.code, error?.message);
         for (const id of slice) {
           if (stop()) return;
-          const message = await channel.messages.fetch(id).catch(() => null);
-          if (message) await message.delete().catch(() => {});
+          const message = await channel.messages.fetch(id).catch((fetchError) => {
+            console.error('Anti-doublons lecture :', fetchError?.code, fetchError?.message);
+            return null;
+          });
+          if (message) {
+            const { deleteSilently } = require('./full/delete-message');
+            const removed = await deleteSilently(message, 'Message doublon');
+            if (!removed) console.error('Anti-doublons :', deleteSilently.lastReason);
+          }
           await sleep(1100);
         }
       });
@@ -129,7 +137,11 @@ async function deletePending(guild, pending, stop) {
     if (stop()) return;
     const channel = guild.channels.cache.get(hit.duplicateChannel) ?? await guild.channels.fetch(hit.duplicateChannel).catch(() => null);
     const message = await channel?.messages?.fetch(hit.duplicateId).catch(() => null);
-    if (message) await message.delete().catch(() => {});
+    if (message) {
+      const { deleteSilently } = require('./full/delete-message');
+      const removed = await deleteSilently(message, 'Message doublon');
+      if (!removed) console.error('Anti-doublons :', deleteSilently.lastReason);
+    }
     await sleep(1100);
   }
 }
@@ -162,12 +174,26 @@ async function runScan(guild, config, progress, stop) {
 }
 
 async function warnAndDelete(message, hit, delay = 4000) {
+  const { deleteSilently } = require('./full/delete-message');
   const embed = stamp(new EmbedBuilder()
     .setColor(0xed4245)
     .setTitle('Doublon détecté')
-    .setDescription(`Le message le plus récent sera retiré.\nOriginal : ${linkTo(message.guild.id, hit.originalChannel, hit.originalId)}`), 'Anti-doublons', { keepColor: true });
-  await message.channel.send(withLogo(embed)).catch(() => {});
-  setTimeout(() => message.delete().catch(() => {}), delay);
+    .setDescription(`Le message le plus récent sera retiré dans ${Math.max(1, Math.round(delay / 1000))} s.\nOriginal : ${linkTo(message.guild.id, hit.originalChannel, hit.originalId)}`), 'Anti-doublons', { keepColor: true });
+  const warning = await message.channel.send(withLogo(embed)).catch((error) => {
+    console.error('Anti-doublons avertissement :', error?.code, error?.message);
+    return null;
+  });
+  await new Promise((resolve) => setTimeout(resolve, delay));
+  const removed = await deleteSilently(message, 'Message doublon');
+  if (!removed && warning) {
+    const reason = deleteSilently.lastReason || 'Suppression impossible';
+    console.error('Anti-doublons suppression :', reason);
+    embed.setDescription(`Le message n’a pas pu être supprimé.\n**${reason}**\nOriginal : ${linkTo(message.guild.id, hit.originalChannel, hit.originalId)}`);
+    await warning.edit(withLogo(embed)).catch((error) => console.error('Anti-doublons édition :', error?.message));
+    return false;
+  }
+  if (warning) await deleteSilently(warning, 'Avertissement doublon');
+  return true;
 }
 
 module.exports = { targetChannels, fileHashes, rule34Fingerprints, runScan, warnAndDelete, linkTo };

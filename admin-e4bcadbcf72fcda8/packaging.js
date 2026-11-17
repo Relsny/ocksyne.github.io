@@ -210,7 +210,7 @@
 <li>Le lien commence par http://127.0.0.1 . Ouvre-le sur le même ordinateur que le bot.</li>
 <li>Coche un salon, plusieurs salons, ou une catégorie. Plus tu en coches, plus l analyse dure.</li>
 <li>Choisis les textes, les liens et les images. Les applications sont des tuiles. La section Mature (18+) est repliée.</li>
-<li>Exact compare une empreinte identique. Puissant ajoute la ressemblance si sharp est installé, et des images de vidéo si ffmpeg est installé.</li>
+<li>Exact compare une empreinte identique. Avancé (ressemblance) ajoute la ressemblance si sharp est installé, et des images de vidéo si ffmpeg est installé.</li>
 <li>Rule34.xxx se coche dans Mature. Les champs s ouvrent sous la tuile : RULE34_API_KEY et RULE34_USER_ID. Elles sont enregistrées dans data/antidoublons.json, sur cet ordinateur seulement. Elles ne vont pas dans token.txt. La clé se crée sur <a href="https://rule34.xxx/index.php?page=account&amp;s=options">la page Options du compte Rule34</a>.</li>
 <li>Clique sur Activer. Le panneau demande : Êtes-vous sûr de vouloir activer le système d anti-doublons ? Lorsque le bot détecte un doublon, le plus récent sera supprimé.</li>
 <li>Le tableau affiche les messages lus et les doublons mis de côté. À la fin, les plus récents sont supprimés.</li>

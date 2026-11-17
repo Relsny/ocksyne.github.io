@@ -9,7 +9,7 @@ module.exports = {
   events: require('./events/watch'),
   guide: [
     '1. Invite le bot avec la permission Gérer les messages, et active l’intent Message Content.',
-    '2. Tape /antidoublons panel. Un lien http://127.0.0.1 s’affiche, visible seulement par toi.',
+    '2. Tape /antidoublons panel. Un bouton ouvre le panneau, visible seulement par toi.',
     '3. Coche un salon, plusieurs salons, ou des catégories entières. Plus il y en a, plus l’analyse est longue.',
     '4. Choisis textes, liens (tous les sites ou une liste, y compris des sites adultes) et images/GIF.',
     '5. Clique sur Activer et confirme. Le tableau compte les messages et met les doublons de côté, puis supprime les plus récents.',

@@ -26,9 +26,11 @@ function page() {
 main{max-width:760px;margin:0 auto;padding:22px 16px 60px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;margin-top:14px;backdrop-filter:blur(10px)}
 button,.primary{font:inherit;font-weight:700;border:0;border-radius:12px;padding:10px 14px;cursor:pointer;margin-right:8px}
+.primary,.ghost{border-radius:999px}
 .primary{background:linear-gradient(135deg,#5865F2,#7b5cff);color:#fff}
-input,select{background:#101118;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px;width:100%;margin:6px 0}
+input,select{background:#101118;color:var(--text);border:1px solid var(--line);border-radius:999px;padding:12px 16px;width:100%;margin:8px 0}
 .sub{color:var(--muted)}
+.foot{margin-top:28px;text-align:center;color:var(--muted);font-size:12px}
 </style></head><body>
 <header class="top"><div><b>DCAS</b><div class="sub">Avatars interdits</div></div><button class="stop" id="stop" type="button">STOP</button></header>
 <main>
@@ -53,7 +55,8 @@ document.getElementById('snap').onclick = async () => { await api('/api/snapshot
 document.getElementById('on').onclick = async () => { if(!confirm('Activer le contrôle des avatars interdits ?')) return; await api('/api/activate',{method:'POST',body:JSON.stringify({logChannelId:document.getElementById('log').value.trim(), action:document.getElementById('action').value})}); refresh(); };
 document.getElementById('stop').onclick = async () => { await api('/api/stop',{method:'POST',body:'{}'}); refresh(); };
 refresh();
-</script></main></body></html>`;
+</script><footer class="foot">DCAS · panneau local · les avatars restent sur cet ordinateur</footer>
+</main></body></html>`;
 }
 
 async function hashAvatar(user) {
