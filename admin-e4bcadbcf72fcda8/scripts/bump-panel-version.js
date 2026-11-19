@@ -3,8 +3,8 @@
 //
 //   node scripts/bump-panel-version.js
 //
-// La version est le SHA-256 (12 caractères) de manifest.json
-// plus le contenu de chaque fichier listé dedans, dans l’ordre des chemins.
+// La version est le SHA-256 (12 caractères) de manifest.json,
+// de chaque fichier listé dedans, puis de packaging.js et panel.js.
 // Le script réécrit les ?v= de index.html. Il n’écrit rien d’autre,
 // donc le relancer sans changer le bot redonne la même version.
 const crypto = require('node:crypto');
@@ -27,6 +27,12 @@ for (const rel of files) {
   hash.update(rel);
   hash.update('\0');
   hash.update(fs.readFileSync(abs));
+  hash.update('\0');
+}
+for (const rel of ['packaging.js', 'panel.js']) {
+  hash.update(rel);
+  hash.update('\0');
+  hash.update(fs.readFileSync(path.join(adminDir, rel)));
   hash.update('\0');
 }
 const version = hash.digest('hex').slice(0, 12);

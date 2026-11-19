@@ -55,4 +55,4 @@ Avant chaque commit qui change `manifest.json` ou un fichier de ce dossier, lanc
 node scripts/bump-panel-version.js
 ```
 
-Le script calcule un SHA-256 sur `manifest.json` et sur chaque fichier qu’il liste, en garde 12 caractères, et les écrit dans les `?v=` de `index.html`. Le panneau s’en sert pour recharger le manifeste et les fichiers du bot. Sans ce passage, le navigateur peut garder un zip périmé.
+Le script calcule un SHA-256 sur `manifest.json`, sur chaque fichier qu’il liste, puis sur `packaging.js` et `panel.js`. Il en garde 12 caractères et les écrit dans les `?v=` de `index.html`. Le panneau s’en sert pour recharger le manifeste, les fichiers du bot et le générateur de zip. Sans ce passage, le navigateur peut garder un zip périmé.

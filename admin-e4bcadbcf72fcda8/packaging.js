@@ -8,6 +8,9 @@
   const TOKEN_DIR = '1 · 🔑 METS TON TOKEN ICI';
   const WIN = '2 · ▶️ LANCER LE BOT (Windows).bat';
   const MAC = '2 · ▶️ LANCER LE BOT (Mac).command';
+  const MAC_REPAIR = 'RÉPARER LE LANCEUR MAC.txt';
+  // Fichier régulier (0100000) + rwxr-xr-x. Sans le bit de type, macOS ignore le 755.
+  const MAC_MODE = 0o100755;
   const GUIDE = '3 · 📖 GUIDE.html';
   const LOGO = '4 · logo.png';
   const LICENCE = '5 · LICENCE.txt';
@@ -164,6 +167,26 @@
     ].join('\n');
   }
 
+  function macRepairTxt() {
+    return [
+      'DCAS — réparer le lanceur Mac',
+      '',
+      'Si un double-clic affiche « vous ne disposez pas des privilèges d’accès nécessaires »,',
+      'Safari ou Google Drive a retiré le droit d’exécution. Voici le plan B.',
+      '',
+      '1. Ouvre Terminal (Applications, Utilitaires, Terminal).',
+      '2. Tape exactement : chmod +x',
+      '3. Ajoute une espace, sans appuyer sur Entrée.',
+      '4. Glisse le fichier « 2 · ▶️ LANCER LE BOT (Mac).command » dans la fenêtre du Terminal.',
+      '5. Appuie sur Entrée. Le Terminal ne dit rien si tout va bien.',
+      '6. Ferme le Terminal.',
+      '7. Clic droit sur le fichier .command, puis Ouvrir.',
+      '   La première fois, macOS (Gatekeeper) demande une confirmation. Choisis Ouvrir.',
+      '8. Les fois suivantes, un double-clic suffit.',
+      '',
+    ].join('\n');
+  }
+
   function licenceTxt() {
     return [
       'DCAS',
@@ -246,7 +269,7 @@ a{color:#c7cbff}
 <section class="step"><div class="n">3</div><div><b>Active les intents privilégiés.</b><p>Toujours dans l onglet Bot, section Privileged Gateway Intents. Coche ce que tes modules demandent.</p><ul>${intentNotes || '<li>Aucun intent privilégié pour cette sélection. Laisse Server Members coché si un module d accueil est présent.</li>'}</ul></div></section>
 <section class="step"><div class="n">4</div><div><b>Invite le bot.</b><p>Onglet OAuth2, URL Generator. Coche bot et applications.commands, puis les permissions Gérer les messages, Expulser, Bannir, Gérer les rôles, Gérer les salons. Ouvre le lien et choisis ton serveur.</p></div></section>
 <section class="step"><div class="n">5</div><div><b>Remplis token.txt.</b><p>Ouvre le dossier <b>1 · 🔑 METS TON TOKEN ICI</b>. Il n y a qu un fichier : token.txt. Remplace le texte après chaque signe =. N ajoute aucun autre signe.</p></div></section>
-<section class="step"><div class="n">6</div><div><b>Lance.</b><p>Windows : double-clic sur <b>2 · ▶️ LANCER LE BOT (Windows).bat</b>. Mac : double-clic sur <b>2 · ▶️ LANCER LE BOT (Mac).command</b>. La première fois, les composants s installent. Laisse la fenêtre ouverte.</p></div></section>
+<section class="step"><div class="n">6</div><div><b>Lance.</b><p>Windows : double-clic sur <b>2 · ▶️ LANCER LE BOT (Windows).bat</b>. Mac : double-clic sur <b>2 · ▶️ LANCER LE BOT (Mac).command</b>. La première fois, les composants s installent. Laisse la fenêtre ouverte.</p><p>Si le Mac affiche « vous ne disposez pas des privilèges d’accès nécessaires », Safari ou Drive a enlevé le droit d’exécution. Ouvre Terminal, tape <code>chmod +x</code>, ajoute une espace, glisse le fichier .command dans le Terminal, puis Entrée. Ensuite, clic droit sur le fichier, Ouvrir (Gatekeeper demande de confirmer une fois). Le détail est dans <b>RÉPARER LE LANCEUR MAC.txt</b>, à côté du lanceur.</p></div></section>
 <section class="step"><div class="n">7</div><div><b>Utilise /help.</b><p>Dans Discord, tape /help. Le bot liste les modules et le pas à pas. Si la commande n apparaît pas, attends une minute après le lancement, ou vérifie que le déploiement n a pas affiché d erreur.</p></div></section>
 <h2>Ce bot-ci</h2>
 ${usage}
@@ -268,7 +291,8 @@ ${usage}
     const list = [
       { path: `${TOKEN_DIR}/token.txt`, text: tokenTxt(slugs) },
       { path: WIN, text: windowsBat() },
-      { path: MAC, text: macCommand(), exec: true },
+      { path: MAC, text: macCommand(), exec: true, unixPermissions: MAC_MODE },
+      { path: MAC_REPAIR, text: macRepairTxt() },
       { path: GUIDE, text: guideHtml({ title, slugs, modules: names, readmes, logoBase64 }) },
       { path: LOGO, bytes: logoBytes },
       { path: LICENCE, text: licenceTxt() },
@@ -282,5 +306,5 @@ ${usage}
     return list;
   }
 
-  return { TOKEN_DIR, WIN, MAC, GUIDE, LOGO, LICENCE, CODE, TREE, tokenTxt, entries, keysFor };
+  return { TOKEN_DIR, WIN, MAC, MAC_REPAIR, MAC_MODE, GUIDE, LOGO, LICENCE, CODE, TREE, tokenTxt, entries, keysFor };
 }));

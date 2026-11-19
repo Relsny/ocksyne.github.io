@@ -36,10 +36,29 @@ function buildEntries(manifest, slugs) {
   return pack.entries({ slugs, names, readmes, logoBytes, codeFiles });
 }
 
+async function assertMacLauncher(buf) {
+  const archive = await JSZip.loadAsync(buf);
+  const name = Object.keys(archive.files).find((file) => file.endsWith('.command'));
+  if (!name) throw new Error('.command absent du zip');
+  const mode = archive.files[name].unixPermissions;
+  if (typeof mode !== 'number' || (mode & 0o777) !== 0o755) {
+    throw new Error(`${name} n'est pas en mode 755 (${mode == null ? 'absent' : mode.toString(8)})`);
+  }
+  if ((mode & 0o170000) !== 0o100000) {
+    throw new Error(`${name} n'est pas marqué comme fichier régulier (${mode.toString(8)})`);
+  }
+  const repair = Object.keys(archive.files).find((file) => file.includes('RÉPARER LE LANCEUR MAC'));
+  if (!repair) throw new Error('RÉPARER LE LANCEUR MAC.txt absent du zip');
+  const guide = Object.keys(archive.files).find((file) => file.endsWith('GUIDE.html'));
+  const guideText = guide ? await archive.files[guide].async('string') : '';
+  if (!guideText.includes('chmod +x')) throw new Error('le guide ne dit pas comment rendre le lanceur Mac exécutable');
+}
+
 async function zipBuffer(entries) {
   const zip = new JSZip();
   for (const entry of entries) {
-    zip.file(entry.path, entry.bytes || entry.text, entry.exec ? { unixPermissions: 0o755 } : {});
+    const mode = entry.unixPermissions != null ? entry.unixPermissions : (entry.exec ? 0o100755 : null);
+    zip.file(entry.path, entry.bytes || entry.text, mode == null ? {} : { unixPermissions: mode });
   }
   return zip.generateAsync({ type: 'nodebuffer', platform: 'UNIX' });
 }
@@ -143,6 +162,7 @@ async function main() {
     const label = selection.length === 1 ? selection[0] : 'complet';
     const entries = buildEntries(saved, selection);
     const buf = await zipBuffer(entries);
+    await assertMacLauncher(buf);
     const zipPath = path.join(root, `${label}.zip`);
     const dest = path.join(root, label);
     fs.writeFileSync(zipPath, buf);

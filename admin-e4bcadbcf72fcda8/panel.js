@@ -85,7 +85,8 @@
     const entries = DCASPack.entries({ slugs, names, readmes, logoBytes, codeFiles });
     const zip = new JSZip();
     for (const entry of entries) {
-      const options = entry.exec ? { unixPermissions: 0o755 } : {};
+      const mode = entry.unixPermissions != null ? entry.unixPermissions : (entry.exec ? 0o100755 : null);
+      const options = mode == null ? {} : { unixPermissions: mode };
       zip.file(entry.path, entry.bytes || entry.text, options);
     }
     saveBlob(await zip.generateAsync({ type: 'blob', platform: 'UNIX' }), filename);
