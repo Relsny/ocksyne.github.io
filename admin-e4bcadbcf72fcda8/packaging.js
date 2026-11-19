@@ -5,19 +5,28 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.DCASPack = api;
 }(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  // Dossiers d'abord, fichiers ensuite. Aucun .txt en vrac : tout est dans le GUIDE.
   const TOKEN_DIR = '1 · 🔑 METS TON TOKEN ICI';
-  const WIN = '2 · ▶️ LANCER LE BOT (Windows).bat';
-  const MAC = '2 · ▶️ LANCER LE BOT (Mac).command';
-  const MAC_REPAIR = 'RÉPARER LE LANCEUR MAC.txt';
+  const IMAGES = '2 · 🖼️ IMAGES INTERDITES';
   // Fichier régulier (0100000) + rwxr-xr-x. Sans le bit de type, macOS ignore le 755.
   const MAC_MODE = 0o100755;
-  const GUIDE = '3 · 📖 GUIDE.html';
-  const LOGO = '4 · logo.png';
-  const LICENCE = '5 · LICENCE.txt';
-  const CODE = '6 · ⚙️ fichiers-du-bot';
-  const IMAGES = '2 · 🖼️ IMAGES INTERDITES';
 
-  const TREE = [TOKEN_DIR, WIN, MAC, GUIDE, LOGO, LICENCE, CODE];
+  function layout(slugs) {
+    const hasImages = (slugs || []).includes('avatars');
+    let n = hasImages ? 3 : 2;
+    const CODE = `${n} · ⚙️ fichiers-du-bot`;
+    n += 1;
+    const MAC = `${n} · ▶️ LANCER LE BOT (Mac).command`;
+    const WIN = `${n} · ▶️ LANCER LE BOT (Windows).bat`;
+    n += 1;
+    const GUIDE = `${n} · 📖 GUIDE.html`;
+    n += 1;
+    const LOGO = `${n} · logo.png`;
+    const tree = [TOKEN_DIR].concat(hasImages ? [IMAGES] : [], [CODE, MAC, WIN, GUIDE, LOGO]);
+    return { TOKEN_DIR, IMAGES, CODE, MAC, WIN, GUIDE, LOGO, TREE: tree };
+  }
+  const DEFAULT = layout([]);
+  const { CODE, MAC, WIN, GUIDE, LOGO, TREE } = DEFAULT;
 
   const INTENTS = {
     bienvenue: 'Server Members',
@@ -171,40 +180,6 @@
     ].join('\n');
   }
 
-  function macRepairTxt() {
-    return [
-      'DCAS — réparer le lanceur Mac',
-      '',
-      'Si un double-clic affiche « vous ne disposez pas des privilèges d’accès nécessaires »,',
-      'Safari ou Google Drive a retiré le droit d’exécution. Voici le plan B.',
-      '',
-      '1. Ouvre Terminal (Applications, Utilitaires, Terminal).',
-      '2. Tape exactement : chmod +x',
-      '3. Ajoute une espace, sans appuyer sur Entrée.',
-      '4. Glisse le fichier « 2 · ▶️ LANCER LE BOT (Mac).command » dans la fenêtre du Terminal.',
-      '5. Appuie sur Entrée. Le Terminal ne dit rien si tout va bien.',
-      '6. Ferme le Terminal.',
-      '7. Clic droit sur le fichier .command, puis Ouvrir.',
-      '   La première fois, macOS (Gatekeeper) demande une confirmation. Choisis Ouvrir.',
-      '8. Les fois suivantes, un double-clic suffit.',
-      '',
-    ].join('\n');
-  }
-
-  function licenceTxt() {
-    return [
-      'DCAS',
-      '',
-      'Code crédité par son auteur (DCAS / sir_ocksyne).',
-      'Modification interdite.',
-      'Créer de nouveaux modules ou des dérivés à partir de ce code est interdit.',
-      'Assembler plusieurs modules déjà achetés est autorisé, y compris avec une IA, sans retirer ce crédit.',
-      '',
-      'DCAS ne fournit pas d hébergement. Tu lances le bot toi-même.',
-      '',
-    ].join('\n');
-  }
-
   function toBase64(bytes) {
     const view = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
     if (typeof Buffer !== 'undefined') return Buffer.from(view).toString('base64');
@@ -223,7 +198,7 @@
       .replace(/>/g, '&gt;');
   }
 
-  function guideHtml({ title, slugs, modules, readmes, logoBase64 }) {
+  function guideHtml({ title, slugs, modules, readmes, logoBase64, L }) {
     const intentNotes = slugs
       .filter((slug) => INTENTS[slug])
       .map((slug) => `<li><b>${escapeHtml(modules[slug] || slug)}</b> : ${escapeHtml(INTENTS[slug])}</li>`)
@@ -234,10 +209,11 @@
       const extra = slug === 'avatars'
         ? `<p><b>Dès que tu lances le bot, l'analyse démarre et les sanctions s'appliquent : il n'y a pas de retour en arrière.</b></p>
 <ol>
-<li>Le dossier <b>2 · 🖼️ IMAGES INTERDITES</b> est déjà rempli. Tu peux garder, supprimer ou ajouter des images jpg, png, webp ou gif. Le bot lit ce dossier au lancement et le surveille ensuite.</li>
+<li>Le dossier <b>${L.IMAGES}</b> est déjà rempli. Tu peux garder, supprimer ou ajouter des images jpg, png, webp ou gif. Le bot lit ce dossier au lancement et le surveille ensuite.</li>
 <li>Un avatar Discord par défaut, ou une photo trop proche d'une image du dossier, entraîne une exclusion. Ce n'est pas un bannissement. Un message privé est envoyé, puis les messages des dernières 24 heures sont retirés.</li>
 <li>Dans token.txt, LOG_CHANNEL_ID est facultatif. Vide : aucun log. Rempli avec l'identifiant du salon (mode développeur, clic droit, Copier l'identifiant) : un embed y est envoyé.</li>
 <li>Il n'y a pas de panneau. /avatars indique seulement l'état.</li>
+<li>Le bot lit ce dossier au lancement, puis le surveille : tu peux ajouter ou retirer des images à tout moment.</li>
 </ol>`
         : slug === 'antidoublons'
         ? `<ol>
@@ -280,8 +256,14 @@ a{color:#c7cbff}
 <section class="step"><div class="n">2</div><div><b>Copie le jeton, l identifiant d application, et l identifiant du serveur.</b><p>Onglet Bot : View Token. Onglet General Information : Application ID. Dans Discord, mode développeur, clic droit sur le serveur : Copier l identifiant.</p></div></section>
 <section class="step"><div class="n">3</div><div><b>Active les intents privilégiés.</b><p>Toujours dans l onglet Bot, section Privileged Gateway Intents. Coche ce que tes modules demandent.</p><ul>${intentNotes || '<li>Aucun intent privilégié pour cette sélection. Laisse Server Members coché si un module d accueil est présent.</li>'}</ul></div></section>
 <section class="step"><div class="n">4</div><div><b>Invite le bot.</b><p>Onglet OAuth2, URL Generator. Coche bot et applications.commands, puis les permissions Gérer les messages, Expulser, Bannir, Gérer les rôles, Gérer les salons. Ouvre le lien et choisis ton serveur.</p></div></section>
-<section class="step"><div class="n">5</div><div><b>Remplis token.txt.</b><p>Ouvre le dossier <b>1 · 🔑 METS TON TOKEN ICI</b>. Il n y a qu un fichier : token.txt. Remplace le texte après chaque signe =. N ajoute aucun autre signe.</p></div></section>
-<section class="step"><div class="n">6</div><div><b>Lance.</b><p>Windows : double-clic sur <b>2 · ▶️ LANCER LE BOT (Windows).bat</b>. Mac : double-clic sur <b>2 · ▶️ LANCER LE BOT (Mac).command</b>. La première fois, les composants s installent. Laisse la fenêtre ouverte.</p><p>Si le Mac affiche « vous ne disposez pas des privilèges d’accès nécessaires », Safari ou Drive a enlevé le droit d’exécution. Ouvre Terminal, tape <code>chmod +x</code>, ajoute une espace, glisse le fichier .command dans le Terminal, puis Entrée. Ensuite, clic droit sur le fichier, Ouvrir (Gatekeeper demande de confirmer une fois). Le détail est dans <b>RÉPARER LE LANCEUR MAC.txt</b>, à côté du lanceur.</p></div></section>
+<section class="step"><div class="n">5</div><div><b>Remplis token.txt.</b><p>Ouvre le dossier <b>${L.TOKEN_DIR}</b>. Il n y a qu un fichier : token.txt. Remplace le texte après chaque signe =. N ajoute aucun autre signe.</p></div></section>
+<section class="step"><div class="n">6</div><div><b>Lance.</b><p>Windows : double-clic sur <b>${L.WIN}</b>. Mac : double-clic sur <b>${L.MAC}</b>. La première fois, les composants s installent. Laisse la fenêtre ouverte.</p></div></section>
+<section class="step"><div class="n">!</div><div><b>Mac : « vous ne disposez pas des privilèges d’accès nécessaires ».</b><p>Safari ou Google Drive a retiré le droit d’exécution du lanceur. Plan B :</p><ol>
+<li>Ouvre Terminal (Applications, Utilitaires, Terminal).</li>
+<li>Tape <code>chmod +x</code> puis une espace, sans appuyer sur Entrée.</li>
+<li>Glisse le fichier <b>${L.MAC}</b> dans la fenêtre du Terminal, puis Entrée.</li>
+<li>Clic droit sur le fichier, Ouvrir. La première fois, macOS demande de confirmer : choisis Ouvrir. Ensuite, un double-clic suffit.</li>
+</ol></div></section>
 <section class="step"><div class="n">7</div><div><b>Utilise /help.</b><p>Dans Discord, tape /help. Le bot liste les modules et le pas à pas. Si la commande n apparaît pas, attends une minute après le lancement, ou vérifie que le déploiement n a pas affiché d erreur.</p></div></section>
 <h2>Ce bot-ci</h2>
 ${usage}
@@ -293,21 +275,25 @@ ${usage}
 <p><b>Le jeton est refusé.</b> Ouvre de nouveau token.txt. Le jeton ne doit pas garder le texte colle_ton_token_ici.</p>
 </div></article>
 <h2>Licence</h2>
-<p>Code crédité par son auteur (DCAS / sir_ocksyne). Modification interdite. Créer un module dérivé est interdit. Assembler des modules déjà achetés est autorisé.</p>
+<article class="step"><div class="n">©</div><div>
+<p>Code crédité par son auteur (DCAS / sir_ocksyne).</p>
+<p>Modification interdite. Créer de nouveaux modules ou des dérivés à partir de ce code est interdit.</p>
+<p>Assembler plusieurs modules déjà achetés est autorisé, y compris avec une IA, sans retirer ce crédit.</p>
+<p>DCAS ne fournit pas d hébergement. Tu lances le bot toi-même.</p>
+</div></article>
 </main></body></html>`;
   }
 
   function entries({ slugs, names, readmes, logoBytes, codeFiles }) {
     const logoBase64 = toBase64(logoBytes);
+    const L = layout(slugs);
     const title = slugs.length === 1 ? (names[slugs[0]] || slugs[0]) : 'Bot DCAS';
     const list = [
       { path: `${TOKEN_DIR}/token.txt`, text: tokenTxt(slugs) },
-      { path: WIN, text: windowsBat() },
-      { path: MAC, text: macCommand(), exec: true, unixPermissions: MAC_MODE },
-      { path: MAC_REPAIR, text: macRepairTxt() },
-      { path: GUIDE, text: guideHtml({ title, slugs, modules: names, readmes, logoBase64 }) },
-      { path: LOGO, bytes: logoBytes },
-      { path: LICENCE, text: licenceTxt() },
+      { path: L.WIN, text: windowsBat() },
+      { path: L.MAC, text: macCommand(), exec: true, unixPermissions: MAC_MODE },
+      { path: L.GUIDE, text: guideHtml({ title, slugs, modules: names, readmes, logoBase64, L }) },
+      { path: L.LOGO, bytes: logoBytes },
     ];
     const forbidden = [];
     for (const file of codeFiles) {
@@ -316,32 +302,18 @@ ${usage}
         forbidden.push(file);
         continue;
       }
-      list.push({ path: `${CODE}/${file.path}`, text: file.text, bytes: file.bytes });
+      list.push({ path: `${L.CODE}/${file.path}`, text: file.text, bytes: file.bytes });
     }
     if (slugs.includes('avatars')) {
       for (const file of forbidden) {
         const base = String(file.path).split('/').pop();
         list.push({ path: `${IMAGES}/${base}`, bytes: file.bytes, text: file.text });
       }
-      list.push({
-        path: `${IMAGES}/LISEZMOI.txt`,
-        text: [
-          'IMAGES INTERDITES',
-          '',
-          'Dès que tu lances le bot, l analyse démarre et les sanctions s appliquent : il n y a pas de retour en arrière.',
-          '',
-          'Garde, supprime ou ajoute des images jpg, png, webp ou gif.',
-          'Le bot lit ce dossier au lancement, puis le surveille.',
-          'Une photo trop proche de l une de ces images, ou l avatar Discord par défaut, entraîne une exclusion.',
-          'Ce n est pas un bannissement.',
-          '',
-        ].join('\n'),
-      });
     }
     const enabled = `${JSON.stringify(slugs, null, 2)}\n`;
-    list.push({ path: `${CODE}/enabled.json`, text: enabled });
+    list.push({ path: `${L.CODE}/enabled.json`, text: enabled });
     return list;
   }
 
-  return { TOKEN_DIR, WIN, MAC, MAC_REPAIR, MAC_MODE, GUIDE, LOGO, LICENCE, CODE, TREE, tokenTxt, entries, keysFor };
+  return { TOKEN_DIR, IMAGES, WIN, MAC, MAC_MODE, GUIDE, LOGO, CODE, TREE, layout, tokenTxt, entries, keysFor };
 }));

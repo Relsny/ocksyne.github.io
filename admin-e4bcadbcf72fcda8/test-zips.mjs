@@ -47,8 +47,10 @@ async function assertMacLauncher(buf) {
   if ((mode & 0o170000) !== 0o100000) {
     throw new Error(`${name} n'est pas marqué comme fichier régulier (${mode.toString(8)})`);
   }
-  const repair = Object.keys(archive.files).find((file) => file.includes('RÉPARER LE LANCEUR MAC'));
-  if (!repair) throw new Error('RÉPARER LE LANCEUR MAC.txt absent du zip');
+  const loose = Object.keys(archive.files).filter((file) => !file.includes('/') && /\.txt$/i.test(file));
+  if (loose.length) throw new Error(`fichiers .txt en vrac à la racine : ${loose.join(', ')}`);
+  const anyTxtOutsideCode = Object.keys(archive.files).filter((file) => /\.txt$/i.test(file) && !file.includes('fichiers-du-bot/') && !file.endsWith('token.txt'));
+  if (anyTxtOutsideCode.length) throw new Error(`.txt hors du code : ${anyTxtOutsideCode.join(', ')}`);
   const guide = Object.keys(archive.files).find((file) => file.endsWith('GUIDE.html'));
   const guideText = guide ? await archive.files[guide].async('string') : '';
   if (!guideText.includes('chmod +x')) throw new Error('le guide ne dit pas comment rendre le lanceur Mac exécutable');
@@ -144,7 +146,6 @@ function checkTree(dest, slugs) {
     const files = fs.readdirSync(path.join(dest, images));
     const pictures = files.filter((name) => /\.(png|jpe?g|webp|gif)$/i.test(name));
     if (pictures.length < 16) throw new Error(`seulement ${pictures.length} images interdites`);
-    if (!files.some((name) => name.toLowerCase().includes('lisezmoi'))) throw new Error('LISEZMOI des images absent');
   } else if (/LOG_CHANNEL_ID/.test(tokenText)) {
     throw new Error('LOG_CHANNEL_ID ne doit être que dans le module avatars');
   }
