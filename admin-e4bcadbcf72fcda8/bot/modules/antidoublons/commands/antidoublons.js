@@ -5,6 +5,7 @@ const { stamp, withLogo } = require('../../../src/brand');
 const { createStore } = require('../../../src/store');
 const { openDashboard } = require('../dashboard');
 const { runScan, targetChannels, fileHashes, rule34Fingerprints, warnAndDelete } = require('../scan');
+const { runFullScan } = require('../fullscan');
 const { consider } = require('../engine');
 const { defaultSources } = require('../lib/normalizer');
 
@@ -156,6 +157,30 @@ async function openFor(interaction) {
       });
       return { ok: true };
     },
+    fullScan: () => {
+      const progress = jobFor(guild.id);
+      if (progress.running) return { ok: false };
+      progress.stopped = false;
+      progress.running = true;
+      progress.phase = 'fullscan';
+      progress.scanned = 0;
+      progress.found = 0;
+      progress.deleted = 0;
+      progress.errors = 0;
+      progress.percent = 0;
+      progress.logs = [];
+      const config = store.get(guild.id);
+      runFullScan({ guild, config, progress, stop: () => progress.stopped }).then((result) => {
+        progress.running = false;
+        store.set(guild.id, { hashes: result.hashes || {}, deletedCount: (store.get(guild.id).deletedCount || 0) + (progress.deleted || 0) });
+      }).catch((error) => {
+        progress.running = false;
+        progress.errors = (progress.errors || 0) + 1;
+        progress.phase = 'erreur';
+        console.error('Anti-doublons analyse complète :', error);
+      });
+      return { ok: true };
+    },
     stop: () => {
       const progress = jobFor(guild.id);
       progress.stopped = true;
@@ -169,6 +194,8 @@ async function openFor(interaction) {
         scanned: progress.scanned,
         found: progress.found,
         deleted: progress.deleted || 0,
+        errors: progress.errors || 0,
+        channelName: progress.channelName || '',
         phase: progress.phase,
         percent: progress.percent,
         logs: progress.logs || [],
