@@ -12,7 +12,7 @@ function reasonFor(error) {
   return error.message || `Suppression impossible (${error.code || 'erreur'})`;
 }
 
-async function deleteSilently(message, label = 'Message') {
+async function deleteSilently(message, label = 'Message', options = {}) {
   deleteSilently.lastReason = '';
   if (!message) {
     deleteSilently.lastReason = 'Message inexistant';
@@ -22,7 +22,8 @@ async function deleteSilently(message, label = 'Message') {
   try {
     logger.info(`🗑️ Tentative de suppression : ${label} | ID: ${message.id}`);
     let target = message;
-    if (message.channel && message.id && typeof message.channel.messages?.fetch === 'function') {
+    const refetch = options.refetch !== false;
+    if (refetch && message.channel && message.id && typeof message.channel.messages?.fetch === 'function') {
       try {
         target = await message.channel.messages.fetch(message.id);
       } catch (fetchError) {

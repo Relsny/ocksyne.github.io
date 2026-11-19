@@ -794,7 +794,8 @@ async function startDeletionCountdown({
 
         const removed = await deleteSilently(
             message,
-            "Message doublon"
+            "Message doublon",
+            { refetch: false }
         );
 
         if (removed && message.guild?.id) {

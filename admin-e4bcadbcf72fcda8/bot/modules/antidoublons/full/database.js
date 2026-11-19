@@ -107,6 +107,48 @@ function createEmptyDatabase() {
 
 }
 
+let linksIndex = new Map();
+let fingerprintIndex = new Map();
+
+function fingerprintKeys(entry) {
+    const keys = [];
+    if (!entry || typeof entry !== "object") return keys;
+    if (entry.contentMd5) keys.push(`md5:${String(entry.contentMd5).toLowerCase()}`);
+    if (entry.contentFamily) keys.push(`family:${String(entry.contentFamily)}`);
+    for (const fingerprint of entry.mediaFingerprints || []) {
+        if (fingerprint && fingerprint.hash) {
+            keys.push(`${fingerprint.kind || "image"}:${String(fingerprint.hash).toLowerCase()}`);
+        }
+    }
+    return keys;
+}
+
+function indexLink(url, entry) {
+    if (!url || !entry) return;
+    linksIndex.set(url, entry);
+    for (const key of fingerprintKeys(entry)) {
+        if (!fingerprintIndex.has(key)) fingerprintIndex.set(key, entry);
+    }
+}
+
+function unindexLink(url, entry) {
+    if (url) linksIndex.delete(url);
+    for (const key of fingerprintKeys(entry)) {
+        if (fingerprintIndex.get(key) === entry) fingerprintIndex.delete(key);
+    }
+}
+
+function rebuildIndexes(database) {
+    linksIndex = new Map();
+    fingerprintIndex = new Map();
+    if (!database || !database.links || typeof database.links !== "object") return;
+    for (const [key, entry] of Object.entries(database.links)) {
+        const normalized = normalizeStoredUrl(key) || key;
+        indexLink(normalized, entry);
+    }
+}
+
+
 
 // ==========================
 // CRÉER DATABASE.JSON
@@ -572,6 +614,7 @@ function loadDatabase() {
 
 
         databaseLoaded = true;
+        rebuildIndexes(databaseCache);
 
 
         return databaseCache;
@@ -611,6 +654,7 @@ function loadDatabase() {
 
 
     databaseLoaded = true;
+    rebuildIndexes(databaseCache);
 
 
     return databaseCache;
@@ -803,6 +847,7 @@ function resetDatabase() {
 
 
     databaseLoaded = true;
+    rebuildIndexes(databaseCache);
 
 
     // ==========================
@@ -872,11 +917,10 @@ function hasLink(url) {
     }
 
 
-    // ==========================
-    // RECHERCHE DIRECTE
-    // ==========================
-
     const direct =
+        linksIndex.get(
+            normalized
+        ) ||
         database.links[
             normalized
         ];
@@ -903,9 +947,7 @@ function hasLink(url) {
 
         logger.info(
             "   ├─ Liens en base :",
-            Object.keys(
-                database.links
-            ).length
+            linksIndex.size
         );
 
 
@@ -942,91 +984,6 @@ function hasLink(url) {
     }
 
 
-    // ==========================
-    // SECOURS
-    // ==========================
-
-    for (
-        const [
-            storedUrl,
-            entry
-        ]
-        of Object.entries(
-            database.links
-        )
-    ) {
-
-        const normalizedStored =
-            normalizeStoredUrl(
-                storedUrl
-            );
-
-
-        if (
-            normalizedStored ===
-            normalized
-        ) {
-
-            logger.info(
-                "🔎 ANTI-DUPLICATE GLOBAL"
-            );
-
-
-            logger.info(
-                "   ├─ URL reçue :",
-                url
-            );
-
-
-            logger.info(
-                "   ├─ URL normalisée :",
-                normalized
-            );
-
-
-            logger.info(
-                "   ├─ Liens en base :",
-                Object.keys(
-                    database.links
-                ).length
-            );
-
-
-            logger.info(
-                "   ├─ Auteur original :",
-                entry.authorTag ||
-                entry.authorId ||
-                "inconnu"
-            );
-
-
-            logger.info(
-                "   ├─ Message original :",
-                entry.messageId ||
-                "inconnu"
-            );
-
-
-            logger.info(
-                "   └─ RESULTAT : ⚠️ DOUBLON"
-            );
-
-
-            return {
-
-                ...entry,
-
-                url:
-                    entry.url ||
-                    normalized
-
-            };
-
-        }
-
-    }
-
-
     logger.info(
         "🔎 ANTI-DUPLICATE GLOBAL"
     );
@@ -1046,9 +1003,7 @@ function hasLink(url) {
 
     logger.info(
         "   ├─ Liens en base :",
-        Object.keys(
-            database.links
-        ).length
+        linksIndex.size
     );
 
 
@@ -1386,6 +1341,11 @@ function addLink(
 
     };
 
+    indexLink(
+        normalizedUrl,
+        database.links[normalizedUrl]
+    );
+
 
     saveDatabase(
         database
@@ -1483,6 +1443,25 @@ function findMediaDuplicate(
         normalizeStoredUrl(
             excludedUrl
         );
+
+    const skipEntry = (storedEntry, storedUrl) => {
+        const normalizedStored = normalizeStoredUrl(storedUrl || storedEntry?.url);
+        if (normalizedExcluded && normalizedStored === normalizedExcluded) return true;
+        if (excludedMessageId && storedEntry.messageId && String(storedEntry.messageId) === String(excludedMessageId)) return true;
+        if (guildId && storedEntry.guildId && String(storedEntry.guildId) !== String(guildId)) return true;
+        return false;
+    };
+
+    const exactKeys = fingerprintKeys(mediaAnalysis);
+    for (const key of exactKeys) {
+        const storedEntry = fingerprintIndex.get(key);
+        if (!storedEntry || skipEntry(storedEntry, storedEntry.url)) continue;
+        logger.info("🧠 DOUBLON MÉDIA GLOBAL TROUVÉ");
+        logger.info("   ├─ URL originale :", storedEntry.url || "");
+        logger.info("   ├─ Auteur :", storedEntry.authorTag || storedEntry.authorId || "inconnu");
+        logger.info("   └─ Message :", storedEntry.messageId || "inconnu");
+        return { ...storedEntry, url: storedEntry.url, matchedBy: "mediaFingerprint" };
+    }
 
 
     for (
@@ -1657,9 +1636,19 @@ function removeLink(
     }
 
 
+    const removedEntry =
+        database.links[
+            normalized
+        ];
+
     delete database.links[
         normalized
     ];
+
+    unindexLink(
+        normalized,
+        removedEntry
+    );
 
 
     saveDatabase(

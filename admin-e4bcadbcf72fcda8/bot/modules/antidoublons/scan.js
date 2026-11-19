@@ -14,19 +14,73 @@ function linkTo(guildId, channelId, messageId) {
   return `https://discord.com/channels/${guildId}/${channelId}/${messageId}`;
 }
 
-async function fileHashes(message, { visual = false } = {}) {
+const FILE_CACHE_MAX = 2000;
+const defaultFileCache = new Map();
+
+function discordContentHash(attachment) {
+  return attachment.contentHash || attachment.content_hash || attachment.hash || null;
+}
+
+function fileCacheKey(attachment) {
+  const hash = discordContentHash(attachment);
+  const name = attachment.name || attachment.filename || '';
+  if (hash && attachment.size != null && name) return `meta:${attachment.size}:${name}:${hash}`;
+  if (attachment.id) return `id:${attachment.id}`;
+  const url = String(attachment.url || '');
+  return `url:${url.split('?')[0] || url}`;
+}
+
+function cacheGet(store, key) {
+  if (!store.has(key)) return null;
+  const value = store.get(key);
+  store.delete(key);
+  store.set(key, value);
+  return value;
+}
+
+function cacheSet(store, key, value) {
+  if (store.has(key)) store.delete(key);
+  store.set(key, value);
+  while (store.size > FILE_CACHE_MAX) store.delete(store.keys().next().value);
+}
+
+function clearFileHashCache(store = defaultFileCache) {
+  store.clear();
+}
+
+async function fileHashes(message, { visual = false, cache } = {}) {
+  const store = cache || defaultFileCache;
   const hashes = [];
   const visualHashes = [];
   for (const attachment of message.attachments.values()) {
     if (!isImageAttachment(attachment)) continue;
+    const key = fileCacheKey(attachment);
+    const cached = cacheGet(store, key);
+    if (cached && (!visual || cached.triedVisual)) {
+      hashes.push(...cached.hashes);
+      if (visual) visualHashes.push(...cached.visualHashes);
+      continue;
+    }
+    const provided = discordContentHash(attachment);
+    const name = attachment.name || attachment.filename || '';
+    if (provided && attachment.size != null && name && !visual) {
+      const fingerprint = `discord:${attachment.size}:${name}:${provided}`;
+      cacheSet(store, key, { hashes: [fingerprint], visualHashes: [], triedVisual: false });
+      hashes.push(fingerprint);
+      continue;
+    }
     const response = await fetch(attachment.url).catch(() => null);
     if (!response?.ok) continue;
     const bytes = Buffer.from(await response.arrayBuffer());
-    hashes.push(sha256(bytes));
+    const fileHash = sha256(bytes);
+    const found = { hashes: [fileHash], visualHashes: [], triedVisual: visual };
     if (visual) {
       const hash = await dHashBuffer(bytes).catch(() => null);
-      if (hash) visualHashes.push(hash);
+      if (hash) found.visualHashes.push(hash);
     }
+    cacheSet(store, key, found);
+    hashes.push(fileHash);
+    if (visual) visualHashes.push(...found.visualHashes);
   }
   return { hashes, visualHashes };
 }
@@ -46,6 +100,16 @@ async function rule34Fingerprints(content, config) {
     if (found?.contentMd5) extras.push(`md5:${found.contentMd5}`);
   }
   return extras;
+}
+
+function isWatchedChannel(channel, config) {
+  if (!channel?.id) return false;
+  const rules = config?.rules || {};
+  if ((rules.ignoredChannels || []).some((id) => String(id) === String(channel.id))) return false;
+  const channelIds = new Set((config.channelIds || []).map(String));
+  if (channelIds.has(String(channel.id))) return true;
+  const categoryIds = new Set((config.categoryIds || []).map(String));
+  return Boolean(channel.parentId && categoryIds.has(String(channel.parentId)));
 }
 
 async function targetChannels(guild, config) {
@@ -125,7 +189,7 @@ async function deletePending(guild, pending, stop) {
           });
           if (message) {
             const { deleteSilently } = require('./full/delete-message');
-            const removed = await deleteSilently(message, 'Message doublon');
+            const removed = await deleteSilently(message, 'Message doublon', { refetch: false });
             if (!removed) console.error('Anti-doublons :', deleteSilently.lastReason);
           }
           await sleep(1100);
@@ -196,4 +260,4 @@ async function warnAndDelete(message, hit, delay = 4000) {
   return true;
 }
 
-module.exports = { targetChannels, fileHashes, rule34Fingerprints, runScan, warnAndDelete, linkTo };
+module.exports = { targetChannels, isWatchedChannel, fileHashes, clearFileHashCache, rule34Fingerprints, runScan, warnAndDelete, linkTo };

@@ -4,7 +4,7 @@ const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, EmbedBuilder, Act
 const { stamp, withLogo } = require('../../../src/brand');
 const { createStore } = require('../../../src/store');
 const { openDashboard } = require('../dashboard');
-const { targetChannels, fileHashes, rule34Fingerprints, warnAndDelete } = require('../scan');
+const { isWatchedChannel, fileHashes, rule34Fingerprints, warnAndDelete } = require('../scan');
 const { runFullScan } = require('../fullscan');
 const { consider } = require('../engine');
 const { defaultSources } = require('../lib/normalizer');
@@ -253,9 +253,7 @@ module.exports = {
     if (!config.active) return;
     const rules = config.rules || {};
     if ((rules.ignoredUsers || []).includes(message.author.id)) return;
-    if ((rules.ignoredChannels || []).includes(message.channelId)) return;
-    const channels = await targetChannels(message.guild, config);
-    if (!channels.some((channel) => channel.id === message.channelId)) return;
+    if (!isWatchedChannel(message.channel, config)) return;
     const record = {
       id: message.id,
       channelId: message.channelId,
