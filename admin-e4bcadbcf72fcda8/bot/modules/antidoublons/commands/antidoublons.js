@@ -8,6 +8,7 @@ const { targetChannels, fileHashes, rule34Fingerprints, warnAndDelete } = requir
 const { runFullScan } = require('../fullscan');
 const { consider } = require('../engine');
 const { defaultSources } = require('../lib/normalizer');
+const history = require('../lib/history');
 
 const store = createStore('antidoublons.json', () => ({
   active: false,
@@ -73,6 +74,9 @@ function defaultState(guild) {
     })) : [],
     permissions: permissionReport(guild, config),
     deletedCount: config?.deletedCount || 0,
+    history: guild ? history.list(guild.id, 200) : [],
+    deletedLinks: guild ? history.links(guild.id, 500) : [],
+    deletedLinksCount: guild ? history.linkTotal(guild.id) : 0,
     active: Boolean(config?.active),
     rule34Configured: Boolean(saved.apiKey && saved.userId),
   };
@@ -193,6 +197,8 @@ async function openFor(interaction) {
         phase: progress.phase,
         percent: progress.percent,
         logs: progress.logs || [],
+        history: history.list(guild.id, 60),
+        deletedLinksCount: history.linkTotal(guild.id),
       };
     },
   });
@@ -272,6 +278,14 @@ module.exports = {
     job.logs = [{ line: `Doublon en direct · ${hits[0].kind || 'lien'}` }, ...(job.logs || [])].slice(0, 30);
     await warnAndDelete(message, hits[0], rules.deleteDelayMs || 4000);
     job.deleted = (job.deleted || 0) + 1;
+    history.record(message.guild.id, {
+      kind: hits[0].kind || 'lien',
+      value: history.describe(hits[0].kind, hits[0].key, message),
+      channel: message.channel?.name || '',
+      author: message.member?.displayName || message.author?.username || '',
+      status: 'deleted',
+      source: 'direct',
+    });
     store.set(message.guild.id, { hashes: config.hashes });
   },
 };

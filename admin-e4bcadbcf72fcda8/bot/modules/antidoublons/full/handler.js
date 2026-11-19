@@ -46,6 +46,7 @@ const PROCESSING_TTL = 120000;
 // ==========================
 
 const { deleteSilently } = require("./delete-message");
+const history = require("../lib/history");
 
 function deleteDelay() {
     return Number(config.deleteDelay) || 4000;
@@ -809,6 +810,29 @@ async function startDeletionCountdown({
             } catch (error) {
                 logger.error("❌ Compteur de suppressions :", error.message);
             }
+        }
+
+        try {
+            if (message.guild?.id) {
+                const links = getNormalizedLinks(message);
+                const files = message.attachments ? [...message.attachments.values()] : [];
+                const oldLink = old?.link || old?.url || null;
+                const kind = links.length || oldLink ? "lien" : files.length ? "image" : "texte";
+                history.record(message.guild.id, {
+                    kind,
+                    value: kind === "lien"
+                        ? (oldLink && links.includes(oldLink) ? oldLink : links[0] || oldLink)
+                        : kind === "image"
+                            ? files.map(file => file.name || "image").join(", ")
+                            : message.content || "",
+                    channel: message.channel?.name || "",
+                    author: message.member?.displayName || message.author?.username || "",
+                    status: removed ? "deleted" : "failed",
+                    source: "direct"
+                });
+            }
+        } catch (error) {
+            logger.error("❌ Historique anti-doublons :", error.message);
         }
 
         if (
