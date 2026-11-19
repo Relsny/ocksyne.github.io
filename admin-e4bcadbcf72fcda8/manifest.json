@@ -17,6 +17,7 @@
     "src/events/interactionCreate.js",
     "src/events/ready.js",
     "src/index.js",
+    "src/invite.js",
     "src/load-modules.js",
     "src/local-panel.js",
     "src/reply.js",

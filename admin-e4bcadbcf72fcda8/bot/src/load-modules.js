@@ -60,7 +60,7 @@ function wire(client, loaded) {
   client.handlers = client.handlers || new Map();
   client.fallbacks = client.fallbacks || [];
   client.dcasModules = loaded.modules.map((mod) => mod.slug);
-  client.dcasModuleMeta = loaded.modules.map((mod) => ({ slug: mod.slug, guide: mod.guide || null }));
+  client.dcasModuleMeta = loaded.modules.map((mod) => ({ slug: mod.slug, guide: mod.guide || null, permissions: mod.permissions || [] }));
 
   const commandsDir = path.join(__dirname, 'commands');
   if (fs.existsSync(commandsDir)) {

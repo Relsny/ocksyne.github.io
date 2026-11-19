@@ -4,6 +4,7 @@ const { card } = require('../../../src/reply');
 const {
   SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, ActionRowBuilder,
   ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle,
+  MessageFlags,
 } = require('discord.js');
 const { createStore } = require('../../../src/store');
 const { randomCode } = require('../../../src/text');
@@ -112,7 +113,7 @@ module.exports = {
         return;
       }
       store.set(guildId, { enabled: sub === 'activer' });
-      await interaction.reply({ content: sub === 'activer' ? 'Vérification activée.' : 'Vérification coupée.', ephemeral: true });
+      await interaction.reply({ content: sub === 'activer' ? 'Vérification activée.' : 'Vérification coupée.', flags: MessageFlags.Ephemeral });
       return;
     }
     const config = store.get(guildId);

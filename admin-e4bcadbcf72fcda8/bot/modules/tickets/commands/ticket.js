@@ -4,6 +4,7 @@ const { card } = require('../../../src/reply');
 const {
   SlashCommandBuilder, PermissionFlagsBits, ChannelType, EmbedBuilder,
   ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder,
+  MessageFlags,
 } = require('discord.js');
 const { createStore } = require('../../../src/store');
 
@@ -118,7 +119,7 @@ module.exports = {
       const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId('ticket:confirm').setLabel('Confirmer la fermeture').setStyle(ButtonStyle.Danger),
       );
-      await interaction.reply({ content: 'Fermer ce ticket et envoyer l’archive ?', components: [row], ephemeral: true });
+      await interaction.reply({ content: 'Fermer ce ticket et envoyer l’archive ?', components: [row], flags: MessageFlags.Ephemeral });
     },
     'ticket:confirm': async (interaction) => {
       const channel = interaction.channel;
