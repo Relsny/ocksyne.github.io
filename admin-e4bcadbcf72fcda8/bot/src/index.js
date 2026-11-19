@@ -33,6 +33,5 @@ process.on('unhandledRejection', (error) => console.error('Promesse non gérée 
 
 client.login(token).catch((error) => {
   console.error('Connexion impossible. Vérifie le jeton dans token.txt.');
-  console.error(error.message || error);
   process.exit(1);
 });

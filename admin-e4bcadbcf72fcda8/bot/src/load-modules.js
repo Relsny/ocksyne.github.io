@@ -54,6 +54,8 @@ function loadModules({ all = false } = {}) {
 }
 
 function wire(client, loaded) {
+  const need = 8 + (loaded.modules || []).length;
+  if (client.getMaxListeners() < need) client.setMaxListeners(need);
   client.commands = client.commands || new (require('discord.js').Collection)();
   client.handlers = client.handlers || new Map();
   client.fallbacks = client.fallbacks || [];

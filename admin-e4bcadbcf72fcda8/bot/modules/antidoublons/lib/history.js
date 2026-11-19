@@ -15,7 +15,8 @@ let seq = 0;
 function load() {
   if (cache) return cache;
   try {
-    cache = JSON.parse(fs.readFileSync(FILE, 'utf8')) || {};
+    const parsed = JSON.parse(fs.readFileSync(FILE, 'utf8'));
+    cache = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
   } catch {
     cache = {};
   }
@@ -26,7 +27,14 @@ function flush() {
   timer = null;
   try {
     fs.mkdirSync(path.dirname(FILE), { recursive: true });
-    fs.writeFileSync(FILE, JSON.stringify(cache || {}));
+    const tmp = `${FILE}.${process.pid}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify(cache || {}));
+    try {
+      fs.renameSync(tmp, FILE);
+    } catch {
+      fs.copyFileSync(tmp, FILE);
+      try { fs.unlinkSync(tmp); } catch { /* ignore */ }
+    }
   } catch (error) {
     console.error('Anti-doublons historique :', error.message);
   }

@@ -12,7 +12,7 @@ module.exports = {
     '2. Tape /antidoublons panel. Un bouton ouvre le panneau, visible seulement par toi.',
     '3. Coche un salon, plusieurs salons, ou des catégories entières. Plus il y en a, plus l’analyse est longue.',
     '4. Choisis textes, liens (tous les sites ou une liste, y compris des sites adultes) et images/GIF.',
-    '5. Clique sur Activer et confirme. Le tableau compte les messages et met les doublons de côté, puis supprime les plus récents.',
+    '5. Clique sur Activer et confirme deux fois. Tout l’historique est analysé tout de suite, les doublons plus récents sont supprimés, puis la surveillance en direct s’active.',
     '6. Le bouton rouge STOP arrête tout de suite.',
     '7. Ensuite, chaque nouveau doublon reçoit un message « Doublon détecté » avec le lien de l’original, puis il est supprimé.',
     '8. Si le bot redémarre alors que c’est activé, il rattrape les messages manqués puis reprend.',

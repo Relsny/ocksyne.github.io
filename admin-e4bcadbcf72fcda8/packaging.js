@@ -223,8 +223,8 @@
 <li>Choisis les textes, les liens et les images. Les applications sont des tuiles. La section Mature (18+) est repliée.</li>
 <li>Exact compare une empreinte identique. Avancé (ressemblance) ajoute la ressemblance si sharp est installé, et des images de vidéo si ffmpeg est installé.</li>
 <li>Rule34.xxx se coche dans Mature. Les champs s ouvrent sous la tuile : RULE34_API_KEY et RULE34_USER_ID. Elles sont enregistrées dans data/antidoublons.json, sur cet ordinateur seulement. Elles ne vont pas dans token.txt. La clé se crée sur <a href="https://rule34.xxx/index.php?page=account&amp;s=options">la page Options du compte Rule34</a>.</li>
-<li>Clique sur Activer. Le panneau demande : Êtes-vous sûr de vouloir activer le système d anti-doublons ? Lorsque le bot détecte un doublon, le plus récent sera supprimé.</li>
-<li>Le tableau affiche les messages lus et les doublons mis de côté. À la fin, les plus récents sont supprimés.</li>
+<li>Clique sur Activer. Le panneau demande une première confirmation : tout l’historique des salons choisis sera analysé, et tous les doublons seront supprimés (le plus ancien est gardé). Puis une seconde : les messages supprimés ne pourront pas être récupérés.</li>
+<li>L’analyse démarre tout de suite. Le tableau et l’historique montrent les messages lus et les doublons, retirés au fur et à mesure. À la fin, la surveillance en direct s’active.</li>
 <li>Le bouton rouge STOP arrête tout de suite.</li>
 <li>Ensuite, chaque nouveau doublon reçoit un message Doublon détecté avec le lien de l original, puis il est supprimé.</li>
 </ol>`
@@ -290,10 +290,6 @@ ${usage}
     const title = slugs.length === 1 ? (names[slugs[0]] || slugs[0]) : 'Bot DCAS';
     const list = [
       { path: `${TOKEN_DIR}/token.txt`, text: tokenTxt(slugs) },
-      { path: L.WIN, text: windowsBat() },
-      { path: L.MAC, text: macCommand(), exec: true, unixPermissions: MAC_MODE },
-      { path: L.GUIDE, text: guideHtml({ title, slugs, modules: names, readmes, logoBase64, L }) },
-      { path: L.LOGO, bytes: logoBytes },
     ];
     const forbidden = [];
     for (const file of codeFiles) {
@@ -312,6 +308,12 @@ ${usage}
     }
     const enabled = `${JSON.stringify(slugs, null, 2)}\n`;
     list.push({ path: `${L.CODE}/enabled.json`, text: enabled });
+    list.push(
+      { path: L.WIN, text: windowsBat() },
+      { path: L.MAC, text: macCommand(), exec: true, unixPermissions: MAC_MODE },
+      { path: L.GUIDE, text: guideHtml({ title, slugs, modules: names, readmes, logoBase64, L }) },
+      { path: L.LOGO, bytes: logoBytes },
+    );
     return list;
   }
 

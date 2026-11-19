@@ -7,6 +7,7 @@ function reasonFor(error) {
   if (error.code === 50013) return 'Permission Gérer les messages manquante';
   if (error.code === 50001) return 'Permission Voir le salon manquante';
   if (error.code === 10008) return 'Message déjà supprimé';
+  if (error.code === 429) return 'Limite de Discord atteinte, nouvel essai dans un instant';
   if (error.code === 50021) return 'Message système, Discord refuse la suppression';
   return error.message || `Suppression impossible (${error.code || 'erreur'})`;
 }
@@ -34,7 +35,17 @@ async function deleteSilently(message, label = 'Message') {
         target = message;
       }
     }
-    await target.delete();
+    try {
+      await target.delete();
+    } catch (error) {
+      if (error.code === 429) {
+        const wait = Math.ceil((Number(error.retryAfter) || 1) * 1000);
+        await new Promise((resolve) => setTimeout(resolve, wait));
+        await target.delete();
+      } else {
+        throw error;
+      }
+    }
     logger.info(`✅ ${label} supprimé | ID: ${message.id}`);
     return true;
   } catch (error) {

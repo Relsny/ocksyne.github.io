@@ -16,7 +16,7 @@ Choix des salons et des catégories, sans plafond. Textes, liens et images. Les 
 
 Rule34.xxx affiche « (nécessite RULE34_API_KEY + RULE34_USER_ID) ». Cocher la tuile déplie, juste en dessous, la clé (champ masqué, avec un œil pour l’afficher) et l’identifiant. Décocher referme le bloc. La clé se génère sur [la page Options du compte](https://rule34.xxx/index.php?page=account&s=options). Enregistrer les écrit dans `data/antidoublons.json`, sur la machine du bot, et nulle part ailleurs. Le badge « configuré ✓ » apparaît alors, avec Modifier et Effacer. Ces deux valeurs ne sont pas dans `token.txt`.
 
-Deux modes d’image : Exact (empreinte identique) ou Avancé (ressemblance, si `sharp` est installé). Le bouton Activer demande : « Êtes-vous sûr de vouloir activer le système d'anti-doublons ? Lorsque le bot détecte un doublon, le plus récent sera supprimé. » Puis un tableau suit l’analyse. STOP, en rouge, interrompt.
+Deux modes d’image : Exact (empreinte identique) ou Avancé (ressemblance, si `sharp` est installé). Le bouton Activer ouvre une double confirmation : tout l’historique sera analysé et les doublons supprimés (le plus ancien est gardé), puis un second avis que les messages supprimés ne pourront pas être récupérés. L’analyse démarre tout de suite ; le tableau et l’historique suivent les suppressions. À la fin, la surveillance en direct s’active. STOP, en rouge, interrompt.
 
 Les messages de moins de 14 jours sont supprimés en lot. Les plus anciens partent un par un, avec une pause, à cause des limites de Discord.
 

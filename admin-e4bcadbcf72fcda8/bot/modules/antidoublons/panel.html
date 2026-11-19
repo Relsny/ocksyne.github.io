@@ -1012,7 +1012,7 @@ try{var t=JSON.parse(localStorage.getItem('dcas-antidoublons-theme')||'null');if
 </div>
 <div class="modal" id="modal-sure" inert>
   <div class="dialog danger" role="dialog" aria-modal="true" aria-labelledby="sure-title">
-    <h3 id="sure-title">Es-tu vraiment sûr ?</h3>
+    <h3 id="sure-title">Êtes-vous vraiment sûr ?</h3>
     <p>Les messages supprimés ne pourront pas être récupérés.</p>
     <div class="dialog-actions"><button class="btn" id="sure-no" type="button">Annuler</button><button class="btn danger" id="sure-yes" type="button">Oui, activer et tout nettoyer</button></div>
   </div>
@@ -2462,7 +2462,7 @@ function ingestHistory(list){
     const id = entryId(e);
     if (!H.map.has(id)) H.map.set(id, Object.assign({}, e, {id, at:Number(e.at)||Date.now()}));
     if (e.status === 'deleted' && e.kind === 'lien' && e.value && !H.links.some(l=>entryId(l) === id)) {
-      H.links.unshift({id, at:Number(e.at)||Date.now(), url:e.value, channel:e.channel, author:e.author, source:e.source});
+      H.links.unshift({id, at:Number(e.at)||Date.now(), url:e.value, channel:e.channel, author:e.author, source:e.source}); if (H.links.length > 1000) H.links.length = 1000;
     }
   });
   if (H.map.size > 400) [...H.map.values()].sort((a,b)=>a.at-b.at).slice(0, H.map.size - 400).forEach(e=>H.map.delete(e.id));
