@@ -2,18 +2,24 @@ Code crédité par son auteur (DCAS / sir_ocksyne) — modification interdite. A
 
 # Avatars interdits
 
-Même idée que l’anti-doublons : un panneau web local, un jeton dans l’adresse, Activer et STOP. Les avatars interdits sont des empreintes SHA-256 exactes. On peut envoyer une image ou copier l’avatar actuel d’un membre.
+Dès que tu lances le bot, l’analyse démarre et les sanctions s’appliquent : il n’y a pas de retour en arrière.
 
-Au démarrage, si c’est activé, tous les membres sont revérifiés. Un changement d’avatar ou une arrivée relance le contrôle. L’action est une alerte, une exclusion d’une heure, ou une expulsion.
+Il n’y a pas de panneau. Au lancement, le bot lit le dossier des images interdites, parcourt les membres, puis surveille les arrivées et les changements d’avatar.
 
-## Commande
+## Sanction
 
-`/avatars panel`
+Ce n’est pas un bannissement. Le membre reçoit un message privé, il est exclu, puis ses messages des dernières 24 heures sont retirés des salons accessibles. Le propriétaire, les bots, et les membres qui peuvent exclure ou gérer le serveur ne sont pas touchés.
 
-## Permissions
+Deux cas : aucun avatar personnel (l’avatar Discord par défaut), ou une photo trop proche d’une image du dossier.
 
-Expulser, Exclure temporairement, Envoyer des messages.
+## Images
 
-## Intents
+Ajoute, retire ou remplace les fichiers jpg, png, webp ou gif dans le dossier « IMAGES INTERDITES ». Le bot relit ce dossier pendant qu’il tourne.
 
-`Guilds`, `GuildMembers` (privilégié).
+## Logs
+
+Dans token.txt, `LOG_CHANNEL_ID` est facultatif. Vide : aucun message de log. Rempli avec l’identifiant d’un salon (mode développeur, clic droit, Copier l’identifiant) : un embed y est envoyé à chaque exclusion.
+
+## Si sharp ou l’OCR manque
+
+Sans sharp, seule une image strictement identique est reconnue. Le message est écrit dans la console, le bot continue. L’OCR n’est pas obligatoire : s’il manque, la comparaison d’images continue.

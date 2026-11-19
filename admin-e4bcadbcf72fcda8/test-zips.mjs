@@ -135,7 +135,39 @@ function checkTree(dest, slugs) {
   }
   const tokenFile = tokenFileIn(dest);
   if (!tokenFile) throw new Error('token.txt absent du zip');
-  assertNoRule34(fs.readFileSync(tokenFile, 'utf8'), tokenFile);
+  const tokenText = fs.readFileSync(tokenFile, 'utf8');
+  assertNoRule34(tokenText, tokenFile);
+  if (slugs.includes('avatars')) {
+    if (!/^LOG_CHANNEL_ID =/m.test(tokenText)) throw new Error('LOG_CHANNEL_ID absent du token avatars');
+    const images = fs.readdirSync(dest).find((name) => name.includes('IMAGES INTERDITES'));
+    if (!images) throw new Error('dossier IMAGES INTERDITES absent');
+    const files = fs.readdirSync(path.join(dest, images));
+    const pictures = files.filter((name) => /\.(png|jpe?g|webp|gif)$/i.test(name));
+    if (pictures.length < 16) throw new Error(`seulement ${pictures.length} images interdites`);
+    if (!files.some((name) => name.toLowerCase().includes('lisezmoi'))) throw new Error('LISEZMOI des images absent');
+  } else if (/LOG_CHANNEL_ID/.test(tokenText)) {
+    throw new Error('LOG_CHANNEL_ID ne doit être que dans le module avatars');
+  }
+}
+
+function assertBrandOnly(dir) {
+  const skip = new Set(['node_modules', '.git', 'uploads', 'tesseract']);
+  function walk(current) {
+    for (const name of fs.readdirSync(current)) {
+      if (skip.has(name) || name.startsWith('.')) continue;
+      const abs = path.join(current, name);
+      const stat = fs.statSync(abs);
+      if (stat.isDirectory()) {
+        walk(abs);
+        continue;
+      }
+      if (!/\.(js|mjs|html|css|md|txt|json)$/i.test(name)) continue;
+      const text = fs.readFileSync(abs, 'utf8');
+      const banned = 'murr' + 'topia';
+      if (text.toLowerCase().includes(banned)) throw new Error(`mot interdit dans ${abs}`);
+    }
+  }
+  walk(dir);
 }
 
 async function main() {
@@ -147,6 +179,7 @@ async function main() {
   for (const file of ['src/token.js', 'src/brand.js']) {
     if (!saved.base.includes(file)) throw new Error(`${file} manque dans manifest.json`);
   }
+  assertBrandOnly(path.join(adminDir, '..'));
   const slugs = Object.keys(saved.modules).sort();
   const legacyName = fs.readdirSync(botDir).find((name) => name.includes('TOKEN') && name.endsWith('.txt'));
   if (!legacyName) throw new Error('modèle de jeton introuvable dans bot/');

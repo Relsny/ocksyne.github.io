@@ -15,6 +15,7 @@
   const LOGO = '4 · logo.png';
   const LICENCE = '5 · LICENCE.txt';
   const CODE = '6 · ⚙️ fichiers-du-bot';
+  const IMAGES = '2 · 🖼️ IMAGES INTERDITES';
 
   const TREE = [TOKEN_DIR, WIN, MAC, GUIDE, LOGO, LICENCE, CODE];
 
@@ -45,6 +46,9 @@
     if (slugs.includes('osu')) {
       keys.push(['OSU_CLIENT_ID', 'ton_osu_client_id', 'Identifiant OAuth osu. Uniquement pour le module Stats osu.']);
       keys.push(['OSU_CLIENT_SECRET', 'ton_osu_client_secret', 'Secret OAuth osu. Uniquement pour le module Stats osu.']);
+    }
+    if (slugs.includes('avatars')) {
+      keys.push(['LOG_CHANNEL_ID', '', 'Salon de logs, facultatif. Mode developpeur, clic droit sur le salon, Copier l identifiant. Laisse vide pour ne rien envoyer.']);
     }
     if (slugs.includes('stream')) {
       keys.push(['TWITCH_CLIENT_ID', 'ton_twitch_client_id', 'Identifiant de l application Twitch. Uniquement pour les annonces de live.']);
@@ -227,7 +231,15 @@
     const usage = slugs.map((slug) => {
       const name = modules[slug] || slug;
       const body = readmes[slug] || 'Lis le mode d emploi dans le dossier du code, modules, puis ce module, README.md.';
-      const extra = slug === 'antidoublons'
+      const extra = slug === 'avatars'
+        ? `<p><b>Dès que tu lances le bot, l'analyse démarre et les sanctions s'appliquent : il n'y a pas de retour en arrière.</b></p>
+<ol>
+<li>Le dossier <b>2 · 🖼️ IMAGES INTERDITES</b> est déjà rempli. Tu peux garder, supprimer ou ajouter des images jpg, png, webp ou gif. Le bot lit ce dossier au lancement et le surveille ensuite.</li>
+<li>Un avatar Discord par défaut, ou une photo trop proche d'une image du dossier, entraîne une exclusion. Ce n'est pas un bannissement. Un message privé est envoyé, puis les messages des dernières 24 heures sont retirés.</li>
+<li>Dans token.txt, LOG_CHANNEL_ID est facultatif. Vide : aucun log. Rempli avec l'identifiant du salon (mode développeur, clic droit, Copier l'identifiant) : un embed y est envoyé.</li>
+<li>Il n'y a pas de panneau. /avatars indique seulement l'état.</li>
+</ol>`
+        : slug === 'antidoublons'
         ? `<ol>
 <li>Dans Discord, tape /antidoublons panel. Seul toi vois la réponse.</li>
 <li>Le lien commence par http://127.0.0.1 . Ouvre-le sur le même ordinateur que le bot.</li>
@@ -297,9 +309,34 @@ ${usage}
       { path: LOGO, bytes: logoBytes },
       { path: LICENCE, text: licenceTxt() },
     ];
+    const forbidden = [];
     for (const file of codeFiles) {
       if (file.path.includes('METS TON TOKEN') || file.path.endsWith('token.txt')) continue;
+      if (slugs.includes('avatars') && file.path.includes('modules/avatars/forbidden/')) {
+        forbidden.push(file);
+        continue;
+      }
       list.push({ path: `${CODE}/${file.path}`, text: file.text, bytes: file.bytes });
+    }
+    if (slugs.includes('avatars')) {
+      for (const file of forbidden) {
+        const base = String(file.path).split('/').pop();
+        list.push({ path: `${IMAGES}/${base}`, bytes: file.bytes, text: file.text });
+      }
+      list.push({
+        path: `${IMAGES}/LISEZMOI.txt`,
+        text: [
+          'IMAGES INTERDITES',
+          '',
+          'Dès que tu lances le bot, l analyse démarre et les sanctions s appliquent : il n y a pas de retour en arrière.',
+          '',
+          'Garde, supprime ou ajoute des images jpg, png, webp ou gif.',
+          'Le bot lit ce dossier au lancement, puis le surveille.',
+          'Une photo trop proche de l une de ces images, ou l avatar Discord par défaut, entraîne une exclusion.',
+          'Ce n est pas un bannissement.',
+          '',
+        ].join('\n'),
+      });
     }
     const enabled = `${JSON.stringify(slugs, null, 2)}\n`;
     list.push({ path: `${CODE}/enabled.json`, text: enabled });
