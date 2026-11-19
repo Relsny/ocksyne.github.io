@@ -572,7 +572,6 @@ textarea.input{height:auto;padding:12px 14px;line-height:1.55;resize:vertical;mi
   <div class="actions">
     <div class="actions-in">
       <p class="dirty" id="dirty" role="status"><i></i><span id="dirty-text">Tout est enregistré</span></p>
-      <button class="btn danger" id="fullscan" type="button" disabled><svg class="ic"><use href="#i-search"/></svg>Analyse complète</button>
       <button class="btn" id="save" type="button"><svg class="ic"><use href="#i-save"/></svg>Enregistrer</button>
       <button class="btn primary" id="arm" type="button"><svg class="ic"><use href="#i-bolt"/></svg>Activer</button>
     </div>
@@ -593,16 +592,16 @@ textarea.input{height:auto;padding:12px 14px;line-height:1.55;resize:vertical;mi
 
 <div class="modal" id="modal-scan" inert>
   <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="scan-title">
-    <h3 id="scan-title">Analyser tout l’historique ?</h3>
-    <p id="scan-text">Analyser tout l’historique de 0 salon(s) et supprimer tous les doublons ?</p>
+    <h3 id="scan-title">Activer l’anti-doublons ?</h3>
+    <p id="scan-text">Activer l’anti-doublons sur 0 salon(s) ? Tout l’historique sera analysé et tous les doublons supprimés (le plus ancien est gardé).</p>
     <div class="dialog-actions"><button class="btn" id="scan-no" type="button">Annuler</button><button class="btn primary" id="scan-yes" type="button"><svg class="ic"><use href="#i-search"/></svg>Continuer</button></div>
   </div>
 </div>
 <div class="modal" id="modal-sure" inert>
   <div class="dialog danger" role="dialog" aria-modal="true" aria-labelledby="sure-title">
     <h3 id="sure-title">Es-tu vraiment sûr ?</h3>
-    <p>Cette action est irréversible. Le plus ancien message est gardé, les doublons plus récents sont supprimés.</p>
-    <div class="dialog-actions"><button class="btn" id="sure-no" type="button">Annuler</button><button class="btn danger" id="sure-yes" type="button">Oui, tout analyser et supprimer</button></div>
+    <p>Les messages supprimés ne pourront pas être récupérés.</p>
+    <div class="dialog-actions"><button class="btn" id="sure-no" type="button">Annuler</button><button class="btn danger" id="sure-yes" type="button">Oui, activer et tout nettoyer</button></div>
   </div>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -675,7 +674,7 @@ function startMockFull(){
       : 'fullscan · #bot-test-business';
     if (Math.random() < .4) { p.found++; p.deleted++; p.logs.push({line:'Supprimé : doublon lien dans #bot-test-business'}); }
     if (Math.random() < .08) { p.errors++; p.logs.push({line:'Erreur : permission manquante dans #bot-test-business'}); }
-    if (p.percent >= 100) stopMockRun();
+    if (p.percent >= 100) { mock.state.active = true; stopMockRun(); }
   }, 500);
 }
 function startMockRun(){
@@ -709,9 +708,8 @@ async function mockApi(path, options){
     mock.state.rule34Configured = !body.clear;
     return {ok:true, configured: !body.clear};
   }
-  if (path === '/api/activate') { mock.state.active = true; startMockRun(); return {ok:true}; }
+  if (path === '/api/activate' || path === '/api/fullscan') { startMockFull(); return {ok:true}; }
   if (path === '/api/stop') { stopMockRun('analyse arrêtée'); mock.state.active = false; return {ok:true, stopped:true}; }
-  if (path === '/api/fullscan') { startMockFull(); return {ok:true}; }
   return {ok:false};
 }
 function api(path, options){
@@ -828,8 +826,6 @@ function syncTree(){
   const chip = $('where-chip');
   chip.textContent = n + ' ' + plural(n,'salon','salons');
   chip.classList.toggle('green', n > 0);
-  const scan = $('fullscan');
-  if (scan) scan.disabled = n + S.selCat.size === 0;
   renderPerms();
   refreshDirty();
 }
@@ -1147,7 +1143,7 @@ function zoneCount(){ return S.selCh.size + S.selCat.size; }
 function openScan(){
   const n = S.selCh.size || S.selCat.size;
   if (!n) return;
-  $('scan-text').textContent = `Analyser tout l’historique de ${n} salon(s) et supprimer tous les doublons ?`;
+  $('scan-text').textContent = `Activer l’anti-doublons sur ${n} salon(s) ? Tout l’historique sera analysé et tous les doublons supprimés (le plus ancien est gardé).`;
   lastFocus = document.activeElement;
   const m = $('modal-scan'); m.removeAttribute('inert'); m.classList.add('on');
   setTimeout(()=>$('scan-no').focus(), 30);
@@ -1155,7 +1151,7 @@ function openScan(){
 function closeScan(){ const m = $('modal-scan'); m.classList.remove('on'); m.setAttribute('inert',''); }
 function openSure(){ const m = $('modal-sure'); m.removeAttribute('inert'); m.classList.add('on'); setTimeout(()=>$('sure-no').focus(), 30); }
 function closeSure(){ const m = $('modal-sure'); m.classList.remove('on'); m.setAttribute('inert',''); if (lastFocus && lastFocus.focus) lastFocus.focus(); }
-$('fullscan').addEventListener('click', openScan);
+$('arm').addEventListener('click', openScan);
 $('scan-no').addEventListener('click', closeScan);
 $('scan-yes').addEventListener('click', ()=>{ closeScan(); openSure(); });
 $('sure-no').addEventListener('click', closeSure);
@@ -1165,14 +1161,13 @@ $('sure-yes').addEventListener('click', async ()=>{
   const btn = $('sure-yes'); busy(btn, true);
   try {
     await saveConfig();
-    const res = await post('/api/fullscan', {});
-    if (res && res.ok === false) throw new Error('fullscan');
+    const res = await post('/api/activate', {});
+    if (res && res.ok === false) throw new Error('activate');
     closeSure();
-    toast('Analyse complète lancée.');
+    toast('Analyse lancée. La surveillance s’active à la fin.');
   } catch (e) { toast('L’analyse complète n’a pas démarré. '+NET_ERR, 'err'); }
   finally { busy(btn, false); }
 });
-$('arm').addEventListener('click', openModal);
 $('no').addEventListener('click', closeModal);
 $('modal').addEventListener('mousedown', e=>{ if (e.target === $('modal')) closeModal(); });
 document.addEventListener('keydown', e=>{
@@ -1246,6 +1241,10 @@ function renderProgress(p){
   if (!hasRun) return;
   dash.classList.toggle('running', running);
   dash.classList.toggle('done', !running && percent >= 100);
+  if (!running && percent >= 100 && /termin/i.test(phaseRaw) && !S.active) {
+    S.active = true;
+    renderHeader();
+  }
   $('dash-tag-text').textContent = running ? 'En cours' : (percent >= 100 ? 'Terminée' : 'Interrompue');
   const phase = phaseRaw || (running ? 'Analyse en cours' : (percent >= 100 ? 'Analyse terminée' : 'En attente'));
   $('phase').textContent = phase.charAt(0).toUpperCase() + phase.slice(1);

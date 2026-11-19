@@ -4,7 +4,7 @@ const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, EmbedBuilder, Act
 const { stamp, withLogo } = require('../../../src/brand');
 const { createStore } = require('../../../src/store');
 const { openDashboard } = require('../dashboard');
-const { runScan, targetChannels, fileHashes, rule34Fingerprints, warnAndDelete } = require('../scan');
+const { targetChannels, fileHashes, rule34Fingerprints, warnAndDelete } = require('../scan');
 const { runFullScan } = require('../fullscan');
 const { consider } = require('../engine');
 const { defaultSources } = require('../lib/normalizer');
@@ -113,6 +113,36 @@ function permissionReport(guild, config) {
 
 async function openFor(interaction) {
   const guild = interaction.guild;
+  function startCleanup() {
+    const progress = jobFor(guild.id);
+    if (progress.running) return { ok: false };
+    progress.stopped = false;
+    progress.running = true;
+    progress.phase = 'fullscan';
+    progress.scanned = 0;
+    progress.found = 0;
+    progress.deleted = 0;
+    progress.errors = 0;
+    progress.percent = 0;
+    progress.logs = [];
+    const config = store.get(guild.id);
+    runFullScan({ guild, config, progress, stop: () => progress.stopped }).then((result) => {
+      progress.running = false;
+      const current = store.get(guild.id);
+      store.set(guild.id, {
+        hashes: result.hashes || {},
+        deletedCount: (current.deletedCount || 0) + (progress.deleted || 0),
+        active: !result.stopped,
+      });
+    }).catch((error) => {
+      progress.running = false;
+      progress.errors = (progress.errors || 0) + 1;
+      progress.phase = 'erreur';
+      store.set(guild.id, { active: false });
+      console.error('Anti-doublons analyse complète :', error);
+    });
+    return { ok: true };
+  }
   const started = await openDashboard({
     guildId: guild.id,
     getState: () => defaultState(guild),
@@ -143,44 +173,8 @@ async function openFor(interaction) {
       store.set(guild.id, { rule34: { apiKey, userId }, rules: { ...current.rules, sources } });
       return { ok: true, configured: true };
     },
-    activate: async () => {
-      const progress = jobFor(guild.id);
-      progress.stopped = false;
-      store.set(guild.id, { active: true });
-      const config = store.get(guild.id);
-      config.hashes = config.hashes || {};
-      runScan(guild, config, progress, () => progress.stopped).then(() => {
-        store.set(guild.id, { hashes: config.hashes, cursor: config.cursor, active: !progress.stopped });
-      }).catch((error) => {
-        progress.phase = 'erreur';
-        console.error('Anti-doublons :', error);
-      });
-      return { ok: true };
-    },
-    fullScan: () => {
-      const progress = jobFor(guild.id);
-      if (progress.running) return { ok: false };
-      progress.stopped = false;
-      progress.running = true;
-      progress.phase = 'fullscan';
-      progress.scanned = 0;
-      progress.found = 0;
-      progress.deleted = 0;
-      progress.errors = 0;
-      progress.percent = 0;
-      progress.logs = [];
-      const config = store.get(guild.id);
-      runFullScan({ guild, config, progress, stop: () => progress.stopped }).then((result) => {
-        progress.running = false;
-        store.set(guild.id, { hashes: result.hashes || {}, deletedCount: (store.get(guild.id).deletedCount || 0) + (progress.deleted || 0) });
-      }).catch((error) => {
-        progress.running = false;
-        progress.errors = (progress.errors || 0) + 1;
-        progress.phase = 'erreur';
-        console.error('Anti-doublons analyse complète :', error);
-      });
-      return { ok: true };
-    },
+    activate: () => startCleanup(),
+    fullScan: () => startCleanup(),
     stop: () => {
       const progress = jobFor(guild.id);
       progress.stopped = true;
