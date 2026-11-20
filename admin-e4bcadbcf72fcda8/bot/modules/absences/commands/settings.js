@@ -4,17 +4,18 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const {
-  ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelSelectMenuBuilder, ChannelType,
-  MessageFlags, ModalBuilder, PermissionFlagsBits, SlashCommandBuilder, StringSelectMenuBuilder,
-  StringSelectMenuOptionBuilder, TextInputBuilder, TextInputStyle,
+  ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType,
+  MessageFlags, PermissionFlagsBits, SlashCommandBuilder,
 } = require('discord.js');
 const { card: replyCard } = require('../../../src/reply');
 const { store } = require('../lib/store');
-const { parseColor, PRESETS, toHex } = require('../lib/style');
+const { parseColor } = require('../lib/style');
 const {
   canPost, missingPostMessage, updateBoard, resolveTextChannel, BANNER_DIR,
-  DEFAULT_TITLE, DEFAULT_DESCRIPTION, boardTitle, boardDescription,
 } = require('../lib/board');
+const {
+  buildProfilModal, buildBannerModal, buildHexModal, colorSelect, logsSelect, settingsMenu,
+} = require('../lib/ui');
 
 const CHANNEL_TYPES = [ChannelType.GuildText, ChannelType.GuildAnnouncement];
 const IMAGE_EXT = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp']);
@@ -47,67 +48,6 @@ function isImageUrl(value) {
   } catch {
     return false;
   }
-}
-
-function colorSelect() {
-  return new StringSelectMenuBuilder()
-    .setCustomId('absence:set-color')
-    .setPlaceholder('Choisissez une couleur')
-    .addOptions(PRESETS.map((preset) => new StringSelectMenuOptionBuilder()
-      .setLabel(preset.name)
-      .setDescription(toHex(preset.value))
-      .setValue(preset.id)));
-}
-
-function logsSelect() {
-  return new ChannelSelectMenuBuilder()
-    .setCustomId('absence:set-logs')
-    .setPlaceholder('Choisissez le salon de logs (facultatif)')
-    .addChannelTypes(...CHANNEL_TYPES)
-    .setMinValues(1)
-    .setMaxValues(1);
-}
-
-function settingsMenu() {
-  return {
-    content: '⚙️ **Réglages du tableau**\nChoisissez ce que vous voulez modifier. Tous les tableaux du serveur partagent le même profil (titre, texte, couleur, bannière et salon de logs).',
-    components: [
-      new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId('absence:profil').setEmoji('📝').setLabel('Profil (titre et texte)').setStyle(ButtonStyle.Primary),
-        new ButtonBuilder().setCustomId('absence:settings-couleur').setEmoji('🎨').setLabel('Couleur').setStyle(ButtonStyle.Secondary),
-      ),
-      new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId('absence:settings-banniere').setEmoji('🖼️').setLabel('Bannière').setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder().setCustomId('absence:settings-logs').setEmoji('📋').setLabel('Salon de logs').setStyle(ButtonStyle.Secondary),
-      ),
-    ],
-    flags: MessageFlags.Ephemeral,
-  };
-}
-
-function profilModal(state) {
-  const modal = new ModalBuilder().setCustomId('absence:profil-submit').setTitle('Profil du tableau');
-  modal.addComponents(
-    new ActionRowBuilder().addComponents(
-      new TextInputBuilder()
-        .setCustomId('titre')
-        .setLabel('Titre')
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true)
-        .setMaxLength(256)
-        .setValue(boardTitle(state).slice(0, 256)),
-    ),
-    new ActionRowBuilder().addComponents(
-      new TextInputBuilder()
-        .setCustomId('description')
-        .setLabel('Description')
-        .setStyle(TextInputStyle.Paragraph)
-        .setRequired(true)
-        .setMaxLength(4000)
-        .setValue(boardDescription(state).slice(0, 4000)),
-    ),
-  );
-  return modal;
 }
 
 async function applyAndReply(interaction, message) {
@@ -210,7 +150,7 @@ module.exports = {
   handlers: {
     'absence:settings': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
-      await interaction.reply(settingsMenu());
+      await interaction.reply({ ...settingsMenu(), flags: MessageFlags.Ephemeral });
     },
     'absence:settings-couleur': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
@@ -218,11 +158,7 @@ module.exports = {
     },
     'absence:settings-banniere': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
-      const modal = new ModalBuilder().setCustomId('absence:banniere-submit').setTitle('Bannière du tableau');
-      modal.addComponents(new ActionRowBuilder().addComponents(
-        new TextInputBuilder().setCustomId('url').setLabel('Lien de l’image ou du GIF (laisser vide pour ignorer)').setStyle(TextInputStyle.Short).setRequired(false).setMaxLength(400).setPlaceholder('https://…'),
-      ));
-      await interaction.showModal(modal);
+      await interaction.showModal(buildBannerModal());
     },
     'absence:banniere-submit': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
@@ -244,7 +180,7 @@ module.exports = {
     },
     'absence:profil': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
-      await interaction.showModal(profilModal(store.get(interaction.guildId)));
+      await interaction.showModal(buildProfilModal(store.get(interaction.guildId)));
     },
     'absence:profil-submit': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
@@ -275,11 +211,7 @@ module.exports = {
     },
     'absence:hex': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
-      const modal = new ModalBuilder().setCustomId('absence:hex-submit').setTitle('Couleur personnalisée');
-      modal.addComponents(new ActionRowBuilder().addComponents(
-        new TextInputBuilder().setCustomId('hex').setLabel('Code hexadécimal').setStyle(TextInputStyle.Short).setRequired(true).setMaxLength(7).setPlaceholder('#F0B232'),
-      ));
-      await interaction.showModal(modal);
+      await interaction.showModal(buildHexModal());
     },
     'absence:hex-submit': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;

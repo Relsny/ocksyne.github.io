@@ -46,14 +46,33 @@ function missingPostMessage() {
   return 'Je n’ai pas la permission d’écrire dans ce salon. Accordez-moi « Voir le salon », « Envoyer des messages » et « Intégrer des liens », puis réessayez.';
 }
 
-const DEFAULT_TITLE = '🗓️ Tableau d’absences staff';
+const DEFAULT_TITLE = '🗓️ REGISTRE DES ABSENCES';
 
 const DEFAULT_DESCRIPTION = [
-  'Ce tableau recense les absences du staff. Chaque membre peut y signaler une absence, consulter celles en cours, ou retirer la sienne en cas d’erreur.',
+  '  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+  '  🔰  **GESTION DES DISPONIBILITÉS STAFF**',
+  '  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
   '',
-  '📝 **Signaler mon absence** — motif, description, date de départ et date de retour',
-  '📋 **Logs** — le détail des absences, visible seulement par vous',
-  '🗑️ **Supprimer mon absence** — en cas d’erreur ou de changement de planning',
+  '-# ℹ️ Ce registre permet à chaque membre du staff de gérer ses absences simplement et de tenir l’équipe informée de ses disponibilités.',
+  '',
+  '╭・📝 **SIGNALER UNE ABSENCE**',
+  '┃ Indiquez le motif, une description,',
+  '┃ la date de départ et celle de retour.',
+  '╰━━━━━━━━━━━━━━━━━━━━━━',
+  '',
+  '╭・📋 **CONSULTER MES LOGS**',
+  '┃ Retrouvez l’historique détaillé',
+  '┃ de vos absences, accessible uniquement',
+  '┃ par vous-même.',
+  '╰━━━━━━━━━━━━━━━━━━━━━━',
+  '',
+  '╭・🗑️ **SUPPRIMER MON ABSENCE**',
+  '┃ En cas d’erreur ou de changement',
+  '┃ de planning, vous pouvez retirer',
+  '┃ votre déclaration.',
+  '╰━━━━━━━━━━━━━━━━━━━━━━',
+  '',
+  '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
 ].join('\n');
 
 function boardTitle(state) {
@@ -62,6 +81,44 @@ function boardTitle(state) {
 
 function boardDescription(state) {
   return (state?.description && String(state.description).trim()) || DEFAULT_DESCRIPTION;
+}
+
+function statusBlock(state, now = Date.now()) {
+  const items = listAbsences(state);
+  const count = items.length;
+  const updated = Number(state.updatedAt) || now;
+  const stampLine = `📅 **Dernière mise à jour :** ${discordTimestamp(updated, 'R')}`;
+  if (count === 0) {
+    return [
+      '🟢 **ÉTAT ACTUEL : STAFF DISPONIBLE**',
+      '',
+      'Aucune absence n’est actuellement signalée.',
+      'Tous les membres du staff sont disponibles.',
+      '',
+      stampLine,
+    ].join('\n');
+  }
+  const title = count === 1
+    ? '🔴 **ÉTAT ACTUEL : 1 ABSENCE EN COURS**'
+    : `🔴 **ÉTAT ACTUEL : ${count} ABSENCES EN COURS**`;
+  const max = 10;
+  const lines = items.slice(0, max).map((item) => `• ${mention(item)} — retour ${discordTimestamp(item.returnAt, 'R')}`);
+  const rest = items.length - max;
+  if (rest > 0) lines.push(`+${rest} autre${rest > 1 ? 's' : ''}`);
+  const next = soonestReturn(items, now);
+  const parts = [title, '', ...lines];
+  if (next) parts.push(`⏳ Prochain retour : ${discordTimestamp(next, 'R')}`);
+  parts.push('', stampLine);
+  return parts.join('\n');
+}
+
+function composeBoardDescription(state, now = Date.now()) {
+  const intro = boardDescription(state);
+  const status = statusBlock(state, now);
+  const combined = intro ? `${intro}\n${status}` : status;
+  if (combined.length <= 4096) return combined;
+  const room = 4096 - status.length - 1;
+  return `${intro.slice(0, Math.max(0, room)).trimEnd()}\n${status}`.slice(0, 4096);
 }
 
 function boardButtons() {
@@ -112,25 +169,10 @@ function bannerFilePath(banner) {
 }
 
 function boardPayload(state, guild, now = Date.now()) {
-  const items = listAbsences(state);
-  const count = items.length;
   const embed = stamp(new EmbedBuilder()
     .setTitle(boardTitle(state))
-    .setDescription(boardDescription(state))
+    .setDescription(composeBoardDescription(state, now))
     .setColor(state.color), 'Absences', { keepColor: true });
-
-  if (count === 0) {
-    embed.addFields({ name: '🟢 Staff disponible', value: 'Tous les membres sont actuellement disponibles.' });
-  } else {
-    embed.addFields({ name: '🔴 Absences en cours', value: `**${peopleLabel(count)}**`, inline: true });
-    const next = soonestReturn(items, now);
-    if (next) embed.addFields({ name: '⏳ Prochain retour', value: discordTimestamp(next, 'R'), inline: true });
-  }
-  const updated = Number(state.updatedAt) || now;
-  embed.addFields({ name: '📅 Dernière mise à jour', value: discordTimestamp(updated, 'R'), inline: count === 0 });
-  if (count > 0) {
-    embed.addFields({ name: '👤 Absents actuellement', value: formatAbsenceList(items) });
-  }
 
   const icon = guildIcon(guild);
   const serverName = guild?.name ? String(guild.name).slice(0, 80) : null;
@@ -288,26 +330,67 @@ async function postCancelledLog(guild, item) {
   return postToLogs(guild, cancelledEmbed(item));
 }
 
-function logsPagePayload(state, page) {
+function historyEntries(state, userId) {
+  if (!userId) return [];
+  const current = state.absences?.[userId] ? [{ ...state.absences[userId], endReason: 'current' }] : [];
+  const past = Array.isArray(state.history?.[userId]) ? state.history[userId] : [];
+  return current.concat(past);
+}
+
+function historyStatus(entry) {
+  if (entry.endReason === 'current') return 'En cours';
+  if (entry.endReason === 'delete') return 'Annulée';
+  return 'De retour';
+}
+
+function historyEmbed(state, userId) {
+  const entries = historyEntries(state, userId);
+  const embed = stamp(new EmbedBuilder()
+    .setTitle('Mon historique')
+    .setColor(state.color)
+    .setDescription(entries.length
+      ? 'Vos absences en cours et passées, visibles seulement par vous.'
+      : 'Vous n’avez encore aucune absence enregistrée.'), 'Absences', { keepColor: true });
+  const slice = entries.slice(0, 8);
+  for (const entry of slice) {
+    const name = `${entry.motif || 'Absence'} · ${historyStatus(entry)}`.slice(0, 256);
+    const value = [
+      entry.description ? entry.description.slice(0, 200) : '',
+      `Départ ${when(entry.startAt)}`,
+      `Retour ${when(entry.returnAt)}`,
+    ].filter(Boolean).join('\n').slice(0, 1024);
+    embed.addFields({ name, value });
+  }
+  if (entries.length > slice.length) {
+    embed.addFields({ name: '…', value: `+${entries.length - slice.length} autre${entries.length - slice.length > 1 ? 's' : ''} dans votre historique.` });
+  }
+  return embed;
+}
+
+function logsPagePayload(state, page, userId) {
   const items = listAbsences(state);
+  const pages = Math.max(1, Math.ceil(Math.max(items.length, 1) / LOGS_PER_PAGE));
+  const current = Math.min(Math.max(0, page), pages - 1);
+  const embeds = [];
   if (!items.length) {
-    const embed = stamp(new EmbedBuilder()
+    embeds.push(stamp(new EmbedBuilder()
       .setTitle('Absences en cours')
       .setColor(state.color)
-      .setDescription('Personne n’est actuellement absent.'), 'Absences', { keepColor: true });
-    return { embeds: [embed], components: [], flags: MessageFlags.Ephemeral };
+      .setDescription('Personne n’est actuellement absent.'), 'Absences', { keepColor: true }));
+  } else {
+    const slice = items.slice(current * LOGS_PER_PAGE, (current + 1) * LOGS_PER_PAGE);
+    for (const item of slice) {
+      embeds.push(memberCard(item, {
+        title: 'Absence en cours',
+        color: state.color,
+        description: mention(item),
+      }));
+    }
   }
-  const pages = Math.max(1, Math.ceil(items.length / LOGS_PER_PAGE));
-  const current = Math.min(Math.max(0, page), pages - 1);
-  const slice = items.slice(current * LOGS_PER_PAGE, (current + 1) * LOGS_PER_PAGE);
-  const embeds = slice.map((item) => memberCard(item, {
-    title: 'Absence en cours',
-    color: state.color,
-    description: mention(item),
-  }));
+  embeds.push(historyEmbed(state, userId));
   if (embeds[0]) embeds[0].setFooter({ text: `DCAS · Absences · Page ${current + 1}/${pages}` });
   const components = [];
-  if (pages > 1) {
+  if (pages > 1 && items.length) {
     components.push(new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId(`absence:viewlogs:${current - 1}`).setLabel('Précédent').setStyle(ButtonStyle.Secondary).setDisabled(current === 0),
       new ButtonBuilder().setCustomId(`absence:viewlogs:${current + 1}`).setLabel('Suivant').setStyle(ButtonStyle.Secondary).setDisabled(current >= pages - 1),
@@ -331,8 +414,12 @@ module.exports = {
   boardPayload,
   boardTitle,
   boardDescription,
+  composeBoardDescription,
+  statusBlock,
   formatAbsenceList,
   soonestReturn,
+  historyEntries,
+  historyEmbed,
   canPost,
   missingPostMessage,
   resolveTextChannel,

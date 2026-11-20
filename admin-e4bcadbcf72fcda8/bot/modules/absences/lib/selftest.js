@@ -116,7 +116,7 @@ assert(multi.boards.length === 2, 'deux tableaux, doublon du même salon ignoré
 assert(multi.title === '📅 Planning staff', 'titre personnalisé enregistré');
 assert(boardTitle(multi) === '📅 Planning staff', 'boardTitle utilise le titre perso');
 assert(boardTitle({ title: null }) === DEFAULT_TITLE, 'titre par défaut');
-assert(boardDescription({ description: null }).includes('Signaler mon absence'), 'texte par défaut');
+assert(boardDescription({ description: null }).includes('SIGNALER UNE ABSENCE'), 'texte par défaut');
 
 const resetProfile = testStore.update('guild1', (state) => ({ ...state, title: null, description: null }));
 assert(resetProfile.title === null && boardTitle(resetProfile) === DEFAULT_TITLE, 'réinitialisation du profil');
@@ -133,8 +133,10 @@ const many = formatAbsenceList(Array.from({ length: 12 }, (_, i) => ({ userId: S
 assert(many.includes('+2 autres'), 'liste tronquée avec +N autres');
 
 const payloadEmpty = boardPayload({ color: 0xF0B232, absences: {}, updatedAt: nowTs, banner: null, title: null, description: null }, null, nowTs);
-assert(payloadEmpty.embeds[0].data.title.includes('Tableau'), 'titre du tableau enrichi');
-assert(payloadEmpty.embeds[0].data.fields.some((field) => field.name.includes('Staff disponible')), 'champ staff disponible');
+assert(payloadEmpty.embeds[0].data.title === DEFAULT_TITLE, 'titre du registre');
+const emptyDesc = payloadEmpty.embeds[0].data.description;
+assert(emptyDesc.includes('STAFF DISPONIBLE') && emptyDesc.includes('Aucune absence') && emptyDesc.includes('Dernière mise à jour'), 'état vide dans la description');
+assert(!payloadEmpty.embeds[0].data.fields || payloadEmpty.embeds[0].data.fields.length === 0, 'pas de champs redondants à vide');
 assert(payloadEmpty.components.length === 2, 'deux rangées de boutons, dont Réglages');
 const payloadBusy = boardPayload({
   color: 0xF0B232,
@@ -144,8 +146,11 @@ const payloadBusy = boardPayload({
   description: null,
   absences: { 42: { userId: '42', motif: 'Congés', description: 'Off', startAt: nowTs, returnAt: nowTs + 3_600_000, createdAt: nowTs } },
 }, { name: 'Serveur test', iconURL: () => 'https://example.com/icon.png' }, nowTs);
-const names = payloadBusy.embeds[0].data.fields.map((field) => field.name).join(' | ');
-assert(names.includes('Absences en cours') && names.includes('Prochain retour') && names.includes('Dernière mise à jour') && names.includes('Absents'), `champs riches manquants : ${names}`);
+const busyDesc = payloadBusy.embeds[0].data.description;
+assert(busyDesc.includes('1 ABSENCE EN COURS') && busyDesc.includes('<@42>') && busyDesc.includes('Prochain retour') && busyDesc.includes('Dernière mise à jour'), `état dynamique manquant : ${busyDesc}`);
+assert(!payloadBusy.embeds[0].data.fields || payloadBusy.embeds[0].data.fields.length === 0, 'pas de champs redondants avec une absence');
+const customDesc = require('./board').composeBoardDescription({ description: 'Intro perso', absences: {}, updatedAt: nowTs }, nowTs);
+assert(customDesc.startsWith('Intro perso') && customDesc.includes('STAFF DISPONIBLE') && customDesc.includes('Dernière mise à jour'), 'état dynamique ajouté au texte perso');
 assert(payloadBusy.embeds[0].data.image && payloadBusy.embeds[0].data.image.url.includes('banner.gif'), 'bannière affichée');
 assert(payloadBusy.embeds[0].data.thumbnail, 'vignette (icône du serveur)');
 assert(payloadBusy.embeds[0].data.footer.text.includes('Serveur test'), 'pied de page avec le nom du serveur');

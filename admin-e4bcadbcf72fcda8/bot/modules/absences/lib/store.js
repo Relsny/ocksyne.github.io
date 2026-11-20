@@ -17,6 +17,7 @@ function defaults() {
     description: null,
     updatedAt: 0,
     absences: {},
+    history: {},
   };
 }
 
@@ -62,6 +63,26 @@ function normalize(raw) {
       createdAt: Number(item.createdAt) || Date.now(),
     };
   }
+
+  const history = {};
+  const sourceHistory = src.history && typeof src.history === 'object' ? src.history : {};
+  for (const [key, list] of Object.entries(sourceHistory)) {
+    if (!Array.isArray(list)) continue;
+    const userId = String(key);
+    history[userId] = list.filter((item) => item && typeof item === 'object').map((item) => ({
+      userId: String(item.userId || userId),
+      username: String(item.username || ''),
+      displayName: String(item.displayName || item.username || ''),
+      avatar: item.avatar || null,
+      motif: String(item.motif || ''),
+      description: String(item.description || ''),
+      startAt: Number(item.startAt) || 0,
+      returnAt: Number(item.returnAt) || 0,
+      createdAt: Number(item.createdAt) || Date.now(),
+      endedAt: Number(item.endedAt) || 0,
+      endReason: item.endReason === 'delete' ? 'delete' : 'return',
+    })).slice(0, 25);
+  }
   let banner = null;
   if (src.banner && typeof src.banner === 'object') {
     if (src.banner.kind === 'url' && src.banner.value) banner = { kind: 'url', value: String(src.banner.value) };
@@ -86,7 +107,31 @@ function normalize(raw) {
     description,
     updatedAt: Number(src.updatedAt) || 0,
     absences,
+    history,
   };
+}
+
+
+function appendHistory(state, item, reason) {
+  if (!item || !item.userId) return state.history || {};
+  const history = { ...(state.history || {}) };
+  const userId = String(item.userId);
+  const list = Array.isArray(history[userId]) ? history[userId].slice() : [];
+  list.unshift({
+    userId,
+    username: String(item.username || ''),
+    displayName: String(item.displayName || item.username || ''),
+    avatar: item.avatar || null,
+    motif: String(item.motif || ''),
+    description: String(item.description || ''),
+    startAt: Number(item.startAt) || 0,
+    returnAt: Number(item.returnAt) || 0,
+    createdAt: Number(item.createdAt) || Date.now(),
+    endedAt: Date.now(),
+    endReason: reason === 'delete' ? 'delete' : 'return',
+  });
+  history[userId] = list.slice(0, 25);
+  return history;
 }
 
 function readFile(file) {
@@ -152,4 +197,15 @@ function createStore(file = DEFAULT_FILE) {
 
 const store = createStore();
 
-module.exports = { DEFAULT_FILE, defaults, createStore, store, normalize, listBoards };
+function useFile(file) {
+  const next = createStore(file);
+  store.file = next.file;
+  store.get = next.get;
+  store.all = next.all;
+  store.update = next.update;
+  store.updateAsync = next.updateAsync;
+  store.read = next.read;
+  return store;
+}
+
+module.exports = { DEFAULT_FILE, defaults, createStore, store, normalize, listBoards, appendHistory, useFile };
