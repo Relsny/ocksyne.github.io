@@ -242,7 +242,21 @@
 <li>Au démarrage, le bot resynchronise seulement le cache : les arrivées pendant l’arrêt ne sont pas attribuées au hasard.</li>
 <li>Quand un membre part, le départ est retranché à l’inviteur d’origine. Un compte plus jeune que le seuil (7 jours par défaut, réglable) est compté comme faux.</li>
 </ol>`
+        : slug === 'boost'
+        ? `<ol>
+<li>Dans le portail Discord (onglet Bot), activez l’intent <b>Server Members</b>. Sans cet intent, le bot ne voit pas les boosts.</li>
+<li>Accordez au bot l’accès au salon du remerciement (voir le salon, envoyer des messages, intégrer des liens, joindre des fichiers).</li>
+<li>Un membre qui peut gérer le serveur tape /boost configurer.</li>
+<li>Il choisit d’abord le salon où le remerciement sera publié.</li>
+<li>Le panneau de configuration s’ouvre (vous seul le voyez) : titre et texte personnalisables, couleur (menu ou code hexadécimal), image facultative, miniature de l’avatar, activation, test et changement de salon.</li>
+<li>Vous pouvez utiliser les variables {mention}, {membre}, {membre_id}, {serveur}, {boosts}, {niveau} et {compte_cree}.</li>
+<li>Pour l’image, envoyez une photo ou un GIF (8 Mo maximum) depuis le bouton Image du message. Les GIF restent animés. Le fichier est enregistré par le bot (un lien CDN finirait par expirer) et rattaché à chaque publication. Pour l’enlever, utilisez le bouton rouge « Retirer l’image » (affiché seulement si une image est déjà en place), puis confirmez.</li>
+<li>Le bouton Tester / aperçu vous montre le message sans le publier dans le salon.</li>
+<li>Quand un membre booste, le remerciement part tout de suite. Si l’événement membre et le message système arrivent tous les deux, un seul message est publié.</li>
+<li>Au premier lancement, les personnes qui boostent déjà le serveur sont mémorisées sans message. Un boost reçu pendant l’arrêt est annoncé une seule fois au redémarrage, s’il a eu lieu après le dernier arrêt connu.</li>
+</ol>`
         : slug === 'antidoublons'
+
         ? `<ol>
 <li>Dans Discord, tape /antidoublons panel. Seul toi vois la réponse.</li>
 <li>Le lien commence par http://127.0.0.1 . Ouvre-le sur le même ordinateur que le bot.</li>

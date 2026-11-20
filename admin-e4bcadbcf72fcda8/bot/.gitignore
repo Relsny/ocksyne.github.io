@@ -4,3 +4,5 @@ data/*.json
 .DS_Store
 
 data/absences-banners/
+
+data/boost-images/

@@ -156,6 +156,15 @@
     "boost": [
       "modules/boost/commands/boost.js",
       "modules/boost/events/boost.js",
+      "modules/boost/lib/announce.js",
+      "modules/boost/lib/flow-test.js",
+      "modules/boost/lib/image.js",
+      "modules/boost/lib/message.js",
+      "modules/boost/lib/selftest.js",
+      "modules/boost/lib/store.js",
+      "modules/boost/lib/style.js",
+      "modules/boost/lib/ui-constraints-test.js",
+      "modules/boost/lib/ui.js",
       "modules/boost/module.js",
       "modules/boost/README.md"
     ],
