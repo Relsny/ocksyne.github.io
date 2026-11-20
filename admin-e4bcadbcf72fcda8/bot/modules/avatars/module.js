@@ -10,6 +10,6 @@ module.exports = {
   guide: [
     'Dès que tu lances le bot, l’analyse démarre et les sanctions s’appliquent : il n’y a pas de retour en arrière.',
     'Le dossier des images interdites est lu au lancement. Un avatar Discord par défaut, ou une photo trop proche d’une image du dossier, entraîne une exclusion.',
-    'LOG_CHANNEL_ID vide : aucun log. Rempli : un embed part dans ce salon.',
+    'LOG_CHANNEL_ID = Facultatif : aucun log. Remplace « Facultatif » par l’identifiant du salon pour y envoyer un embed.',
   ],
 };

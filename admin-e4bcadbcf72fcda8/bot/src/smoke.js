@@ -3,6 +3,7 @@
 const { Client, Collection } = require('discord.js');
 const { loadModules, wire } = require('./load-modules');
 const { parseDuration } = require('./text');
+const { optionalSnowflake, parseTokenText } = require('./token');
 
 const EXPECTED = [
   'absences', 'anniv', 'antidoublons', 'antiraid', 'autorole', 'autostart', 'avatars',
@@ -22,6 +23,16 @@ assert(parseDuration('1h30') === 5_400_000, 'durée 1h30');
 assert(parseDuration('2j') === 172_800_000, 'durée 2j');
 assert(parseDuration('45m') === 2_700_000, 'durée 45m');
 assert(parseDuration('non') === null, 'durée invalide');
+
+assert(optionalSnowflake('') === '', 'optionalSnowflake vide');
+assert(optionalSnowflake('Facultatif') === '', 'optionalSnowflake Facultatif');
+assert(optionalSnowflake('  facultatif  ') === '', 'optionalSnowflake facultatif');
+assert(optionalSnowflake('Facultatíf') === '', 'optionalSnowflake accent');
+assert(optionalSnowflake('abc') === '', 'optionalSnowflake non numérique');
+assert(optionalSnowflake('123456789012345678') === '123456789012345678', 'optionalSnowflake identifiant');
+assert(optionalSnowflake(' 42 ') === '42', 'optionalSnowflake espaces');
+assert(!parseTokenText('LOG_CHANNEL_ID = Facultatif\n').LOG_CHANNEL_ID, 'parseTokenText Facultatif');
+assert(parseTokenText('LOG_CHANNEL_ID = 123456789012345678\n').LOG_CHANNEL_ID === '123456789012345678', 'parseTokenText identifiant');
 
 const loaded = loadModules({ all: true });
 assert(loaded.modules.length === EXPECTED.length, `attendu ${EXPECTED.length} modules, reçu ${loaded.modules.length}`);

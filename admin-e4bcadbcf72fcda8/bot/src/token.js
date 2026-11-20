@@ -13,6 +13,11 @@ const PLACEHOLDERS = new Set([
   'ton_twitch_client_secret',
 ]);
 
+function optionalSnowflake(value) {
+  const trimmed = String(value || '').trim();
+  return /^\d+$/.test(trimmed) ? trimmed : '';
+}
+
 function parseTokenText(text) {
   const values = {};
   for (const rawLine of String(text).split(/\r?\n/)) {
@@ -22,6 +27,12 @@ function parseTokenText(text) {
     const value = rawLine.slice(cut + 1).trim();
     if (!key) continue;
     if (!value || PLACEHOLDERS.has(value)) continue;
+    if (key === 'LOG_CHANNEL_ID') {
+      const id = optionalSnowflake(value);
+      if (!id) continue;
+      values[key] = id;
+      continue;
+    }
     values[key] = value;
   }
   return values;
@@ -83,8 +94,12 @@ function loadToken(startDir) {
     error.code = 'TOKEN_FILE_MISSING';
     throw error;
   }
-  const values = parseTokenText(fs.readFileSync(file, 'utf8'));
+  const text = fs.readFileSync(file, 'utf8');
+  const values = parseTokenText(text);
   for (const [key, value] of Object.entries(values)) process.env[key] = value;
+  if (/(?:^|\n)\s*LOG_CHANNEL_ID\s*=/m.test(text) && !values.LOG_CHANNEL_ID) {
+    delete process.env.LOG_CHANNEL_ID;
+  }
   if (!values.DISCORD_TOKEN) {
     const error = new Error(missingValueMessage(
       file,
@@ -108,4 +123,4 @@ function loadToken(startDir) {
   return { file, values };
 }
 
-module.exports = { parseTokenText, findTokenFile, loadToken, PLACEHOLDERS, TOKEN_MARK };
+module.exports = { optionalSnowflake, parseTokenText, findTokenFile, loadToken, PLACEHOLDERS, TOKEN_MARK };

@@ -2,7 +2,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { pixelsMatch, signature, matches } = require('../guard/compare');
-const { shouldLog } = require('../guard/enforce');
+const { shouldLog, logChannelId } = require('../guard/enforce');
+const { optionalSnowflake, parseTokenText } = require('../../../src/token');
 const { findImagesDir } = require('../guard/images');
 const { readText } = require('../guard/ocr');
 
@@ -25,10 +26,25 @@ signature(bytes).then(async (sign) => {
   const clean = await signature(blank);
   assert(!matches(clean, [{ sha256: 'autre', pixels: sign.pixels }]), 'image propre ignorée');
   const previous = process.env.LOG_CHANNEL_ID;
-  delete process.env.LOG_CHANNEL_ID;
-  assert(shouldLog() === false, 'sans salon de logs, aucun envoi');
-  process.env.LOG_CHANNEL_ID = '123';
-  assert(shouldLog() === true, 'salon de logs pris en compte');
+  function withLog(value, check, message) {
+    if (value === undefined) delete process.env.LOG_CHANNEL_ID;
+    else process.env.LOG_CHANNEL_ID = value;
+    assert(check(), message);
+  }
+  withLog(undefined, () => shouldLog() === false && logChannelId() === '', 'sans salon de logs, aucun envoi');
+  withLog('Facultatif', () => shouldLog() === false && logChannelId() === '', 'Facultatif : aucun salon');
+  withLog('facultatif', () => shouldLog() === false && logChannelId() === '', 'facultatif minuscule');
+  withLog('Facultatif ', () => shouldLog() === false && logChannelId() === '', 'Facultatif avec espace');
+  withLog('Facultatíf', () => shouldLog() === false && logChannelId() === '', 'Facultatif avec accent');
+  withLog('pas-un-id', () => shouldLog() === false && logChannelId() === '', 'valeur non numérique');
+  withLog('123456789012345678', () => shouldLog() === true && logChannelId() === '123456789012345678', 'identifiant numérique');
+  withLog(' 123 ', () => shouldLog() === true && logChannelId() === '123', 'identifiant avec espaces');
+  assert(optionalSnowflake('Facultatif') === '', 'optionalSnowflake Facultatif');
+  assert(optionalSnowflake('123456789012345678') === '123456789012345678', 'optionalSnowflake id');
+  const skipped = parseTokenText('DISCORD_TOKEN = abc\nDISCORD_CLIENT_ID = 1\nLOG_CHANNEL_ID = Facultatif\n');
+  assert(!skipped.LOG_CHANNEL_ID, 'parseTokenText ignore Facultatif');
+  const kept = parseTokenText('DISCORD_TOKEN = abc\nDISCORD_CLIENT_ID = 1\nLOG_CHANNEL_ID = 123456789012345678\n');
+  assert(kept.LOG_CHANNEL_ID === '123456789012345678', 'parseTokenText garde un identifiant');
   if (previous === undefined) delete process.env.LOG_CHANNEL_ID;
   else process.env.LOG_CHANNEL_ID = previous;
   const text = await readText(Buffer.from('pas une image'));

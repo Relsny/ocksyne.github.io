@@ -140,7 +140,13 @@ function checkTree(dest, slugs) {
   const tokenText = fs.readFileSync(tokenFile, 'utf8');
   assertNoRule34(tokenText, tokenFile);
   if (slugs.includes('avatars')) {
-    if (!/^LOG_CHANNEL_ID =/m.test(tokenText)) throw new Error('LOG_CHANNEL_ID absent du token avatars');
+    if (!/^LOG_CHANNEL_ID = Facultatif$/m.test(tokenText)) throw new Error('LOG_CHANNEL_ID doit valoir Facultatif par défaut');
+    const guideName = top.find((name) => name.endsWith('GUIDE.html'));
+    if (!guideName) throw new Error('GUIDE.html absent du zip avatars');
+    const guideText = fs.readFileSync(path.join(dest, guideName), 'utf8');
+    if (!guideText.includes('Facultatif') || !guideText.includes('Laisse-le tel quel')) {
+      throw new Error('le guide avatars ne dit pas de remplacer ou laisser Facultatif');
+    }
     const images = fs.readdirSync(dest).find((name) => name.includes('IMAGES INTERDITES'));
     if (!images) throw new Error('dossier IMAGES INTERDITES absent');
     const files = fs.readdirSync(path.join(dest, images));

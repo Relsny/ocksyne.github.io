@@ -18,7 +18,7 @@ Ajoute, retire ou remplace les fichiers jpg, png, webp ou gif dans le dossier «
 
 ## Logs
 
-Dans token.txt, `LOG_CHANNEL_ID` est facultatif. Vide : aucun message de log. Rempli avec l’identifiant d’un salon (mode développeur, clic droit, Copier l’identifiant) : un embed y est envoyé à chaque exclusion.
+Dans token.txt, la ligne est `LOG_CHANNEL_ID = Facultatif`. Remplace « Facultatif » par l’identifiant du salon (mode développeur, clic droit, Copier l’identifiant) pour recevoir les logs. Laisse-le tel quel pour ne pas en recevoir.
 
 ## Si sharp ou l’OCR manque
 

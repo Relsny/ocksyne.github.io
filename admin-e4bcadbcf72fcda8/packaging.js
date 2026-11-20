@@ -57,7 +57,7 @@
       keys.push(['OSU_CLIENT_SECRET', 'ton_osu_client_secret', 'Secret OAuth osu. Uniquement pour le module Stats osu.']);
     }
     if (slugs.includes('avatars')) {
-      keys.push(['LOG_CHANNEL_ID', '', 'Salon de logs, facultatif. Mode developpeur, clic droit sur le salon, Copier l identifiant. Laisse vide pour ne rien envoyer.']);
+      keys.push(['LOG_CHANNEL_ID', 'Facultatif', 'Salon de logs, facultatif. Remplace Facultatif par l identifiant du salon (mode developpeur, clic droit, Copier l identifiant) pour recevoir les logs. Laisse Facultatif pour ne rien envoyer.']);
     }
     if (slugs.includes('stream')) {
       keys.push(['TWITCH_CLIENT_ID', 'ton_twitch_client_id', 'Identifiant de l application Twitch. Uniquement pour les annonces de live.']);
@@ -211,7 +211,7 @@
 <ol>
 <li>Le dossier <b>${L.IMAGES}</b> est déjà rempli. Tu peux garder, supprimer ou ajouter des images jpg, png, webp ou gif. Le bot lit ce dossier au lancement et le surveille ensuite.</li>
 <li>Un avatar Discord par défaut, ou une photo trop proche d'une image du dossier, entraîne une exclusion. Ce n'est pas un bannissement. Un message privé est envoyé, puis les messages des dernières 24 heures sont retirés.</li>
-<li>Dans token.txt, LOG_CHANNEL_ID est facultatif. Vide : aucun log. Rempli avec l'identifiant du salon (mode développeur, clic droit, Copier l'identifiant) : un embed y est envoyé.</li>
+<li>Dans token.txt, la ligne est LOG_CHANNEL_ID = Facultatif. Remplace « Facultatif » par l'identifiant du salon (mode développeur, clic droit, Copier l'identifiant) pour recevoir les logs. Laisse-le tel quel pour ne pas en recevoir.</li>
 <li>Il n'y a pas de panneau. /avatars indique seulement l'état.</li>
 <li>Le bot lit ce dossier au lancement, puis le surveille : tu peux ajouter ou retirer des images à tout moment.</li>
 </ol>`
