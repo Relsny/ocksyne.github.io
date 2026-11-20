@@ -85,6 +85,9 @@ const extraTests = [
   'modules/boost/lib/ui-constraints-test.js',
   'modules/boost/lib/flow-test.js',
   'modules/autostart/lib/selftest.js',
+  'modules/bienvenue/lib/selftest.js',
+  'modules/bienvenue/lib/ui-constraints-test.js',
+  'modules/bienvenue/lib/flow-test.js',
 ];
 for (const rel of extraTests) {
   const file = path.join(__dirname, '..', rel);

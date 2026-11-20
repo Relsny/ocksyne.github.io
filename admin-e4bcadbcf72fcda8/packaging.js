@@ -261,7 +261,20 @@
 <li>Quand un membre booste, le remerciement part tout de suite. Si l’événement membre et le message système arrivent tous les deux, un seul message est publié.</li>
 <li>Au premier lancement, les personnes qui boostent déjà le serveur sont mémorisées sans message. Un boost reçu pendant l’arrêt est annoncé une seule fois au redémarrage, s’il a eu lieu après le dernier arrêt connu.</li>
 </ol>`
+        : slug === 'bienvenue'
+        ? `<ol>
+<li>Dans le portail Discord (onglet Bot), activez l’intent <b>Server Members</b>. Sans cet intent, le bot ne voit pas les arrivées ni les départs.</li>
+<li>Accordez au bot l’accès au salon d’accueil (voir le salon, envoyer des messages, intégrer des liens, joindre des fichiers).</li>
+<li>Un membre qui peut gérer le serveur tape /bienvenue configurer.</li>
+<li>Il choisit d’abord le salon où le message d’accueil sera publié.</li>
+<li>Le panneau de configuration s’ouvre (vous seul le voyez) : titres et textes d’arrivée, de départ et de message privé, couleurs séparées, bannières facultatives, mention hors embed, prise en compte des bots, activation de chaque partie, test et changement de salon.</li>
+<li>Vous pouvez utiliser les variables {mention}, {membre}, {membre_id}, {serveur}, {numero}, {effectif} et {compte_cree}. {numero} s’écrit avec le suffixe ordinal (1ᵉʳ, 2ᵉ…).</li>
+<li>Pour une bannière, envoyez une photo ou un GIF (8 Mo maximum) depuis Image d’accueil ou Image de départ. Les GIF restent animés. Le fichier est enregistré par le bot (un lien CDN finirait par expirer) et rattaché à chaque publication. Pour l’enlever, choisissez « Retirer la bannière d’accueil » ou « Retirer la bannière de départ » dans le menu des couleurs, puis confirmez.</li>
+<li>Le message de départ est optionnel. Il peut utiliser le même salon que l’accueil, ou un autre (bouton Salon de départ). Le message privé de bienvenue est également optionnel : s’il est refusé (MP fermés), l’accueil public est tout de même publié.</li>
+<li>Le bouton Tester / aperçu vous montre les messages concernés, sans les publier et sans envoyer de MP. Les bots sont ignorés par défaut ; vous pouvez les inclure.</li>
+</ol>`
         : slug === 'autostart'
+
         ? `<ol>
 <li><b>Ce n’est pas un hébergement.</b> Ces scripts lancent le bot sur <em>votre</em> ordinateur, à l’ouverture de session. Si la machine s’éteint, se met en veille ou n’a plus Internet, le bot s’arrête. DCAS ne le fait pas tourner à votre place.</li>
 <li>Les scripts n’ouvrent jamais votre jeton et ne l’affichent pas. Remplissez d’abord token.txt, installez Node.js (version LTS), puis lancez une première fois le bot avec <b>${L.MAC}</b> ou <b>${L.WIN}</b> pour installer les composants et enregistrer les commandes.</li>

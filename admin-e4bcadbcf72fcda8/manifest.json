@@ -155,6 +155,15 @@
     "bienvenue": [
       "modules/bienvenue/commands/bienvenue.js",
       "modules/bienvenue/events/members.js",
+      "modules/bienvenue/lib/flow-test.js",
+      "modules/bienvenue/lib/image.js",
+      "modules/bienvenue/lib/message.js",
+      "modules/bienvenue/lib/selftest.js",
+      "modules/bienvenue/lib/send.js",
+      "modules/bienvenue/lib/store.js",
+      "modules/bienvenue/lib/style.js",
+      "modules/bienvenue/lib/ui-constraints-test.js",
+      "modules/bienvenue/lib/ui.js",
       "modules/bienvenue/module.js",
       "modules/bienvenue/README.md"
     ],
