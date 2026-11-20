@@ -66,7 +66,7 @@
     addEventListener('keydown', onKey);
   }
 
-  // Particules qui convergent vers l'éclair, puis explosent en lumière
+  // Particules qui convergent vers le logo, puis explosent en lumière
   function particles(cv) {
     if (!cv || !cv.getContext) return () => {};
     const ctx = cv.getContext('2d');
@@ -97,7 +97,7 @@
       const t = (now - t0) / 1000;
       ctx.clearRect(0, 0, w, h);
       ctx.globalCompositeOperation = 'lighter';
-      const cx = w / 2, cy = h / 2 - 62;
+      const cx = w / 2, cy = h / 2 - 16;
       for (const p of ps) {
         let rad, ang, alpha;
         if (t < 1.15) {
