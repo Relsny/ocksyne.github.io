@@ -8,8 +8,8 @@ module.exports = {
   commands: [],
   events: [],
   guide: [
-    'Ce n’est pas une commande Discord. Ouvre modules/autostart/README.md.',
-    'Windows : double-clic sur windows/demarrer-dcas.bat, ou une tâche au démarrage de la session.',
-    'macOS : le fichier macos/fr.dcas.bot.plist se charge avec launchctl. Le bot ne démarre que si l’ordinateur est allumé.',
+    'Ce n’est pas une commande Discord, et ce n’est pas un hébergement : le bot s’arrête si l’ordinateur s’éteint, se met en veille ou perd Internet.',
+    'Après avoir lancé le bot une première fois (jeton et installation), ouvrez le dossier « Démarrage automatique » du zip et double-cliquez sur ACTIVER, pour Windows ou pour Mac.',
+    'ETAT du bot indique si le démarrage est actif et montre les dernières lignes du journal. DESACTIVER retire le lancement à l’ouverture de session.',
   ],
 };

@@ -113,10 +113,15 @@
       "modules/autorole/README.md"
     ],
     "autostart": [
-      "modules/autostart/macos/fr.dcas.bot.plist",
+      "modules/autostart/lib/selftest.js",
+      "modules/autostart/macos/ACTIVER le démarrage automatique (Mac).command",
+      "modules/autostart/macos/DESACTIVER le démarrage automatique (Mac).command",
+      "modules/autostart/macos/ETAT du bot (Mac).command",
       "modules/autostart/module.js",
       "modules/autostart/README.md",
-      "modules/autostart/windows/demarrer-dcas.bat"
+      "modules/autostart/windows/ACTIVER le démarrage automatique (Windows).bat",
+      "modules/autostart/windows/DESACTIVER le démarrage automatique (Windows).bat",
+      "modules/autostart/windows/ETAT du bot (Windows).bat"
     ],
     "avatars": [
       "modules/avatars/commands/avatars.js",

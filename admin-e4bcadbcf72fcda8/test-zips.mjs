@@ -38,14 +38,16 @@ function buildEntries(manifest, slugs) {
 
 async function assertMacLauncher(buf) {
   const archive = await JSZip.loadAsync(buf);
-  const name = Object.keys(archive.files).find((file) => file.endsWith('.command'));
-  if (!name) throw new Error('.command absent du zip');
-  const mode = archive.files[name].unixPermissions;
-  if (typeof mode !== 'number' || (mode & 0o777) !== 0o755) {
-    throw new Error(`${name} n'est pas en mode 755 (${mode == null ? 'absent' : mode.toString(8)})`);
-  }
-  if ((mode & 0o170000) !== 0o100000) {
-    throw new Error(`${name} n'est pas marqué comme fichier régulier (${mode.toString(8)})`);
+  const commands = Object.keys(archive.files).filter((file) => file.endsWith('.command') && !archive.files[file].dir);
+  if (!commands.length) throw new Error('.command absent du zip');
+  for (const name of commands) {
+    const mode = archive.files[name].unixPermissions;
+    if (typeof mode !== 'number' || (mode & 0o777) !== 0o755) {
+      throw new Error(`${name} n'est pas en mode 755 (${mode == null ? 'absent' : mode.toString(8)})`);
+    }
+    if ((mode & 0o170000) !== 0o100000) {
+      throw new Error(`${name} n'est pas marqué comme fichier régulier (${mode.toString(8)})`);
+    }
   }
   const loose = Object.keys(archive.files).filter((file) => !file.includes('/') && /\.txt$/i.test(file));
   if (loose.length) throw new Error(`fichiers .txt en vrac à la racine : ${loose.join(', ')}`);
@@ -54,6 +56,24 @@ async function assertMacLauncher(buf) {
   const guide = Object.keys(archive.files).find((file) => file.endsWith('GUIDE.html'));
   const guideText = guide ? await archive.files[guide].async('string') : '';
   if (!guideText.includes('chmod +x')) throw new Error('le guide ne dit pas comment rendre le lanceur Mac exécutable');
+  const names = Object.keys(archive.files);
+  const hasAutostart = names.some((file) => file.includes('Démarrage automatique/') || file.includes('modules/autostart/'));
+  if (hasAutostart) {
+    const needed = [
+      'ACTIVER le démarrage automatique (Mac).command',
+      'DESACTIVER le démarrage automatique (Mac).command',
+      'ETAT du bot (Mac).command',
+      'ACTIVER le démarrage automatique (Windows).bat',
+      'DESACTIVER le démarrage automatique (Windows).bat',
+      'ETAT du bot (Windows).bat',
+    ];
+    for (const name of needed) {
+      if (!names.some((file) => file.endsWith(name))) throw new Error(`script manquant dans le zip : ${name}`);
+    }
+    if (!/pas un hébergement/i.test(guideText) && !/pas un hebergement/i.test(guideText)) {
+      throw new Error('le guide autostart ne dit pas clairement que ce n\'est pas un hébergement');
+    }
+  }
 }
 
 async function zipBuffer(entries) {

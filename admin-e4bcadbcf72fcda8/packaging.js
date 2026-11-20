@@ -13,17 +13,23 @@
 
   function layout(slugs) {
     const hasImages = (slugs || []).includes('avatars');
+    const hasAutostart = (slugs || []).includes('autostart');
     let n = hasImages ? 3 : 2;
     const CODE = `${n} · ⚙️ fichiers-du-bot`;
     n += 1;
     const MAC = `${n} · ▶️ LANCER LE BOT (Mac).command`;
     const WIN = `${n} · ▶️ LANCER LE BOT (Windows).bat`;
     n += 1;
+    let AUTOSTART = '';
+    if (hasAutostart) {
+      AUTOSTART = `${n} · 🔁 Démarrage automatique`;
+      n += 1;
+    }
     const GUIDE = `${n} · 📖 GUIDE.html`;
     n += 1;
     const LOGO = `${n} · logo.png`;
-    const tree = [TOKEN_DIR].concat(hasImages ? [IMAGES] : [], [CODE, MAC, WIN, GUIDE, LOGO]);
-    return { TOKEN_DIR, IMAGES, CODE, MAC, WIN, GUIDE, LOGO, TREE: tree };
+    const tree = [TOKEN_DIR].concat(hasImages ? [IMAGES] : [], [CODE, MAC, WIN], hasAutostart ? [AUTOSTART] : [], [GUIDE, LOGO]);
+    return { TOKEN_DIR, IMAGES, CODE, MAC, WIN, AUTOSTART, GUIDE, LOGO, TREE: tree };
   }
   const DEFAULT = layout([]);
   const { CODE, MAC, WIN, GUIDE, LOGO, TREE } = DEFAULT;
@@ -255,7 +261,18 @@
 <li>Quand un membre booste, le remerciement part tout de suite. Si l’événement membre et le message système arrivent tous les deux, un seul message est publié.</li>
 <li>Au premier lancement, les personnes qui boostent déjà le serveur sont mémorisées sans message. Un boost reçu pendant l’arrêt est annoncé une seule fois au redémarrage, s’il a eu lieu après le dernier arrêt connu.</li>
 </ol>`
+        : slug === 'autostart'
+        ? `<ol>
+<li><b>Ce n’est pas un hébergement.</b> Ces scripts lancent le bot sur <em>votre</em> ordinateur, à l’ouverture de session. Si la machine s’éteint, se met en veille ou n’a plus Internet, le bot s’arrête. DCAS ne le fait pas tourner à votre place.</li>
+<li>Les scripts n’ouvrent jamais votre jeton et ne l’affichent pas. Remplissez d’abord token.txt, installez Node.js (version LTS), puis lancez une première fois le bot avec <b>${L.MAC}</b> ou <b>${L.WIN}</b> pour installer les composants et enregistrer les commandes.</li>
+<li>Ouvrez ensuite le dossier <b>${L.AUTOSTART}</b>. Double-cliquez sur <b>ACTIVER le démarrage automatique</b>, pour Mac ou pour Windows, selon votre système. Le dossier du bot (celui qui contient package.json, souvent « fichiers-du-bot ») est détecté automatiquement s’il est à côté ; sinon, glissez-le dans la fenêtre ou choisissez-le.</li>
+<li>Sur Mac, le fichier <code>.command</code> s’ouvre dans le Terminal : c’est normal. Un agent launchd (<code>~/Library/LaunchAgents/fr.dcas.bot.plist</code>) est créé, avec le chemin absolu de Node.js (Homebrew, /usr/local, nvm…). Le bot redémarre s’il s’arrête de façon inattendue, pas après une fermeture normale. Le journal est <code>logs/dcas-autostart.log</code> dans le dossier du bot.</li>
+<li>Sur Windows, un lanceur invisible (<code>.vbs</code>) est placé dans le dossier Démarrage de votre session (<code>shell:startup</code>). Le bot part sans fenêtre, avec le même journal. Les chemins avec espaces ou accents sont pris en charge.</li>
+<li><b>ETAT du bot</b> indique si le démarrage automatique est actif, montre les dernières lignes du journal, et permet d’arrêter ou de relancer le bot tout de suite. <b>DESACTIVER le démarrage automatique</b> retire le lancement à l’ouverture de session.</li>
+<li>Si macOS affiche « vous ne disposez pas des privilèges d’accès nécessaires », ouvrez le Terminal, tapez <code>chmod +x</code> puis une espace, glissez le fichier <b>ACTIVER le démarrage automatique (Mac).command</b> (ou ETAT / DESACTIVER), validez, puis ouvrez-le avec un clic droit, Ouvrir.</li>
+</ol>`
         : slug === 'antidoublons'
+
 
         ? `<ol>
 <li>Dans Discord, tape /antidoublons panel. Seul toi vois la réponse.</li>
@@ -339,7 +356,12 @@ ${usage}
         forbidden.push(file);
         continue;
       }
-      list.push({ path: `${L.CODE}/${file.path}`, text: file.text, bytes: file.bytes });
+      const entry = { path: `${L.CODE}/${file.path}`, text: file.text, bytes: file.bytes };
+      if (file.path.endsWith('.command')) {
+        entry.exec = true;
+        entry.unixPermissions = MAC_MODE;
+      }
+      list.push(entry);
     }
     if (slugs.includes('avatars')) {
       for (const file of forbidden) {
@@ -355,8 +377,28 @@ ${usage}
       { path: L.GUIDE, text: guideHtml({ title, slugs, modules: names, readmes, logoBase64, L }) },
       { path: L.LOGO, bytes: logoBytes },
     );
+    if (slugs.includes('autostart') && L.AUTOSTART) {
+      const copies = [
+        ['modules/autostart/macos/ACTIVER le démarrage automatique (Mac).command', 'ACTIVER le démarrage automatique (Mac).command', true],
+        ['modules/autostart/macos/DESACTIVER le démarrage automatique (Mac).command', 'DESACTIVER le démarrage automatique (Mac).command', true],
+        ['modules/autostart/macos/ETAT du bot (Mac).command', 'ETAT du bot (Mac).command', true],
+        ['modules/autostart/windows/ACTIVER le démarrage automatique (Windows).bat', 'ACTIVER le démarrage automatique (Windows).bat', false],
+        ['modules/autostart/windows/DESACTIVER le démarrage automatique (Windows).bat', 'DESACTIVER le démarrage automatique (Windows).bat', false],
+        ['modules/autostart/windows/ETAT du bot (Windows).bat', 'ETAT du bot (Windows).bat', false],
+      ];
+      for (const [src, name, exec] of copies) {
+        const file = codeFiles.find((item) => item.path === src);
+        if (!file) throw new Error(`script de démarrage automatique manquant : ${src}`);
+        const entry = { path: `${L.AUTOSTART}/${name}`, text: file.text, bytes: file.bytes };
+        if (exec) {
+          entry.exec = true;
+          entry.unixPermissions = MAC_MODE;
+        }
+        list.push(entry);
+      }
+    }
     return list;
   }
 
-  return { TOKEN_DIR, IMAGES, WIN, MAC, MAC_MODE, GUIDE, LOGO, CODE, TREE, layout, tokenTxt, entries, keysFor };
+  return { TOKEN_DIR, IMAGES, WIN, MAC, MAC_MODE, AUTOSTART: DEFAULT.AUTOSTART, GUIDE, LOGO, CODE, TREE, layout, tokenTxt, entries, keysFor };
 }));
