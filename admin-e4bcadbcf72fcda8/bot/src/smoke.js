@@ -44,6 +44,9 @@ client.commands = new Collection();
 wire(client, loaded);
 
 assert(client.commands.has('ping'), 'commande /ping manquante');
+assert(client.commands.has('tableau'), 'commande /tableau manquante');
+assert(client.commands.has('settings'), 'commande /settings manquante');
+assert(!client.commands.has('absence'), 'ancienne commande /absence encore présente');
 assert(client.commands.size >= EXPECTED.length, `trop peu de commandes (${client.commands.size})`);
 
 for (const mod of loaded.modules) {

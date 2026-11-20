@@ -28,8 +28,16 @@
   ],
   "modules": {
     "absences": [
-      "modules/absences/commands/absence.js",
+      "modules/absences/commands/settings.js",
+      "modules/absences/commands/tableau.js",
       "modules/absences/events/tick.js",
+      "modules/absences/lib/board.js",
+      "modules/absences/lib/dates.js",
+      "modules/absences/lib/retry.js",
+      "modules/absences/lib/schedule.js",
+      "modules/absences/lib/selftest.js",
+      "modules/absences/lib/store.js",
+      "modules/absences/lib/style.js",
       "modules/absences/module.js",
       "modules/absences/README.md"
     ],

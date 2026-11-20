@@ -4,8 +4,8 @@ module.exports = {
   slug: 'absences',
   intents: ['Guilds'],
   partials: [],
-  permissions: ['SendMessages', 'EmbedLinks'],
-  commands: [require('./commands/absence')],
+  permissions: ['ViewChannel', 'SendMessages', 'EmbedLinks', 'ReadMessageHistory', 'AttachFiles'],
+  commands: [require('./commands/tableau'), require('./commands/settings')],
   events: [require('./events/tick')],
-  guide: ['/absence panneau dans le salon du tableau, et /absence logs pour le journal. Le bouton Absent ouvre sujet, description et date de retour. Le rouge passe au vert « De retour » quand la date est passée, y compris après un redémarrage.'],
+  guide: ['/tableau publie le tableau dans le salon choisi, puis propose un salon de logs facultatif. Le bouton « Signaler mon absence » ouvre le formulaire. /settings change la couleur, la bannière et le salon de logs. Le retour est annoncé automatiquement, même après un redémarrage.'],
 };
