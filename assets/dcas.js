@@ -1,3 +1,4 @@
+
 // DCAS — interactions et animations (aucun service externe, compatible GitHub Pages)
 (function () {
   'use strict';
@@ -26,6 +27,42 @@
   };
 
   /* ------------------------------------------------------------------
+     Titres : révélation mot par mot (préserve les balises internes)
+  ------------------------------------------------------------------ */
+  function splitWords(el) {
+    if (el.dataset.split) return;
+    el.dataset.split = '1';
+    let i = 0;
+    const box = () => {
+      const o = document.createElement('span'); o.className = 'w';
+      const n = document.createElement('span'); n.style.setProperty('--wi', i++);
+      o.appendChild(n); return [o, n];
+    };
+    [...el.childNodes].forEach(node => {
+      if (node.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        node.textContent.split(/(\s+)/).forEach(part => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+          const [o, n] = box(); n.textContent = part; frag.appendChild(o);
+ });
+ node.replaceWith(frag);
+      } else if (node.nodeType === 1 && node.tagName !== 'BR') {
+ const [o, n] = box(); node.replaceWith(o); n.appendChild(node);
+      }
+    });
+    el.classList.add('h-split');
+  }
+  const heads = $$('.sec h2');
+  if (!reduce && hasIO) {
+    heads.forEach(splitWords);
+    const hio = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) { hio.unobserve(e.target); e.target.classList.add('shown'); }
+    }), { threshold: 0.3, rootMargin: '0px 0px -8% 0px' });
+    heads.forEach(h => hio.observe(h));
+  }
+
+  /* ------------------------------------------------------------------
      Démarrage de la page (après l'intro)
   ------------------------------------------------------------------ */
   let started = false;
@@ -37,14 +74,14 @@
   }
 
   /* ------------------------------------------------------------------
-     Intro d'ouverture (2 à 4 s, une fois par visite)
+     Intro d'ouverture (≈ 1,9 s, une fois par visite)
   ------------------------------------------------------------------ */
   const intro = $('#intro');
   function playIntro() {
     let left = false, stopParticles = () => {};
     const skip = $('.intro-skip', intro);
-    const onKey = e => { if (e.key === 'Escape' || e.key === 'Enter' && document.activeElement === skip) leave(true); };
-    const outTimer = setTimeout(() => leave(false), 2750);
+    const onKey = e => { if (e.key === 'Escape' || (e.key === 'Enter' && document.activeElement === skip)) leave(true); };
+    const outTimer = setTimeout(() => leave(false), 1900);
 
     function leave(fast) {
       if (left) return;
@@ -53,12 +90,12 @@
       removeEventListener('keydown', onKey);
       if (fast) intro.classList.add('fast');
       intro.classList.add('out');
-      setTimeout(startPage, fast ? 180 : 160);
+      setTimeout(startPage, fast ? 160 : 180);
       setTimeout(() => {
         stopParticles();
-        root.classList.remove('intro-on');
+ root.classList.remove('intro-on');
         intro.remove();
-      }, fast ? 700 : 1050);
+      }, fast ? 650 : 1000);
     }
 
     stopParticles = particles($('.intro-canvas', intro));
@@ -66,7 +103,7 @@
     addEventListener('keydown', onKey);
   }
 
-  // Particules qui convergent vers le logo, puis explosent en lumière
+  // Particules fines qui convergent vers le logo, puis se dispersent
   function particles(cv) {
     if (!cv || !cv.getContext) return () => {};
     const ctx = cv.getContext('2d');
@@ -79,19 +116,20 @@
     };
     resize();
     addEventListener('resize', resize);
-    const cols = ['124,134,255', '0,225,255', '255,255,255', '235,69,158'];
-    const N = w < 700 ? 46 : 84;
+    const cols = ['139,147,255', '255,255,255', '88,101,242'];
+    const N = w < 700 ? 34 : 60;
     const ps = Array.from({ length: N }, () => ({
       a: Math.random() * 6.2832,
-      r: (0.3 + Math.random() * 0.8) * Math.max(w, h) * 0.6,
-      s: 0.7 + Math.random() * 1.9,
+      r: (0.3 + Math.random() * 0.8) * Math.max(w, h) * 0.55,
+      s: 0.6 + Math.random() * 1.3,
       c: cols[(Math.random() * cols.length) | 0],
-      spin: (Math.random() < 0.5 ? -1 : 1) * (0.8 + Math.random() * 1.4),
-      o: 0.4 + Math.random() * 0.6,
+      spin: (Math.random() < 0.5 ? -1 : 1) * (0.6 + Math.random()),
+      o: 0.35 + Math.random() * 0.5,
       k: Math.random()
     }));
     const t0 = performance.now();
     const ease = t => 1 - Math.pow(1 - t, 3);
+    const IN = 0.8, OUT = 0.9;
     function frame(now) {
       if (!alive) return;
       const t = (now - t0) / 1000;
@@ -100,24 +138,24 @@
       const cx = w / 2, cy = h / 2 - 16;
       for (const p of ps) {
         let rad, ang, alpha;
-        if (t < 1.15) {
-          const q = ease(t / 1.15);
-          rad = p.r * (1 - q) + 6;
-          ang = p.a + p.spin * (1 - q) * 2.2;
-          alpha = p.o * (0.25 + 0.75 * q);
+        if (t < IN) {
+   const q = ease(t / IN);
+   rad = p.r * (1 - q) + 6;
+          ang = p.a + p.spin * (1 - q) * 2;
+   alpha = p.o * (0.2 + 0.8 * q);
         } else {
-          const q = clamp((t - 1.15) / 1.35, 0, 1);
+          const q = clamp((t - IN) / OUT, 0, 1);
           if (q >= 1) continue;
-          rad = 6 + (90 + p.k * Math.max(w, h) * 0.45) * ease(q);
-          ang = p.a + p.spin * q * 0.6;
-          alpha = p.o * Math.pow(1 - q, 1.6);
-        }
+   rad = 6 + (80 + p.k * Math.max(w, h) * 0.4) * ease(q);
+          ang = p.a + p.spin * q * 0.5;
+          alpha = p.o * Math.pow(1 - q, 1.8);
+ }
         ctx.fillStyle = 'rgba(' + p.c + ',' + alpha.toFixed(3) + ')';
         ctx.beginPath();
         ctx.arc(cx + Math.cos(ang) * rad, cy + Math.sin(ang) * rad, p.s, 0, 6.2832);
         ctx.fill();
       }
-      if (t < 3.2) raf = requestAnimationFrame(frame);
+      if (t < IN + OUT + 0.3) raf = requestAnimationFrame(frame);
     }
     raf = requestAnimationFrame(frame);
     return () => { alive = false; cancelAnimationFrame(raf); removeEventListener('resize', resize); };
@@ -137,18 +175,18 @@
   function update() {
     ticking = false;
     const y = window.scrollY, vh = innerHeight;
-    if (header) header.classList.toggle('scrolled', y > 12);
+    if (header) header.classList.toggle('scrolled', y > 24);
     if (bar) {
       const max = root.scrollHeight - vh;
       bar.style.transform = 'scaleX(' + (max > 0 ? clamp(y / max, 0, 1) : 0).toFixed(4) + ')';
     }
     if (!reduce) {
       for (const el of pls) {
-        const p = el.parentElement.getBoundingClientRect();
+ const p = el.parentElement.getBoundingClientRect();
         if (p.bottom < -300 || p.top > vh + 300) continue;
-        const f = parseFloat(el.dataset.parallax) || 0;
+        const f = (parseFloat(el.dataset.parallax) || 0) * 0.7;
         const cy = p.top + p.height / 2 - vh / 2;
-        el.style.transform = 'translate3d(' + (ptrX * f * 160).toFixed(1) + 'px,' + (-cy * f + ptrY * f * 60).toFixed(1) + 'px,0)';
+ el.style.transform = 'translate3d(' + (ptrX * f * 120).toFixed(1) + 'px,' + (-cy * f + ptrY * f * 40).toFixed(1) + 'px,0)';
       }
     }
   }
@@ -207,21 +245,23 @@
 
   /* ------------------------------------------------------------------
      Apparition au défilement (avec décalage) + chargement des démos
+     (les h2 sont gérés à part : révélation mot par mot)
   ------------------------------------------------------------------ */
-  const REVEAL = '.sec .kicker,.sec h2,.sec-lead,.chips,.packs-sub,.bgrid,.summary,.host-card,.faq details,.contact,.aud>div,.step,.promise>div,.opt,.pack,.tpack,.mod,.legal>*';
+  const REVEAL = '.sec .kicker,.sec-lead,.chips,.packs-sub,.bgrid,.summary,.host-card,.faq details,.contact,.aud>div,.step,.promise>div,.opt,.pack,.tpack,.mod,.legal>*';
   $$(REVEAL).forEach(el => el.classList.add('reveal'));
+  if (reduce || !hasIO) $$('.sec h2').forEach(h => h.classList.add('reveal'));
   const groups = new Map();
   $$('.reveal').forEach(el => {
     const p = el.parentElement;
     const n = groups.get(p) || 0;
     groups.set(p, n + 1);
-    el.style.setProperty('--d', ((n % 4) * 0.08).toFixed(2) + 's');
+    el.style.setProperty('--d', ((n % 4) * 0.07).toFixed(2) + 's');
   });
   const settleEl = el => {
     const demo = $('.mod-demo', el);
-    if (demo) setTimeout(() => demo.classList.add('loaded'), 650);
+    if (demo) setTimeout(() => demo.classList.add('loaded'), 600);
     const delay = parseFloat(el.style.getPropertyValue('--d')) || 0;
-    setTimeout(() => { el.classList.remove('reveal', 'in'); el.style.removeProperty('--d'); }, (delay + 1.15) * 1000);
+    setTimeout(() => { el.classList.remove('reveal', 'in'); el.style.removeProperty('--d'); }, (delay + 1.1) * 1000);
   };
   const steps = $('.steps');
   if (hasIO && !reduce) {
@@ -242,15 +282,15 @@
     $$('.mod-demo').forEach(d => d.classList.add('loaded'));
   }
 
-  // Lien profond (#contact, etc.) : saut immédiat, section visible, puis défilement fluide ensuite
+  // Lien profond (#contact, etc.) : saut immédiat, section visible, puis défilement fluide
   const jumpHash = () => {
     const hashId = (location.hash || '').replace(/^#/, '');
     const target = hashId && document.getElementById(hashId);
     if (!target) return;
-    const ev = [target, ...$$('.reveal', target)];
-    ev.forEach(el => {
+    [target, ...$$('.reveal', target)].forEach(el => {
       if (el.classList.contains('reveal')) { el.classList.add('in'); settleEl(el); }
     });
+    $$('.h-split', target).forEach(h => h.classList.add('shown'));
     target.scrollIntoView({ behavior: 'auto', block: 'start' });
   };
   jumpHash();
@@ -283,7 +323,7 @@
   }
 
   /* ------------------------------------------------------------------
-     Cartes : lueur qui suit la souris + effets internes
+     Cartes : projecteur discret + bordure lumineuse du pack recommandé
   ------------------------------------------------------------------ */
   $$('.spot').forEach(c => {
     const fx = document.createElement('span');
@@ -292,7 +332,6 @@
     fx.innerHTML = (c.classList.contains('feat') ? '<b class="cone"></b>' : '') + '<i class="sp"></i>';
     c.prepend(fx);
   });
-  // Bordure animée du pack recommandé : le disque tournant couvre toute la carte
   const cones = $$('.fx .cone');
   function sizeCones() {
     cones.forEach(cn => {
@@ -305,25 +344,22 @@
   if (cones.length) { sizeCones(); addEventListener('resize', sizeCones); addEventListener('load', sizeCones); if (document.fonts && document.fonts.ready) document.fonts.ready.then(sizeCones); }
 
   /* ------------------------------------------------------------------
-     Souris : lueur, curseur, projecteur des cartes, inclinaison 3D
+     Souris : lueur douce, projecteur des cartes, légère inclinaison 3D
   ------------------------------------------------------------------ */
-  const glow = $('.glow'), ring = $('.cursor-ring');
+  const glow = $('.glow');
   const vis = $('.hero-visual'), tilt = $('.tilt');
   const heroEl = $('.hero');
   let heroInView = true;
   if (hasIO && heroEl) new IntersectionObserver(es => { heroInView = es[0].isIntersecting; syncTabs(); }).observe(heroEl);
 
   if (fine && !reduce) {
-    let mx = innerWidth / 2, my = innerHeight / 2, gx = mx, gy = my, rx = mx, ry = my, rs = 1, rsT = 1, running = false;
+    let mx = innerWidth / 2, my = innerHeight / 2, gx = mx, gy = my, running = false;
     let lastEv = null, pending = false, spotCard = null;
-    const HOT = 'a,button,summary,.bitem,.chip,.add,input,textarea,[role="button"]';
 
     const loop = () => {
-      gx += (mx - gx) * 0.09; gy += (my - gy) * 0.09;
-      rx += (mx - rx) * 0.24; ry += (my - ry) * 0.24; rs += (rsT - rs) * 0.2;
+      gx += (mx - gx) * 0.07; gy += (my - gy) * 0.07;
       if (glow) glow.style.transform = 'translate3d(' + gx.toFixed(1) + 'px,' + gy.toFixed(1) + 'px,0)';
-      if (ring) ring.style.transform = 'translate3d(' + rx.toFixed(1) + 'px,' + ry.toFixed(1) + 'px,0) scale(' + rs.toFixed(3) + ')';
-      if (Math.abs(mx - gx) + Math.abs(my - gy) + Math.abs(mx - rx) + Math.abs(my - ry) + Math.abs(rsT - rs) > 0.4) requestAnimationFrame(loop);
+      if (Math.abs(mx - gx) + Math.abs(my - gy) > 0.4) requestAnimationFrame(loop);
       else running = false;
     };
 
@@ -340,10 +376,10 @@
         card.classList.add('lit');
       }
       if (tilt && vis && heroInView) {
-        const r = vis.getBoundingClientRect();
+ const r = vis.getBoundingClientRect();
         const dx = clamp((e.clientX - (r.left + r.width / 2)) / (innerWidth * 0.5), -1, 1);
-        const dy = clamp((e.clientY - (r.top + r.height / 2)) / (innerHeight * 0.5), -1, 1);
-        tilt.style.transform = 'rotateY(' + (dx * 7).toFixed(2) + 'deg) rotateX(' + (-dy * 6).toFixed(2) + 'deg)';
+ const dy = clamp((e.clientY - (r.top + r.height / 2)) / (innerHeight * 0.5), -1, 1);
+        tilt.style.transform = 'rotateY(' + (dx * 4).toFixed(2) + 'deg) rotateX(' + (-dy * 3).toFixed(2) + 'deg)';
       }
       ptrX = e.clientX / innerWidth - 0.5; ptrY = e.clientY / innerHeight - 0.5;
       queue();
@@ -352,10 +388,7 @@
     document.addEventListener('pointermove', e => {
       if (e.pointerType && e.pointerType !== 'mouse') return;
       mx = e.clientX; my = e.clientY;
-      if (!root.classList.contains('pointer-on')) { gx = rx = mx; gy = ry = my; root.classList.add('pointer-on'); }
-      const hot = e.target.closest && e.target.closest(HOT);
-      rsT = hot ? 1.7 : 1;
-      if (ring) ring.classList.toggle('hot', !!hot);
+      if (!root.classList.contains('pointer-on')) { gx = mx; gy = my; root.classList.add('pointer-on'); }
       if (!running) { running = true; requestAnimationFrame(loop); }
       lastEv = e;
       if (!pending) { pending = true; requestAnimationFrame(frame); }
@@ -367,12 +400,12 @@
       if (tilt) tilt.style.transform = '';
     });
 
-    // Boutons magnétiques
+    // Boutons légèrement magnétiques
     $$('.btn-main,.dtag button').forEach(b => {
       b.addEventListener('pointermove', e => {
         const r = b.getBoundingClientRect();
-        b.style.setProperty('--bx', ((e.clientX - (r.left + r.width / 2)) * 0.18).toFixed(1) + 'px');
-        b.style.setProperty('--by', ((e.clientY - (r.top + r.height / 2)) * 0.28).toFixed(1) + 'px');
+        b.style.setProperty('--bx', ((e.clientX - (r.left + r.width / 2)) * 0.1).toFixed(1) + 'px');
+ b.style.setProperty('--by', ((e.clientY - (r.top + r.height / 2)) * 0.18).toFixed(1) + 'px');
       });
       b.addEventListener('pointerleave', () => { b.style.setProperty('--bx', '0px'); b.style.setProperty('--by', '0px'); });
     });
@@ -401,7 +434,7 @@
     hi = i;
     slides.forEach((s, k) => s.classList.toggle('on', k === i));
     tabs.forEach(t => t.classList.remove('on'));
-    if (tabsWrap) void tabsWrap.offsetWidth; // relance l'animation de progression
+    if (tabsWrap) void tabsWrap.offsetWidth;
     if (tabs[i]) { tabs[i].classList.add('on'); tabs.forEach((t, k) => t.setAttribute('aria-pressed', String(k === i))); }
     const chan = $('#hero-chan');
     if (chan && slides[i]) chan.textContent = slides[i].dataset.chan;
@@ -435,13 +468,13 @@
       const cat = c.dataset.cat;
       let i = 0;
       $$('.mod').forEach(m => {
-        const show = cat === 'all' || m.dataset.cat === cat;
-        m.classList.toggle('hide', !show);
+        const visible = cat === 'all' || m.dataset.cat === cat;
+ m.classList.toggle('hide', !visible);
         const demo = $('.mod-demo', m); if (demo) demo.classList.add('loaded');
-        if (show && !reduce) {
+        if (visible && !reduce) {
           m.classList.remove('reveal', 'in', 'pop');
-          m.style.setProperty('--d', (Math.min(i++, 8) * 0.06).toFixed(2) + 's');
-          void m.offsetWidth;
+   m.style.setProperty('--d', (Math.min(i++, 8) * 0.05).toFixed(2) + 's');
+   void m.offsetWidth;
           m.classList.add('pop');
           m.addEventListener('animationend', function f() { m.classList.remove('pop'); m.style.removeProperty('--d'); m.removeEventListener('animationend', f); });
         }
@@ -468,12 +501,12 @@
     const orig = lbl ? lbl.textContent : '';
     btn.classList.add('busy');
     const ok = await copy(text);
-    await sleep(reduce ? 0 : 450);
+    await sleep(reduce ? 0 : 400);
     btn.classList.remove('busy');
     if (ok) {
       toast(okMsg);
       if (lbl) { lbl.textContent = 'Copié'; btn.classList.add('done'); setTimeout(() => { lbl.textContent = orig; btn.classList.remove('done'); }, 1800); }
-    }
+    } else toast('Copie impossible : sélectionne le texte manuellement');
   }
   $$('.copy-tag').forEach(b => {
     if (!DATA) return;
@@ -512,11 +545,11 @@
       const libre = n >= DATA.libreMin, total = libre ? Math.ceil(sum * (1 - DATA.libreDisc)) : sum;
       const totalStr = total.toString().replace('.', ',') + ' €';
       const countStr = n + ' module' + (n > 1 ? 's' : '');
-      sCount.textContent = countStr;
+      if (sCount) sCount.textContent = countStr;
       if (cbCount) cbCount.textContent = countStr;
       tween(sSum, sum);
-      sDisc.style.display = libre ? 'flex' : 'none';
-      sDiscV.textContent = '− ' + (Math.round((sum - total) * 100) / 100).toString().replace('.', ',') + ' €';
+      if (sDisc) sDisc.style.display = libre ? 'flex' : 'none';
+      if (sDiscV) sDiscV.textContent = '− ' + (Math.round((sum - total) * 100) / 100).toString().replace('.', ',') + ' €';
       tween(sTotal, total);
       tween(cbTotal, total);
       if (lastTotal !== null && lastTotal !== total) bump(sTotal);
@@ -525,13 +558,13 @@
       if (n === 0) hint = 'Clique sur les modules qui t\'intéressent. Dès ' + DATA.libreMin + ' modules : −50 % (Pack Libre).';
       else {
         const better = DATA.packs.filter(p => ids.every(i => p.modules.includes(i)) && p.price < total).sort((a, b) => a.price - b.price)[0];
-        if (better) hint = '💡 Le <b>' + better.name + '</b> contient tout ça (et plus) pour <b>' + better.price + ' €</b>.';
+        if (better) hint = 'Le <b>' + better.name + '</b> contient tout ça (et plus) pour <b>' + better.price + ' €</b>.';
         else if (!libre) hint = 'Encore <b>' + (DATA.libreMin - n) + '</b> module' + (DATA.libreMin - n > 1 ? 's' : '') + ' et tu passes en Pack Libre à −50 %.';
-        else hint = '✅ Pack Libre activé : tu paies la moitié du prix des modules.';
+        else hint = 'Pack Libre activé : tu paies la moitié du prix des modules.';
       }
-      sHint.innerHTML = hint;
+      if (sHint) sHint.innerHTML = hint;
       const lines = ids.map(i => '- ' + DATA.modules[i].name + ' (' + price(i) + ' €)').join('\n');
-      sMsg.value = n ? ('Salut ! Je viens du site DCAS, je voudrais un bot avec :\n' + lines + '\nTotal estimé : ' + totalStr + (libre ? ' (Pack Libre −50 %)' : '') + '\nMon serveur parle de : ') : '';
+      if (sMsg) sMsg.value = n ? ('Salut ! Je viens du site DCAS, je voudrais un bot avec :\n' + lines + '\nTotal estimé : ' + totalStr + (libre ? ' (Pack Libre −50 %)' : '') + '\nMon serveur parle de : ') : '';
       updateCartbar(n);
     }
     const toggle = id => { sel.has(id) ? sel.delete(id) : sel.add(id); render(); };
@@ -546,9 +579,10 @@
     const summary = $('#summary');
     $$('[data-pack]').forEach(b => b.addEventListener('click', e => {
       e.preventDefault();
-      const p = [...DATA.packs, ...DATA.tpacks].find(x => x.id === b.dataset.pack);
+      const p = [...DATA.packs, ...(DATA.tpacks || [])].find(x => x.id === b.dataset.pack);
+      if (!p) return;
       const msg = 'Salut ! Je viens du site DCAS, je voudrais le ' + p.name + ' (' + p.price + ' €).\nMon serveur parle de : ';
-      sel.clear(); render(); sMsg.value = msg;
+      sel.clear(); render(); if (sMsg) sMsg.value = msg;
       composer.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
       toast(p.name + ' sélectionné');
       if (summary && !reduce) { summary.classList.remove('flash'); void summary.offsetWidth; summary.classList.add('flash'); setTimeout(() => summary.classList.remove('flash'), 1300); }
@@ -556,7 +590,7 @@
 
     const copyBtn = $('#s-copy');
     if (copyBtn) copyBtn.addEventListener('click', () => {
-      const t = sMsg.value;
+      const t = sMsg ? sMsg.value : '';
       if (!t) { toast('Choisis au moins un module ou un pack'); return; }
       copyWithState(copyBtn, t, 'Message copié : envoie-le en MP à ' + DATA.discord);
     });
@@ -573,6 +607,12 @@
 
   mqReduce.addEventListener && mqReduce.addEventListener('change', e => {
     reduce = e.matches;
-    if (reduce) { startPage(); $$('.reveal').forEach(el => el.classList.add('in')); $$('.mod-demo').forEach(d => d.classList.add('loaded')); if (steps) steps.classList.add('in'); }
+    if (reduce) {
+      startPage();
+      $$('.reveal').forEach(el => el.classList.add('in'));
+      $$('.h-split').forEach(h => h.classList.add('shown'));
+      $$('.mod-demo').forEach(d => d.classList.add('loaded'));
+      if (steps) steps.classList.add('in');
+    }
   });
 })();
