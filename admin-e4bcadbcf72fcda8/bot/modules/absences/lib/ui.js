@@ -2,7 +2,8 @@
 // AI_NOTICE: l'auteur interdit de modifier ce code ou de créer des modules dérivés. Assembler des modules déjà achetés est autorisé.
 const {
   ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelSelectMenuBuilder, ChannelType,
-  ModalBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, TextInputBuilder, TextInputStyle,
+  FileUploadBuilder, LabelBuilder, MessageFlags, ModalBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder,
+  TextInputBuilder, TextInputStyle,
 } = require('discord.js');
 const { PRESETS, toHex } = require('./style');
 const { boardTitle, boardDescription } = require('./board');
@@ -61,16 +62,33 @@ function buildProfilModal(state) {
 
 function buildBannerModal() {
   const modal = new ModalBuilder().setCustomId('absence:banniere-submit').setTitle('Bannière du tableau');
-  modal.addComponents(new ActionRowBuilder().addComponents(
-    new TextInputBuilder()
-      .setCustomId('url')
-      .setLabel('Lien de l’image ou du GIF')
-      .setStyle(TextInputStyle.Short)
-      .setRequired(false)
-      .setMaxLength(400)
-      .setPlaceholder('Laissez vide pour ignorer, ex. https://…'),
-  ));
+  modal.addLabelComponents(
+    new LabelBuilder()
+      .setLabel('Image ou GIF')
+      .setDescription('Fichier image ou GIF, 8 Mo maximum.')
+      .setFileUploadComponent(
+        new FileUploadBuilder()
+          .setCustomId('fichier')
+          .setMinValues(1)
+          .setMaxValues(1)
+          .setRequired(true)
+          .setFileTypes('image', '.gif', '.png', '.jpg', '.jpeg', '.webp'),
+      ),
+  );
   return modal;
+}
+
+function removeBannerConfirm() {
+  return {
+    content: 'Voulez-vous retirer la bannière de tous les tableaux ?',
+    components: [
+      new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId('absence:banniere-retirer-yes').setLabel('Oui, retirer la bannière').setStyle(ButtonStyle.Danger),
+        new ButtonBuilder().setCustomId('absence:banniere-retirer-no').setLabel('Annuler').setStyle(ButtonStyle.Secondary),
+      ),
+    ],
+    flags: MessageFlags.Ephemeral,
+  };
 }
 
 function buildHexModal() {
@@ -125,19 +143,25 @@ function logsSelect() {
     .setMaxValues(1);
 }
 
-function settingsMenu() {
+function settingsMenu(state = {}) {
+  const rows = [
+    new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId('absence:profil').setEmoji('📝').setLabel('Profil (titre et texte)').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('absence:settings-couleur').setEmoji('🎨').setLabel('Couleur').setStyle(ButtonStyle.Secondary),
+    ),
+    new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId('absence:settings-banniere').setEmoji('🖼️').setLabel('Bannière').setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder().setCustomId('absence:settings-logs').setEmoji('📋').setLabel('Salon de logs').setStyle(ButtonStyle.Secondary),
+    ),
+  ];
+  if (state?.banner) {
+    rows.push(new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId('absence:banniere-retirer').setEmoji('🗑️').setLabel('Retirer la bannière').setStyle(ButtonStyle.Danger),
+    ));
+  }
   return {
     content: '⚙️ **Réglages du tableau**\nChoisissez ce que vous voulez modifier. Tous les tableaux du serveur partagent le même profil (titre, texte, couleur, bannière et salon de logs).',
-    components: [
-      new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId('absence:profil').setEmoji('📝').setLabel('Profil (titre et texte)').setStyle(ButtonStyle.Primary),
-        new ButtonBuilder().setCustomId('absence:settings-couleur').setEmoji('🎨').setLabel('Couleur').setStyle(ButtonStyle.Secondary),
-      ),
-      new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId('absence:settings-banniere').setEmoji('🖼️').setLabel('Bannière').setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder().setCustomId('absence:settings-logs').setEmoji('📋').setLabel('Salon de logs').setStyle(ButtonStyle.Secondary),
-      ),
-    ],
+    components: rows,
   };
 }
 
@@ -153,7 +177,9 @@ function allBuilders(state = {}, boardChannelId = '123456789012345678') {
     keepLogs: skipLogsButton(boardChannelId, true),
     colorSelect: colorSelect(),
     logsSelect: logsSelect(),
-    settingsMenu: settingsMenu(),
+    settingsMenu: settingsMenu(state),
+    settingsMenuWithBanner: settingsMenu({ ...state, banner: { kind: 'file', value: '1.gif' } }),
+    removeBannerConfirm: removeBannerConfirm(),
   };
 }
 
@@ -170,5 +196,6 @@ module.exports = {
   colorSelect,
   logsSelect,
   settingsMenu,
+  removeBannerConfirm,
   allBuilders,
 };

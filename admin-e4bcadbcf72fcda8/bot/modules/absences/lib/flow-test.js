@@ -4,9 +4,10 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { MessageFlags, PermissionFlagsBits } = require('discord.js');
-const { useFile, store } = require('./store');
+const { useFile, store, createStore } = require('./store');
 const { stop } = require('./schedule');
 const { listBoards } = require('./store');
+const { useBannerDir, boardPayload } = require('./board');
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -104,6 +105,7 @@ function makeInteraction({ guild, board, logs, user }, overrides = {}) {
     },
     fields: {
       getTextInputValue: (name) => (overrides.fields && overrides.fields[name]) || '',
+      getUploadedFiles: (name) => (overrides.uploads && overrides.uploads[name]) || null,
     },
     replied: false,
     deferred: false,
@@ -152,13 +154,39 @@ function makeInteraction({ guild, board, logs, user }, overrides = {}) {
 }
 
 function lastPayload(channel) {
-  return channel.sends.at(-1) || [...channel._messages.values()].at(-1)?.payload;
+  return [...channel._messages.values()].at(-1)?.payload || channel.sends.at(-1);
 }
 
 async function run() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dcas-absences-flow-'));
   const file = path.join(dir, 'absences.json');
+  const banners = path.join(dir, 'banners');
   useFile(file);
+  useBannerDir(banners);
+  const gifBytes = Buffer.from('GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00!\xf9\x04\x00\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;', 'binary');
+  const attachment = {
+    id: '99',
+    name: 'photo.gif',
+    contentType: 'image/gif',
+    size: gifBytes.length,
+    url: 'https://cdn.discordapp.com/attachments/1/2/photo.gif',
+  };
+  function uploaded(att) {
+    const col = new Map([[att.id, att]]);
+    col.first = () => att;
+    return col;
+  }
+  const previousFetch = global.fetch;
+  global.fetch = async (url) => {
+    if (String(url).includes('photo.gif')) {
+      return {
+        ok: true,
+        headers: { get: (name) => (String(name).toLowerCase() === 'content-type' ? 'image/gif' : null) },
+        arrayBuffer: async () => gifBytes,
+      };
+    }
+    throw new Error(`fetch inattendu ${url}`);
+  };
   const { guild, board, logs } = makeGuild();
   const user = makeUser();
   const tableau = require('../commands/tableau');
@@ -237,6 +265,8 @@ async function run() {
   await settings.handlers['absence:settings'](settingsBtn);
   assert(settingsBtn._replies.length === 1, 'menu Réglages');
   settingsBtn._replies[0].components.forEach((row) => row.toJSON());
+  const settingsIds = settingsBtn._replies[0].components.flatMap((row) => row.components).map((btn) => btn.data.custom_id);
+  assert(!settingsIds.includes('absence:banniere-retirer'), 'pas de bouton Retirer tant qu’il n’y a pas de bannière');
 
   const profilBtn = makeInteraction({ guild, board, logs, user }, { customId: 'absence:profil', button: true });
   await settings.handlers['absence:profil'](profilBtn);
@@ -258,9 +288,20 @@ async function run() {
   assert(couleur._replies.length === 1, '/settings couleur');
   assert(store.get(guild.id).color === 0x5865F2, 'couleur blurple');
 
-  const banniere = makeInteraction({ guild, board, logs, user }, { chat: true, subcommand: 'banniere', strings: { url: 'https://example.com/banner.gif' } });
+  const banniere = makeInteraction({ guild, board, logs, user }, { chat: true, subcommand: 'banniere', attachment });
   await settings.execute(banniere);
-  assert(store.get(guild.id).banner?.value.includes('banner.gif'), '/settings banniere url');
+  assert(store.get(guild.id).banner?.kind === 'file' && store.get(guild.id).banner.value.endsWith('.gif'), '/settings banniere fichier');
+  assert(fs.existsSync(path.join(banners, store.get(guild.id).banner.value)), 'fichier bannière écrit sur disque');
+  const afterUpload = lastPayload(board);
+  assert(afterUpload.embeds[0].data.image.url === 'attachment://banner.gif', 'le tableau joint la bannière');
+  assert(afterUpload.files && afterUpload.files.length === 1, 'edit envoie le fichier de bannière');
+  assert(Array.isArray(afterUpload.attachments) && afterUpload.attachments.length === 0, 'edit remplace les pièces jointes précédentes');
+
+  const reloaded = createStore(file).get(guild.id);
+  assert(reloaded.banner?.kind === 'file' && reloaded.banner.value === store.get(guild.id).banner.value, 'bannière relue après redémarrage');
+  const reloadedPayload = boardPayload(reloaded, guild);
+  assert(reloadedPayload.embeds[0].data.image.url === 'attachment://banner.gif', 'après redémarrage, la pièce jointe est conservée');
+  assert(reloadedPayload.files.length === 1, 'après redémarrage, le fichier est renvoyé');
 
   const logsCmd = makeInteraction({ guild, board, logs, user }, { chat: true, subcommand: 'logs', channels: { salon: logs } });
   await settings.execute(logsCmd);
@@ -269,7 +310,50 @@ async function run() {
   const bannerBtn = makeInteraction({ guild, board, logs, user }, { customId: 'absence:settings-banniere', button: true });
   await settings.handlers['absence:settings-banniere'](bannerBtn);
   assert(bannerBtn._modals.length === 1, 'modale bannière via Réglages');
-  assert(bannerBtn._modals[0].components[0].components[0].label.length <= 45, 'libellé bannière <= 45');
+  const bannerModal = bannerBtn._modals[0];
+  assert(bannerModal.components[0].type === 18 && bannerModal.components[0].label.length <= 45, 'libellé FileUpload <= 45');
+  assert(bannerModal.components[0].component.type === 19, 'composant FileUpload');
+
+  const modalUpload = makeInteraction({ guild, board, logs, user }, {
+    customId: 'absence:banniere-submit',
+    modal: true,
+    uploads: { fichier: uploaded(attachment) },
+  });
+  await settings.handlers['absence:banniere-submit'](modalUpload);
+  assert(store.get(guild.id).banner?.kind === 'file', 'bannière enregistrée depuis la modale');
+
+  const settingsWithBanner = makeInteraction({ guild, board, logs, user }, { customId: 'absence:settings', button: true });
+  await settings.handlers['absence:settings'](settingsWithBanner);
+  const withBannerIds = settingsWithBanner._replies[0].components.flatMap((row) => row.components).map((btn) => btn.data.custom_id);
+  assert(withBannerIds.includes('absence:banniere-retirer'), 'bouton Retirer la bannière visible une fois la bannière posée');
+  const removeStyle = settingsWithBanner._replies[0].components.flatMap((row) => row.components).find((btn) => btn.data.custom_id === 'absence:banniere-retirer').data.style;
+  assert(removeStyle === 4, 'le bouton Retirer est rouge');
+
+  const removeAsk = makeInteraction({ guild, board, logs, user }, { customId: 'absence:banniere-retirer', button: true });
+  await settings.handlers['absence:banniere-retirer'](removeAsk);
+  assert(removeAsk._replies.length === 1, 'confirmation de retrait');
+  const confirmIds = removeAsk._replies[0].components[0].components.map((btn) => btn.data.custom_id);
+  assert(confirmIds.includes('absence:banniere-retirer-yes') && confirmIds.includes('absence:banniere-retirer-no'), 'boutons de confirmation');
+  removeAsk._replies[0].components[0].toJSON();
+
+  const bannerFile = path.join(banners, store.get(guild.id).banner.value);
+  const removeYes = makeInteraction({ guild, board, logs, user }, { customId: 'absence:banniere-retirer-yes', button: true, message: { id: 'i5' } });
+  await settings.handlers['absence:banniere-retirer-yes'](removeYes);
+  assert(!store.get(guild.id).banner, 'bannière retirée du stockage');
+  assert(!fs.existsSync(bannerFile), 'fichier de bannière supprimé');
+  const afterRemove = lastPayload(board);
+  assert(!afterRemove.embeds[0].data.image, 'image retirée de l’embed');
+  assert(Array.isArray(afterRemove.attachments) && afterRemove.attachments.length === 0, 'pièces jointes vidées après retrait');
+  assert(!afterRemove.files || afterRemove.files.length === 0, 'plus de fichier joint après retrait');
+
+  // Reposer une bannière pour tester /settings banniere retirer:Oui
+  const again = makeInteraction({ guild, board, logs, user }, { chat: true, subcommand: 'banniere', attachment });
+  await settings.execute(again);
+  assert(store.get(guild.id).banner, 'bannière reposée');
+  const slashRemove = makeInteraction({ guild, board, logs, user }, { chat: true, subcommand: 'banniere', booleans: { retirer: true } });
+  await settings.execute(slashRemove);
+  assert(!store.get(guild.id).banner, '/settings banniere retirer');
+  assert(!fs.existsSync(path.join(banners, `${guild.id}.gif`)), 'fichier aussi retiré par /settings');
 
   const hexBtn = makeInteraction({ guild, board, logs, user }, { customId: 'absence:hex', button: true });
   await settings.handlers['absence:hex'](hexBtn);
@@ -287,6 +371,7 @@ async function run() {
   assert(listBoards(store.get(guild.id)).length === 2, 'deux tableaux partagent les données');
 
   stop();
+  global.fetch = previousFetch;
   fs.rmSync(dir, { recursive: true, force: true });
   console.log('ABSENCES FLOW TEST OK');
 }

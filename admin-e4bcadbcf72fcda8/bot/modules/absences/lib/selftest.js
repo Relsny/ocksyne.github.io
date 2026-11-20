@@ -7,7 +7,7 @@ const path = require('node:path');
 const { parseParisDateTime, validateAbsenceRange, nextDelay, zonedLocalToUtc, MAX_TIMEOUT, TIMEZONE } = require('./dates');
 const { createStore, normalize, listBoards } = require('./store');
 const { parseColor } = require('./style');
-const { boardPayload, boardTitle, boardDescription, DEFAULT_TITLE, formatAbsenceList, soonestReturn } = require('./board');
+const { boardPayload, boardTitle, boardDescription, DEFAULT_TITLE, formatAbsenceList, soonestReturn, useBannerDir, editBoardPayload } = require('./board');
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -151,9 +151,26 @@ assert(busyDesc.includes('1 ABSENCE EN COURS') && busyDesc.includes('<@42>') && 
 assert(!payloadBusy.embeds[0].data.fields || payloadBusy.embeds[0].data.fields.length === 0, 'pas de champs redondants avec une absence');
 const customDesc = require('./board').composeBoardDescription({ description: 'Intro perso', absences: {}, updatedAt: nowTs }, nowTs);
 assert(customDesc.startsWith('Intro perso') && customDesc.includes('STAFF DISPONIBLE') && customDesc.includes('Dernière mise à jour'), 'état dynamique ajouté au texte perso');
-assert(payloadBusy.embeds[0].data.image && payloadBusy.embeds[0].data.image.url.includes('banner.gif'), 'bannière affichée');
+assert(payloadBusy.embeds[0].data.image && payloadBusy.embeds[0].data.image.url.includes('banner.gif'), 'ancienne bannière par lien encore affichée');
 assert(payloadBusy.embeds[0].data.thumbnail, 'vignette (icône du serveur)');
 assert(payloadBusy.embeds[0].data.footer.text.includes('Serveur test'), 'pied de page avec le nom du serveur');
+const bannerDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dcas-absences-banner-'));
+useBannerDir(bannerDir);
+const gif = Buffer.from('GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00!\xf9\x04\x00\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;', 'binary');
+fs.writeFileSync(path.join(bannerDir, 'guild1.gif'), gif);
+const payloadFile = boardPayload({
+  color: 0xF0B232,
+  updatedAt: nowTs,
+  banner: { kind: 'file', value: 'guild1.gif' },
+  title: null,
+  description: null,
+  absences: {},
+}, { name: 'Serveur test', iconURL: () => 'https://example.com/icon.png' }, nowTs);
+assert(payloadFile.embeds[0].data.image.url === 'attachment://banner.gif', 'bannière en pièce jointe attachment://');
+assert(payloadFile.files.length === 1, 'fichier joint au payload');
+const edited = editBoardPayload(payloadFile);
+assert(Array.isArray(edited.attachments) && edited.attachments.length === 0 && edited.files.length === 1, 'edit remplace la pièce jointe');
+fs.rmSync(bannerDir, { recursive: true, force: true });
 
 const color = parseColor('#f0b232');
 assert(color.ok && color.value === 0xF0B232, 'couleur hex');
@@ -174,6 +191,9 @@ const settingsJson = mod.commands[1].data.toJSON();
 assert(settingsJson.name_localizations && settingsJson.name_localizations.fr === 'reglages', 'localisation française /reglages');
 const subs = (settingsJson.options || []).map((option) => option.name);
 assert(subs.includes('profil') && subs.includes('couleur') && subs.includes('banniere') && subs.includes('logs'), `sous-commandes /settings : ${subs.join(',')}`);
+const bannerSub = (settingsJson.options || []).find((option) => option.name === 'banniere');
+const bannerOpts = (bannerSub.options || []).map((option) => option.name);
+assert(bannerOpts.includes('fichier') && bannerOpts.includes('retirer') && !bannerOpts.includes('url'), `options bannière : ${bannerOpts.join(',')}`);
 const logsSub = (settingsJson.options || []).find((option) => option.name === 'logs');
 assert(logsSub, 'sous-commande logs');
 const salonOpt = (logsSub.options || []).find((option) => option.name === 'salon');
@@ -204,6 +224,9 @@ assert(client.handlers.has('absence:delete'), 'handler Supprimer');
 assert(client.handlers.has('absence:skip-logs'), 'handler Passer sans logs');
 assert(client.handlers.has('absence:settings'), 'handler Réglages');
 assert(client.handlers.has('absence:profil'), 'handler profil');
+assert(client.handlers.has('absence:banniere-retirer'), 'handler retirer bannière');
+assert(client.handlers.has('absence:banniere-retirer-yes'), 'handler confirmation retrait');
+
 
 fs.rmSync(dir, { recursive: true, force: true });
 console.log('ABSENCES SELFTEST OK');

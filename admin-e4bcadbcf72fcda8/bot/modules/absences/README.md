@@ -22,7 +22,7 @@ Au lancement, le lanceur réenregistre les commandes slash (`/tableau`, `/settin
 - **📝 Signaler mon absence** — ouvre un formulaire : motif, description, départ et retour au format `JJ/MM/AAAA HH:MM` (heure de Paris). Une seule absence à la fois : pour en déclarer une nouvelle, il faut d’abord supprimer l’ancienne.
 - **📋 Logs** — montre d’abord les absences en cours du staff (avatar, mention, motif, description, horaires), puis la section « Mon historique » avec vos absences passées et celle en cours. Seule la personne qui clique voit cette réponse.
 - **🗑️ Supprimer mon absence** — retire sa propre absence après confirmation.
-- **⚙️ Réglages** — réservé à ceux qui peuvent gérer le serveur : profil (titre et texte), couleur, bannière, salon de logs.
+- **⚙️ Réglages** — réservé à ceux qui peuvent gérer le serveur : profil (titre et texte), couleur, bannière (envoi d’une photo ou d’un GIF), salon de logs. Un bouton rouge **Retirer la bannière** apparaît seulement si une bannière est déjà en place, avec une confirmation.
 
 ## Réglages
 
@@ -30,7 +30,7 @@ Au lancement, le lanceur réenregistre les commandes slash (`/tableau`, `/settin
 
 - `profil` — titre et texte de présentation, ou `reinitialiser` pour le texte par défaut. Le bloc « ÉTAT ACTUEL » et la dernière mise à jour restent toujours ajoutés et à jour, même avec un texte personnalisé.
 - `couleur` — code hexadécimal (`#F0B232`) ou nom (or, blurple, vert, rouge, violet, rose, orange, cyan, gris, noir)
-- `banniere` — lien ou fichier (image ou GIF), ou `retirer`
+- `banniere` — envoyez une image ou un GIF avec l’option `fichier` (8 Mo maximum, les GIF restent animés). L’option `retirer` enlève la bannière de tous les tableaux. Les liens ne sont plus demandés : le fichier est enregistré sur le bot pour ne pas dépendre d’une URL qui expire.
 - `logs` — définir, changer ou retirer le salon de logs (facultatif)
 
 Tous les tableaux du serveur se mettent à jour tout de suite.

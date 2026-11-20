@@ -12,8 +12,92 @@ const { when, discordTimestamp } = require('./dates');
 const { RETURN_COLOR, CANCEL_COLOR, toHex } = require('./style');
 const { permissionMessage, withRetry } = require('./retry');
 
-const BANNER_DIR = path.join(__dirname, '..', '..', '..', 'data', 'absences-banners');
+const DEFAULT_BANNER_DIR = path.join(__dirname, '..', '..', '..', 'data', 'absences-banners');
+let BANNER_DIR = DEFAULT_BANNER_DIR;
 const LOGS_PER_PAGE = 4;
+const IMAGE_EXT = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp']);
+const MAX_BANNER_BYTES = 8 * 1024 * 1024;
+
+function useBannerDir(dir) {
+  BANNER_DIR = dir;
+  fs.mkdirSync(BANNER_DIR, { recursive: true });
+  return BANNER_DIR;
+}
+
+function bannerDir() {
+  return BANNER_DIR;
+}
+
+function sniffImage(bytes, contentType, filename) {
+  const header = Buffer.from(bytes).subarray(0, 16);
+  if (header.subarray(0, 6).toString('ascii') === 'GIF87a' || header.subarray(0, 6).toString('ascii') === 'GIF89a') return '.gif';
+  if (header.length >= 8 && header[0] === 0x89 && header[1] === 0x50 && header[2] === 0x4E && header[3] === 0x47) return '.png';
+  if (header.length >= 3 && header[0] === 0xFF && header[1] === 0xD8 && header[2] === 0xFF) return '.jpg';
+  if (header.length >= 12 && header.subarray(0, 4).toString('ascii') === 'RIFF' && header.subarray(8, 12).toString('ascii') === 'WEBP') return '.webp';
+  const type = String(contentType || '').toLowerCase();
+  if (type === 'image/gif') return '.gif';
+  if (type === 'image/png') return '.png';
+  if (type === 'image/jpeg' || type === 'image/jpg') return '.jpg';
+  if (type === 'image/webp') return '.webp';
+  const ext = path.extname(filename || '').toLowerCase();
+  if (IMAGE_EXT.has(ext) && type.startsWith('image/')) return ext;
+  return null;
+}
+
+function storedBannerName(guildId, ext) {
+  return `${guildId}${ext}`;
+}
+
+function removeStoredBanner(guildId, banner, { keep = null } = {}) {
+  const names = new Set();
+  if (banner?.kind === 'file' && banner.value) names.add(path.basename(banner.value));
+  if (guildId) {
+    for (const ext of IMAGE_EXT) names.add(storedBannerName(guildId, ext));
+  }
+  for (const name of names) {
+    if (keep && name === path.basename(keep)) continue;
+    const file = path.join(BANNER_DIR, name);
+    if (fs.existsSync(file)) fs.unlinkSync(file);
+  }
+}
+
+async function saveBannerFromAttachment(guildId, attachment) {
+  if (!attachment) return { ok: false, message: 'Ajoutez une image ou un GIF (8 Mo maximum).' };
+  const givenType = String(attachment.contentType || attachment.content_type || '').toLowerCase();
+  if (givenType && !givenType.startsWith('image/')) {
+    return { ok: false, message: 'Le fichier doit être une image PNG, JPG, WEBP ou un GIF.' };
+  }
+  if (attachment.size && attachment.size > MAX_BANNER_BYTES) {
+    return { ok: false, message: 'L’image est trop lourde. Envoyez un fichier de moins de 8 Mo.' };
+  }
+  const url = attachment.url || attachment.proxyURL || attachment.proxy_url;
+  if (!url) return { ok: false, message: 'Impossible de télécharger le fichier envoyé. Réessayez.' };
+  let res;
+  try {
+    res = await fetch(url);
+  } catch {
+    return { ok: false, message: 'Impossible de télécharger le fichier envoyé. Réessayez.' };
+  }
+  if (!res.ok) return { ok: false, message: 'Impossible de télécharger le fichier envoyé. Réessayez.' };
+  const bytes = Buffer.from(await res.arrayBuffer());
+  if (bytes.length > MAX_BANNER_BYTES) {
+    return { ok: false, message: 'L’image est trop lourde. Envoyez un fichier de moins de 8 Mo.' };
+  }
+  const headerType = res.headers?.get?.('content-type') || givenType;
+  const ext = sniffImage(bytes, headerType, attachment.name);
+  if (!ext) {
+    return { ok: false, message: 'Le fichier doit être une image PNG, JPG, WEBP ou un GIF.' };
+  }
+  fs.mkdirSync(BANNER_DIR, { recursive: true });
+  const name = storedBannerName(guildId, ext);
+  const file = path.join(BANNER_DIR, name);
+  const previous = fs.readdirSync(BANNER_DIR).filter((item) => item.startsWith(String(guildId)) && item !== name);
+  fs.writeFileSync(file, bytes);
+  for (const item of previous) {
+    fs.unlinkSync(path.join(BANNER_DIR, item));
+  }
+  return { ok: true, banner: { kind: 'file', value: name }, bytes: bytes.length, ext };
+}
 
 function listAbsences(state) {
   return Object.values(state.absences || {}).sort((a, b) => a.startAt - b.startAt || a.createdAt - b.createdAt);
@@ -34,16 +118,19 @@ async function resolveTextChannel(guild, channelId) {
   return channel?.isTextBased?.() ? channel : null;
 }
 
-function canPost(channel, guild) {
+function canPost(channel, guild, { attach = false } = {}) {
   const me = guild?.members?.me;
   if (!channel || !me) return true;
   const perms = channel.permissionsFor(me);
   if (!perms) return true;
-  return perms.has(['ViewChannel', 'SendMessages', 'EmbedLinks']);
+  const need = ['ViewChannel', 'SendMessages', 'EmbedLinks'];
+  if (attach) need.push('AttachFiles');
+  return perms.has(need);
 }
 
-function missingPostMessage() {
-  return 'Je n’ai pas la permission d’écrire dans ce salon. Accordez-moi « Voir le salon », « Envoyer des messages » et « Intégrer des liens », puis réessayez.';
+function missingPostMessage({ attach = false } = {}) {
+  const extra = attach ? ', « Intégrer des liens » et « Joindre des fichiers »' : ' et « Intégrer des liens »';
+  return `Je n’ai pas la permission d’écrire dans ce salon. Accordez-moi « Voir le salon », « Envoyer des messages »${extra}, puis réessayez.`;
 }
 
 const DEFAULT_TITLE = '🗓️ REGISTRE DES ABSENCES';
@@ -183,30 +270,45 @@ function boardPayload(state, guild, now = Date.now()) {
   if (icon) embed.setThumbnail(icon);
 
   const files = [];
-  if (state.banner?.kind === 'url') {
-    embed.setImage(state.banner.value);
-  } else if (state.banner?.kind === 'file') {
+  if (state.banner?.kind === 'file') {
     const file = bannerFilePath(state.banner);
     if (file) {
-      const name = path.basename(file);
+      const ext = path.extname(file).toLowerCase() || '.png';
+      const name = `banner${ext}`;
       embed.setImage(`attachment://${name}`);
       files.push(new AttachmentBuilder(file, { name }));
     }
+  } else if (state.banner?.kind === 'url' && state.banner.value) {
+    // Anciennes configurations : les liens CDN finissent par expirer.
+    embed.setImage(state.banner.value);
   }
   return { embeds: [embed], components: boardButtons(), files };
+}
+
+function editBoardPayload(payload) {
+  return {
+    embeds: payload.embeds,
+    components: payload.components,
+    files: payload.files || [],
+    attachments: [],
+  };
 }
 
 async function sendOrEdit(channel, messageId, payload) {
   if (messageId) {
     try {
       const message = await withRetry(() => channel.messages.fetch(messageId));
-      await withRetry(() => message.edit(payload));
+      await withRetry(() => message.edit(editBoardPayload(payload)));
       return message;
     } catch (error) {
       if (Number(error?.code) !== 10008) throw error;
     }
   }
-  return withRetry(() => channel.send(payload));
+  return withRetry(() => channel.send({
+    embeds: payload.embeds,
+    components: payload.components,
+    files: payload.files || [],
+  }));
 }
 
 async function updateBoard(guild) {
@@ -223,8 +325,8 @@ async function updateBoard(guild) {
   for (const board of boards) {
     const channel = await resolveTextChannel(guild, board.channelId);
     if (!channel) continue;
-    if (!canPost(channel, guild)) {
-      lastError = missingPostMessage();
+    if (!canPost(channel, guild, { attach: Boolean(payload.files?.length) })) {
+      lastError = missingPostMessage({ attach: Boolean(payload.files?.length) });
       next.push(board);
       continue;
     }
@@ -399,13 +501,18 @@ function logsPagePayload(state, page, userId) {
   return { embeds, components, flags: MessageFlags.Ephemeral };
 }
 
-function bannerDir() {
-  return BANNER_DIR;
-}
-
 module.exports = {
   LOGS_PER_PAGE,
-  BANNER_DIR,
+  get BANNER_DIR() { return BANNER_DIR; },
+  IMAGE_EXT,
+  MAX_BANNER_BYTES,
+  useBannerDir,
+  bannerDir,
+  sniffImage,
+  saveBannerFromAttachment,
+  removeStoredBanner,
+  bannerFilePath,
+  editBoardPayload,
   DEFAULT_TITLE,
   DEFAULT_DESCRIPTION,
   listAbsences,
