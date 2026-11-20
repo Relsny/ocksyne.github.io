@@ -19,7 +19,7 @@ Au lancement, le lanceur réenregistre les commandes slash (`/tableau`, `/settin
 
 ## Boutons
 
-- **📝 Signaler mon absence** — ouvre un formulaire : motif, description, départ et retour au format `JJ/MM/AAAA HH:MM` (heure de Paris). Une seule absence à la fois : pour en déclarer une nouvelle, il faut d’abord supprimer l’ancienne.
+- **📝 Signaler mon absence** — ouvre un formulaire : motif, description, départ et retour au format `JJ/MM/AAAA HH:MM` (heure de Paris). Le départ peut être dans le passé ou dans le futur. La date de retour doit être postérieure au départ et ne doit pas être déjà passée. Il n’y a pas d’autre limite de durée. Une seule absence à la fois : pour en déclarer une nouvelle, il faut d’abord supprimer l’ancienne.
 - **📋 Logs** — montre d’abord les absences en cours du staff (avatar, mention, motif, description, horaires), puis la section « Mon historique » avec vos absences passées et celle en cours. Seule la personne qui clique voit cette réponse.
 - **🗑️ Supprimer mon absence** — retire sa propre absence après confirmation.
 - **⚙️ Réglages** — réservé à ceux qui peuvent gérer le serveur : profil (titre et texte), couleur, bannière (envoi d’une photo ou d’un GIF), salon de logs. Un bouton rouge **Retirer la bannière** apparaît seulement si une bannière est déjà en place, avec une confirmation.

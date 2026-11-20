@@ -45,8 +45,12 @@ const back = now + 3_600_000;
 assert(validateAbsenceRange(start, back, now).ok, 'plage valide');
 assert(!validateAbsenceRange(back, start, now).ok, 'retour avant départ refusé');
 assert(!validateAbsenceRange(start, start, now).ok, 'retour égal au départ refusé');
-assert(!validateAbsenceRange(now - 8 * 24 * 60 * 60 * 1000, back, now).ok, 'départ trop ancien refusé');
-assert(!validateAbsenceRange(start, now + 400 * 24 * 60 * 60 * 1000, now).ok, 'retour trop lointain refusé');
+assert(validateAbsenceRange(now - 8 * 24 * 60 * 60 * 1000, back, now).ok, 'départ de plus de 7 jours accepté');
+assert(validateAbsenceRange(start, now + 400 * 24 * 60 * 60 * 1000, now).ok, 'retour lointain accepté');
+const pastReturn = validateAbsenceRange(now - 10 * 24 * 60 * 60 * 1000, now - 60_000, now);
+assert(!pastReturn.ok && pastReturn.message.includes('déjà passée'), 'retour déjà passé refusé');
+assert(parseParisDateTime('20/11/2015 14:30').ok, 'année ancienne acceptée si la date est valide');
+assert(parseParisDateTime('20/11/2110 14:30').ok, 'année lointaine acceptée si la date est valide');
 
 assert(nextDelay(now + 5_000, now) === 5_000, 'délai court');
 assert(nextDelay(now - 1, now) === 0, 'délai déjà passé');

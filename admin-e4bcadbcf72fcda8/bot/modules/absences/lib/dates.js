@@ -51,9 +51,6 @@ function parseParisDateTime(value) {
   const year = Number(match[3]);
   const hour = Number(match[4]);
   const minute = Number(match[5]);
-  if (year < 2020 || year > 2100) {
-    return { ok: false, code: 'year', message: 'Cette date n’est pas réaliste. Vérifiez l’année.' };
-  }
   if (hour > 23 || minute > 59) {
     return { ok: false, code: 'time', message: 'L’heure doit être comprise entre 00:00 et 23:59.' };
   }
@@ -79,14 +76,8 @@ function validateAbsenceRange(startAt, returnAt, now = Date.now()) {
   if (returnAt <= startAt) {
     return { ok: false, message: 'La date de retour doit être postérieure à la date de départ.' };
   }
-  if (startAt < now - 7 * DAY) {
-    return { ok: false, message: 'La date de départ ne peut pas remonter à plus de 7 jours.' };
-  }
-  if (startAt > now + 366 * DAY) {
-    return { ok: false, message: 'La date de départ ne peut pas dépasser un an.' };
-  }
-  if (returnAt > now + 366 * DAY) {
-    return { ok: false, message: 'La date de retour ne peut pas dépasser un an.' };
+  if (returnAt <= now) {
+    return { ok: false, message: 'La date de retour est déjà passée.' };
   }
   return { ok: true };
 }

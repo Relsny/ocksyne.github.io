@@ -261,6 +261,32 @@ async function run() {
   assert(!afterDelete.absences['42'], 'absence retirée');
   assert(afterDelete.history['42'] && afterDelete.history['42'][0].endReason === 'delete', 'entrée d’historique après suppression');
 
+  const pastRetour = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear() - 1} 18:00`;
+  const pastReturnSubmit = makeInteraction({ guild, board, logs, user }, {
+    customId: 'absence:submit',
+    modal: true,
+    fields: { motif: 'Congés', description: 'Déjà fini', depart: '01/01/' + (now.getFullYear() - 1) + ' 10:00', retour: pastRetour },
+  });
+  await tableau.handlers['absence:submit'](pastReturnSubmit);
+  assert(pastReturnSubmit._replies.length === 1, 'refus d’un retour déjà passé');
+  assert(String(pastReturnSubmit._replies[0].embeds?.[0]?.data?.description || pastReturnSubmit._replies[0].content || '').includes('déjà passée'), 'message retour déjà passé');
+  assert(!store.get(guild.id).absences['42'], 'aucune absence enregistrée si le retour est passé');
+
+  const oldDepart = `01/01/${now.getFullYear() - 1} 10:00`;
+  const farSubmit = makeInteraction({ guild, board, logs, user }, {
+    customId: 'absence:submit',
+    modal: true,
+    fields: { motif: 'Congés', description: 'Départ ancien', depart: oldDepart, retour },
+  });
+  await tableau.handlers['absence:submit'](farSubmit);
+  assert(store.get(guild.id).absences['42'], 'départ ancien accepté si le retour est à venir');
+  // la retirer pour ne pas gêner la suite
+  store.update(guild.id, (state) => {
+    const absences = { ...state.absences };
+    delete absences['42'];
+    return { ...state, absences };
+  });
+
   const settingsBtn = makeInteraction({ guild, board, logs, user }, { customId: 'absence:settings', button: true });
   await settings.handlers['absence:settings'](settingsBtn);
   assert(settingsBtn._replies.length === 1, 'menu Réglages');
