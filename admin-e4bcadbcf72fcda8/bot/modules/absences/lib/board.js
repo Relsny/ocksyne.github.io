@@ -7,8 +7,8 @@ const {
   ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageFlags,
 } = require('discord.js');
 const { stamp } = require('../../../src/brand');
-const { store } = require('./store');
-const { when } = require('./dates');
+const { store, listBoards } = require('./store');
+const { when, discordTimestamp } = require('./dates');
 const { RETURN_COLOR, CANCEL_COLOR, toHex } = require('./style');
 const { permissionMessage, withRetry } = require('./retry');
 
@@ -46,20 +46,63 @@ function missingPostMessage() {
   return 'Je n’ai pas la permission d’écrire dans ce salon. Accordez-moi « Voir le salon », « Envoyer des messages » et « Intégrer des liens », puis réessayez.';
 }
 
-function boardButtons() {
-  return new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId('absence:signal').setEmoji('📝').setLabel('Signaler mon absence').setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId('absence:viewlogs').setEmoji('📋').setLabel('Logs').setStyle(ButtonStyle.Secondary),
-    new ButtonBuilder().setCustomId('absence:delete').setEmoji('🗑️').setLabel('Supprimer mon absence').setStyle(ButtonStyle.Danger),
-  );
+const DEFAULT_TITLE = '🗓️ Tableau d’absences staff';
+
+const DEFAULT_DESCRIPTION = [
+  'Ce tableau recense les absences du staff. Chaque membre peut y signaler une absence, consulter celles en cours, ou retirer la sienne en cas d’erreur.',
+  '',
+  '📝 **Signaler mon absence** — motif, description, date de départ et date de retour',
+  '📋 **Logs** — le détail des absences, visible seulement par vous',
+  '🗑️ **Supprimer mon absence** — en cas d’erreur ou de changement de planning',
+].join('\n');
+
+function boardTitle(state) {
+  return (state?.title && String(state.title).trim()) || DEFAULT_TITLE;
 }
 
-function boardDescription(count) {
+function boardDescription(state) {
+  return (state?.description && String(state.description).trim()) || DEFAULT_DESCRIPTION;
+}
+
+function boardButtons() {
   return [
-    'Signalez une absence, consultez celles en cours ou retirez la vôtre en cas d’erreur.',
-    '',
-    `**Absences en cours : ${count}**`,
-  ].join('\n');
+    new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId('absence:signal').setEmoji('📝').setLabel('Signaler mon absence').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('absence:viewlogs').setEmoji('📋').setLabel('Logs').setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder().setCustomId('absence:delete').setEmoji('🗑️').setLabel('Supprimer mon absence').setStyle(ButtonStyle.Danger),
+    ),
+    new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId('absence:settings').setEmoji('⚙️').setLabel('Réglages').setStyle(ButtonStyle.Secondary),
+    ),
+  ];
+}
+
+function peopleLabel(count) {
+  return count <= 1 ? `${count} personne` : `${count} personnes`;
+}
+
+function soonestReturn(items, now = Date.now()) {
+  if (!items.length) return null;
+  const upcoming = items.filter((item) => item.returnAt > now).sort((a, b) => a.returnAt - b.returnAt);
+  if (upcoming.length) return upcoming[0].returnAt;
+  return items.slice().sort((a, b) => a.returnAt - b.returnAt)[0].returnAt;
+}
+
+function formatAbsenceList(items) {
+  if (!items.length) return 'Personne n’est absent pour le moment.';
+  const max = 10;
+  const lines = items.slice(0, max).map((item) => `${mention(item)} · retour ${discordTimestamp(item.returnAt, 'R')}`);
+  const rest = items.length - max;
+  if (rest > 0) lines.push(`*+${rest} autre${rest > 1 ? 's' : ''}*`);
+  return lines.join('\n').slice(0, 1024);
+}
+
+function guildIcon(guild, size = 128) {
+  try {
+    return guild?.iconURL?.({ size, extension: 'png' }) || null;
+  } catch {
+    return null;
+  }
 }
 
 function bannerFilePath(banner) {
@@ -68,12 +111,34 @@ function bannerFilePath(banner) {
   return fs.existsSync(abs) ? abs : null;
 }
 
-function boardPayload(state) {
+function boardPayload(state, guild, now = Date.now()) {
   const items = listAbsences(state);
+  const count = items.length;
   const embed = stamp(new EmbedBuilder()
-    .setTitle('Tableau d’absences staff')
-    .setDescription(boardDescription(items.length))
+    .setTitle(boardTitle(state))
+    .setDescription(boardDescription(state))
     .setColor(state.color), 'Absences', { keepColor: true });
+
+  if (count === 0) {
+    embed.addFields({ name: '🟢 Staff disponible', value: 'Tous les membres sont actuellement disponibles.' });
+  } else {
+    embed.addFields({ name: '🔴 Absences en cours', value: `**${peopleLabel(count)}**`, inline: true });
+    const next = soonestReturn(items, now);
+    if (next) embed.addFields({ name: '⏳ Prochain retour', value: discordTimestamp(next, 'R'), inline: true });
+  }
+  const updated = Number(state.updatedAt) || now;
+  embed.addFields({ name: '📅 Dernière mise à jour', value: discordTimestamp(updated, 'R'), inline: count === 0 });
+  if (count > 0) {
+    embed.addFields({ name: '👤 Absents actuellement', value: formatAbsenceList(items) });
+  }
+
+  const icon = guildIcon(guild);
+  const serverName = guild?.name ? String(guild.name).slice(0, 80) : null;
+  embed.setFooter({
+    text: serverName ? `${serverName} · DCAS` : 'DCAS · Absences',
+    iconURL: icon || undefined,
+  });
+  if (icon) embed.setThumbnail(icon);
 
   const files = [];
   if (state.banner?.kind === 'url') {
@@ -86,7 +151,7 @@ function boardPayload(state) {
       files.push(new AttachmentBuilder(file, { name }));
     }
   }
-  return { embeds: [embed], components: [boardButtons()], files };
+  return { embeds: [embed], components: boardButtons(), files };
 }
 
 async function sendOrEdit(channel, messageId, payload) {
@@ -105,36 +170,55 @@ async function sendOrEdit(channel, messageId, payload) {
 async function updateBoard(guild) {
   if (!guild) return { ok: false, message: 'Le bot n’est pas sur ce serveur.' };
   const state = store.get(guild.id);
-  if (!state.boardChannelId) return { ok: false, message: 'Aucun tableau n’est encore publié. Utilisez /tableau pour commencer.' };
-  const channel = await resolveTextChannel(guild, state.boardChannelId);
-  if (!channel) return { ok: false, message: 'Le salon du tableau est introuvable. Il a peut-être été supprimé. Relancez /tableau.' };
-  if (!canPost(channel, guild)) return { ok: false, message: missingPostMessage() };
-  try {
-    const message = await sendOrEdit(channel, state.boardMessageId, boardPayload(state));
-    if (message.id !== state.boardMessageId) {
-      store.update(guild.id, (current) => ({ ...current, boardMessageId: message.id, boardChannelId: channel.id }));
+  const boards = listBoards(state);
+  if (!boards.length) return { ok: false, message: 'Aucun tableau n’est encore publié. Utilisez /tableau pour commencer.' };
+  const payload = boardPayload(state, guild);
+  const next = [];
+  let okCount = 0;
+  let lastError = null;
+  let lastMessage = null;
+  let lastChannel = null;
+  for (const board of boards) {
+    const channel = await resolveTextChannel(guild, board.channelId);
+    if (!channel) continue;
+    if (!canPost(channel, guild)) {
+      lastError = missingPostMessage();
+      next.push(board);
+      continue;
     }
-    return { ok: true, message, channel };
-  } catch (error) {
-    return { ok: false, message: permissionMessage(error) || missingPostMessage() };
+    try {
+      const message = await sendOrEdit(channel, board.messageId, payload);
+      next.push({ channelId: channel.id, messageId: message.id });
+      okCount += 1;
+      lastMessage = message;
+      lastChannel = channel;
+    } catch (error) {
+      lastError = permissionMessage(error) || missingPostMessage();
+      next.push(board);
+    }
   }
+  store.update(guild.id, (current) => ({ ...current, boards: next }));
+  if (!okCount) return { ok: false, message: lastError || 'Impossible de mettre le tableau à jour. Vérifiez mes permissions dans le salon, puis réessayez.' };
+  return { ok: true, message: lastMessage, channel: lastChannel, count: okCount };
 }
 
-async function publishBoard(guild, boardChannel, logChannelId) {
+async function publishBoard(guild, boardChannel, { logChannelId = null, logsSpecified = false } = {}) {
   const previous = store.get(guild.id);
-  if (previous.boardChannelId && previous.boardMessageId && previous.boardChannelId !== boardChannel.id) {
-    const old = await resolveTextChannel(guild, previous.boardChannelId);
-    if (old) {
-      const msg = await old.messages.fetch(previous.boardMessageId).catch(() => null);
-      if (msg) await msg.delete().catch(() => {});
-    }
+  const boards = listBoards(previous);
+  const existing = boards.find((board) => board.channelId === boardChannel.id) || null;
+  if (existing?.messageId) {
+    const old = await boardChannel.messages.fetch(existing.messageId).catch(() => null);
+    if (old) await old.delete().catch(() => {});
   }
-  store.update(guild.id, (current) => ({
-    ...current,
-    boardChannelId: boardChannel.id,
-    logChannelId: logChannelId || null,
-  }));
-  return updateBoard(guild);
+  store.update(guild.id, (current) => {
+    const list = listBoards(current).filter((board) => board.channelId !== boardChannel.id);
+    list.push({ channelId: boardChannel.id, messageId: null });
+    const patch = { ...current, boards: list };
+    if (logsSpecified) patch.logChannelId = logChannelId || null;
+    return patch;
+  });
+  const result = await updateBoard(guild);
+  return { ...result, replaced: Boolean(existing), added: !existing };
 }
 
 function memberCard(item, { title, color, description, extraFields = [] }) {
@@ -239,10 +323,16 @@ function bannerDir() {
 module.exports = {
   LOGS_PER_PAGE,
   BANNER_DIR,
+  DEFAULT_TITLE,
+  DEFAULT_DESCRIPTION,
   listAbsences,
+  listBoards,
   boardButtons,
   boardPayload,
+  boardTitle,
   boardDescription,
+  formatAbsenceList,
+  soonestReturn,
   canPost,
   missingPostMessage,
   resolveTextChannel,

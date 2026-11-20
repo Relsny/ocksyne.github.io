@@ -9,13 +9,32 @@ const DEFAULT_FILE = path.join(__dirname, '..', '..', '..', 'data', 'absences.js
 
 function defaults() {
   return {
-    boardChannelId: null,
-    boardMessageId: null,
+    boards: [],
     logChannelId: null,
     color: DEFAULT_COLOR,
     banner: null,
+    title: null,
+    description: null,
+    updatedAt: 0,
     absences: {},
   };
+}
+
+function listBoards(state) {
+  const boards = Array.isArray(state?.boards) ? state.boards : [];
+  const seen = new Set();
+  const list = [];
+  for (const board of boards) {
+    if (!board || !board.channelId) continue;
+    const channelId = String(board.channelId);
+    if (seen.has(channelId)) continue;
+    seen.add(channelId);
+    list.push({
+      channelId,
+      messageId: board.messageId ? String(board.messageId) : null,
+    });
+  }
+  return list;
 }
 
 function clone(value) {
@@ -48,12 +67,24 @@ function normalize(raw) {
     if (src.banner.kind === 'url' && src.banner.value) banner = { kind: 'url', value: String(src.banner.value) };
     if (src.banner.kind === 'file' && src.banner.value) banner = { kind: 'file', value: String(src.banner.value) };
   }
+  let boards = [];
+  if (Array.isArray(src.boards) && src.boards.length) {
+    boards = listBoards({ boards: src.boards });
+  } else if (src.boardChannelId) {
+    boards = listBoards({
+      boards: [{ channelId: src.boardChannelId, messageId: src.boardMessageId || null }],
+    });
+  }
+  const title = typeof src.title === 'string' && src.title.trim() ? src.title.trim().slice(0, 256) : null;
+  const description = typeof src.description === 'string' && src.description.trim() ? src.description.trim().slice(0, 4000) : null;
   return {
-    boardChannelId: src.boardChannelId ? String(src.boardChannelId) : null,
-    boardMessageId: src.boardMessageId ? String(src.boardMessageId) : null,
+    boards,
     logChannelId: src.logChannelId ? String(src.logChannelId) : null,
     color: Number.isFinite(color) && color >= 0 && color <= 0xFFFFFF ? color : base.color,
     banner,
+    title,
+    description,
+    updatedAt: Number(src.updatedAt) || 0,
     absences,
   };
 }
@@ -106,6 +137,7 @@ function createStore(file = DEFAULT_FILE) {
     const allData = readFile(file);
     const current = normalize(allData[guildId]);
     const next = normalize(mutator(clone(current)) || current);
+    next.updatedAt = Date.now();
     allData[guildId] = next;
     writeAtomic(file, allData);
     return clone(next);
@@ -120,4 +152,4 @@ function createStore(file = DEFAULT_FILE) {
 
 const store = createStore();
 
-module.exports = { DEFAULT_FILE, defaults, createStore, store, normalize };
+module.exports = { DEFAULT_FILE, defaults, createStore, store, normalize, listBoards };

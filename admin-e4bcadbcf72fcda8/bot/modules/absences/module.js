@@ -7,5 +7,5 @@ module.exports = {
   permissions: ['ViewChannel', 'SendMessages', 'EmbedLinks', 'ReadMessageHistory', 'AttachFiles'],
   commands: [require('./commands/tableau'), require('./commands/settings')],
   events: [require('./events/tick')],
-  guide: ['/tableau publie le tableau dans le salon choisi, puis propose un salon de logs facultatif. Le bouton « Signaler mon absence » ouvre le formulaire. /settings change la couleur, la bannière et le salon de logs. Le retour est annoncé automatiquement, même après un redémarrage.'],
+  guide: ['/tableau publie un tableau dans le salon choisi (vous pouvez en avoir plusieurs). Le salon de logs est facultatif. /settings ou le bouton ⚙️ Réglages modifie le profil (titre et texte), la couleur, la bannière et les logs. Le retour est annoncé automatiquement, même après un redémarrage.'],
 };

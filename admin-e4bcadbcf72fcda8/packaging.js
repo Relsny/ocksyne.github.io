@@ -220,12 +220,14 @@
 <li>Un membre qui peut gérer le serveur tape /tableau.</li>
 <li>Il choisit d’abord le salon où le tableau d’absences sera publié.</li>
 <li>Ensuite, il peut choisir un salon de logs, ou cliquer sur <b>Passer (sans logs)</b>. Ce salon n’est pas obligatoire. Sans logs, le tableau, le compteur, le bouton Logs et le retour automatique fonctionnent quand même.</li>
-<li>Le tableau affiche le nombre d’absences en cours et trois boutons.</li>
+<li>Tu peux relancer /tableau dans un autre salon : chaque salon a son tableau, tous partagent les mêmes absences et le même profil, et restent à jour. Dans un salon qui a déjà un tableau, le message est remplacé (l’ancien est retiré, un nouveau est publié).</li>
+<li>Le tableau présente le staff, les absences en cours, le prochain retour, et une courte liste des personnes absentes, avec le nom et l’icône du serveur.</li>
 <li><b>📝 Signaler mon absence</b> ouvre un formulaire : motif, description, départ et retour au format JJ/MM/AAAA HH:MM (heure de Paris). Une seule absence à la fois : pour en déclarer une nouvelle, il faut d’abord supprimer l’ancienne.</li>
 <li><b>📋 Logs</b> montre la liste des absences en cours (avatar, mention, motif, horaires). Seule la personne qui clique voit cette réponse.</li>
 <li><b>🗑️ Supprimer mon absence</b> retire sa propre absence après confirmation.</li>
-<li>/settings couleur change la couleur de l’embed (code #F0B232 ou un nom : or, blurple, vert…). /settings banniere ajoute une image ou un GIF, ou la retire. /settings logs définit, change ou retire le salon de logs.</li>
-<li>À l’heure de retour, l’absence est retirée du tableau. Si un salon de logs est défini, un embed vert « De retour » y est publié. Le contrôle reprend après un redémarrage.</li>
+<li>Le bouton <b>⚙️ Réglages</b> (réservé à ceux qui peuvent gérer le serveur) et la commande /settings permettent de modifier le profil du tableau (titre et texte, ou rétablir le texte par défaut), la couleur, la bannière et le salon de logs. Sur un client Discord en français, la commande peut aussi apparaître sous le nom /reglages.</li>
+<li>Au lancement, le fichier lanceur réenregistre tout seul les commandes slash (/tableau, /settings, /help). Si une commande n’apparaît pas, remplis DISCORD_GUILD_ID dans token.txt puis relance : l’enregistrement sur un serveur est immédiat. Sans identifiant de serveur, le déploiement est global et peut prendre jusqu’à une heure ; un redémarrage de Discord (Ctrl+R) aide parfois.</li>
+<li>À l’heure de retour, l’absence est retirée de tous les tableaux. Si un salon de logs est défini, un embed vert « De retour » y est publié. Le contrôle reprend après un redémarrage.</li>
 </ol>`
         : slug === 'antidoublons'
         ? `<ol>

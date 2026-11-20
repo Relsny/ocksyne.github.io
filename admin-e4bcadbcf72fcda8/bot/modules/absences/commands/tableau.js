@@ -45,8 +45,8 @@ function skipLogsButton(boardChannelId) {
     .setStyle(ButtonStyle.Secondary);
 }
 
-async function finishSetup(interaction, boardChannel, logChannelId) {
-  const result = await publishBoard(interaction.guild, boardChannel, logChannelId);
+async function finishSetup(interaction, boardChannel, { logChannelId = null, logsSpecified = false } = {}) {
+  const result = await publishBoard(interaction.guild, boardChannel, { logChannelId, logsSpecified });
   if (!result.ok) {
     const payload = ephemeral(result.message);
     if (interaction.replied || interaction.deferred || interaction.message) {
@@ -58,10 +58,24 @@ async function finishSetup(interaction, boardChannel, logChannelId) {
     }
     return;
   }
-  const logsLine = logChannelId
-    ? `Le salon de logs est <#${logChannelId}>. Vous pourrez le changer ou le retirer plus tard avec /settings logs.`
-    : 'Aucun salon de logs n’a été choisi. Tout le reste fonctionne : le tableau, le compteur, le bouton Logs et le retour automatique. Vous pourrez en ajouter un plus tard avec /settings logs.';
-  const content = `Le tableau d’absences a été publié dans <#${boardChannel.id}>.\n${logsLine}`;
+  const state = store.get(interaction.guildId);
+  const boardCount = (state.boards || []).length;
+  const head = result.replaced
+    ? `Le tableau de <#${boardChannel.id}> a été actualisé.`
+    : `Le tableau d’absences a été publié dans <#${boardChannel.id}>.`;
+  const multi = boardCount > 1
+    ? ` Il y a actuellement ${boardCount} tableaux sur ce serveur. Ils partagent les mêmes absences et le même profil, et restent tous à jour.`
+    : ' Vous pouvez en publier un autre dans un salon différent avec /tableau : les absences resteront les mêmes.';
+  let logsLine;
+  if (logsSpecified && logChannelId) {
+    logsLine = `Le salon de logs est <#${logChannelId}>.`;
+  } else if (state.logChannelId) {
+    logsLine = `Le salon de logs reste <#${state.logChannelId}>.`;
+  } else {
+    logsLine = 'Aucun salon de logs n’a été choisi. Tout le reste fonctionne : le tableau, le compteur, le bouton Logs et le retour automatique.';
+  }
+  const settingsLine = 'Pour modifier le profil du tableau (titre, texte, couleur, bannière, logs), utilisez **/settings** ou le bouton ⚙️ Réglages sous le tableau.';
+  const content = `${head}${multi}\n${logsLine}\n${settingsLine}`;
   await interaction.update({ content, components: [] }).catch(async () => {
     await interaction.editReply({ content, components: [] }).catch(async () => {
       await interaction.followUp(ephemeral(content)).catch(() => {});
@@ -76,7 +90,7 @@ function selectedChannel(interaction) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('tableau')
-    .setDescription('Publie le tableau d’absences staff dans le salon de votre choix.')
+    .setDescription('Publie un tableau d’absences staff. Vous pouvez en avoir plusieurs, un par salon.')
     .setDMPermission(false)
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
   handlers: {
@@ -90,11 +104,17 @@ module.exports = {
         await interaction.reply(ephemeral(missingPostMessage()));
         return;
       }
+      const existingLogs = store.get(interaction.guildId).logChannelId;
+      const skip = skipLogsButton(channel.id);
+      if (existingLogs) skip.setLabel('Garder le réglage actuel');
+      const step = existingLogs
+        ? `Étape 2 sur 2 — Un salon de logs est déjà défini : <#${existingLogs}>. Vous pouvez en choisir un autre, ou garder ce réglage. Ce salon est facultatif.`
+        : 'Étape 2 sur 2 — Choisissez un salon de logs, ou passez cette étape. Ce salon est facultatif.';
       await interaction.update({
-        content: 'Étape 2 sur 2 — Choisissez un salon de logs, ou passez cette étape. Ce salon est facultatif.',
+        content: step,
         components: [
           new ActionRowBuilder().addComponents(logsSelect(channel.id)),
-          new ActionRowBuilder().addComponents(skipLogsButton(channel.id)),
+          new ActionRowBuilder().addComponents(skip),
         ],
       });
     },
@@ -114,7 +134,7 @@ module.exports = {
         await interaction.reply(ephemeral(missingPostMessage()));
         return;
       }
-      await finishSetup(interaction, boardChannel, logChannel.id);
+      await finishSetup(interaction, boardChannel, { logChannelId: logChannel.id, logsSpecified: true });
     },
     'absence:skip-logs': async (interaction) => {
       const boardId = interaction.customId.split(':')[2];
@@ -123,7 +143,7 @@ module.exports = {
         await interaction.update({ content: 'Le salon du tableau est introuvable. Relancez /tableau.', components: [] });
         return;
       }
-      await finishSetup(interaction, boardChannel, null);
+      await finishSetup(interaction, boardChannel, { logsSpecified: false });
     },
     'absence:signal': async (interaction) => {
       const state = store.get(interaction.guildId);

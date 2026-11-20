@@ -5,8 +5,9 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { parseParisDateTime, validateAbsenceRange, nextDelay, zonedLocalToUtc, MAX_TIMEOUT, TIMEZONE } = require('./dates');
-const { createStore } = require('./store');
+const { createStore, normalize, listBoards } = require('./store');
 const { parseColor } = require('./style');
+const { boardPayload, boardTitle, boardDescription, DEFAULT_TITLE, formatAbsenceList, soonestReturn } = require('./board');
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -71,7 +72,7 @@ const first = testStore.update('guild1', (state) => ({
     },
   },
 }));
-assert(first.boardChannelId === '111', 'salon du tableau enregistré');
+assert(first.boards.length === 1 && first.boards[0].channelId === '111', 'ancien boardChannelId migré vers boards');
 assert(first.logChannelId === null, 'salon de logs facultatif resté vide');
 assert(first.absences['42'].motif === 'Congés', 'absence enregistrée');
 
@@ -94,7 +95,60 @@ second.update('guild1', (state) => {
 const after = second.get('guild1');
 assert(!after.absences['42'], 'absence retirée');
 assert(after.logChannelId === '222', 'salon de logs ajouté plus tard');
-assert(after.boardChannelId === '111', 'le reste de la config est conservé');
+assert(after.boards[0].channelId === '111', 'le reste de la config est conservé');
+
+
+const migrated = normalize({ boardChannelId: '999', boardMessageId: '888', logChannelId: null, absences: {} });
+assert(migrated.boards[0].channelId === '999' && migrated.boards[0].messageId === '888', 'migration normalize depuis l’ancien format');
+assert(!('boardChannelId' in migrated) || migrated.boardChannelId == null, 'plus de boardChannelId unique après normalize');
+
+const multi = testStore.update('guild1', (state) => ({
+  ...state,
+  boards: [
+    { channelId: '111', messageId: 'm1' },
+    { channelId: '333', messageId: 'm2' },
+    { channelId: '111', messageId: 'm3' },
+  ],
+  title: '📅 Planning staff',
+  description: 'Texte personnalisé du tableau.',
+}));
+assert(multi.boards.length === 2, 'deux tableaux, doublon du même salon ignoré');
+assert(multi.title === '📅 Planning staff', 'titre personnalisé enregistré');
+assert(boardTitle(multi) === '📅 Planning staff', 'boardTitle utilise le titre perso');
+assert(boardTitle({ title: null }) === DEFAULT_TITLE, 'titre par défaut');
+assert(boardDescription({ description: null }).includes('Signaler mon absence'), 'texte par défaut');
+
+const resetProfile = testStore.update('guild1', (state) => ({ ...state, title: null, description: null }));
+assert(resetProfile.title === null && boardTitle(resetProfile) === DEFAULT_TITLE, 'réinitialisation du profil');
+
+const nowTs = Date.UTC(2026, 10, 20, 10, 0, 0);
+const items = [
+  { userId: '1', startAt: nowTs, returnAt: nowTs + 3_600_000, createdAt: nowTs },
+  { userId: '2', startAt: nowTs, returnAt: nowTs + 7_200_000, createdAt: nowTs },
+];
+assert(soonestReturn(items, nowTs) === nowTs + 3_600_000, 'prochain retour le plus proche');
+const list = formatAbsenceList(items.map((item) => ({ ...item, motif: 'x' })));
+assert(list.includes('<@1>') && list.includes('<t:'), 'liste des absents avec mention et horodatage');
+const many = formatAbsenceList(Array.from({ length: 12 }, (_, i) => ({ userId: String(i), returnAt: nowTs })));
+assert(many.includes('+2 autres'), 'liste tronquée avec +N autres');
+
+const payloadEmpty = boardPayload({ color: 0xF0B232, absences: {}, updatedAt: nowTs, banner: null, title: null, description: null }, null, nowTs);
+assert(payloadEmpty.embeds[0].data.title.includes('Tableau'), 'titre du tableau enrichi');
+assert(payloadEmpty.embeds[0].data.fields.some((field) => field.name.includes('Staff disponible')), 'champ staff disponible');
+assert(payloadEmpty.components.length === 2, 'deux rangées de boutons, dont Réglages');
+const payloadBusy = boardPayload({
+  color: 0xF0B232,
+  updatedAt: nowTs,
+  banner: { kind: 'url', value: 'https://example.com/banner.gif' },
+  title: null,
+  description: null,
+  absences: { 42: { userId: '42', motif: 'Congés', description: 'Off', startAt: nowTs, returnAt: nowTs + 3_600_000, createdAt: nowTs } },
+}, { name: 'Serveur test', iconURL: () => 'https://example.com/icon.png' }, nowTs);
+const names = payloadBusy.embeds[0].data.fields.map((field) => field.name).join(' | ');
+assert(names.includes('Absences en cours') && names.includes('Prochain retour') && names.includes('Dernière mise à jour') && names.includes('Absents'), `champs riches manquants : ${names}`);
+assert(payloadBusy.embeds[0].data.image && payloadBusy.embeds[0].data.image.url.includes('banner.gif'), 'bannière affichée');
+assert(payloadBusy.embeds[0].data.thumbnail, 'vignette (icône du serveur)');
+assert(payloadBusy.embeds[0].data.footer.text.includes('Serveur test'), 'pied de page avec le nom du serveur');
 
 const color = parseColor('#f0b232');
 assert(color.ok && color.value === 0xF0B232, 'couleur hex');
@@ -112,10 +166,20 @@ assert(typeof mod.events[0].execute === 'function', 'événement ready');
 const tableau = JSON.stringify(mod.commands[0].data.toJSON());
 assert(tableau.includes('tableau'), 'slash /tableau');
 const settingsJson = mod.commands[1].data.toJSON();
+assert(settingsJson.name_localizations && settingsJson.name_localizations.fr === 'reglages', 'localisation française /reglages');
+const subs = (settingsJson.options || []).map((option) => option.name);
+assert(subs.includes('profil') && subs.includes('couleur') && subs.includes('banniere') && subs.includes('logs'), `sous-commandes /settings : ${subs.join(',')}`);
 const logsSub = (settingsJson.options || []).find((option) => option.name === 'logs');
 assert(logsSub, 'sous-commande logs');
 const salonOpt = (logsSub.options || []).find((option) => option.name === 'salon');
 assert(salonOpt && salonOpt.required !== true, 'le salon de logs n’est pas obligatoire dans /settings');
+for (const command of mod.commands) {
+  const json = command.data.toJSON();
+  assert(json.description.length <= 100, `description trop longue pour /${json.name}`);
+  for (const option of json.options || []) {
+    assert(option.description.length <= 100, `description trop longue pour ${json.name} ${option.name}`);
+  }
+}
 
 const { loadModules, wire } = require('../../../src/load-modules');
 const { Client, Collection } = require('discord.js');
@@ -133,6 +197,8 @@ assert(client.handlers.has('absence:signal'), 'handler Signaler');
 assert(client.handlers.has('absence:viewlogs'), 'handler Logs');
 assert(client.handlers.has('absence:delete'), 'handler Supprimer');
 assert(client.handlers.has('absence:skip-logs'), 'handler Passer sans logs');
+assert(client.handlers.has('absence:settings'), 'handler Réglages');
+assert(client.handlers.has('absence:profil'), 'handler profil');
 
 fs.rmSync(dir, { recursive: true, force: true });
 console.log('ABSENCES SELFTEST OK');
