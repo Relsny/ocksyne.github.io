@@ -195,6 +195,15 @@
     "invites": [
       "modules/invites/commands/invites.js",
       "modules/invites/events/track.js",
+      "modules/invites/lib/cache.js",
+      "modules/invites/lib/flow-test.js",
+      "modules/invites/lib/messages.js",
+      "modules/invites/lib/resolve.js",
+      "modules/invites/lib/selftest.js",
+      "modules/invites/lib/store.js",
+      "modules/invites/lib/style.js",
+      "modules/invites/lib/ui-constraints-test.js",
+      "modules/invites/lib/ui.js",
       "modules/invites/module.js",
       "modules/invites/README.md"
     ],

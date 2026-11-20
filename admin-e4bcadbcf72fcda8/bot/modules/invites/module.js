@@ -4,8 +4,12 @@ module.exports = {
   slug: 'invites',
   intents: ['Guilds', 'GuildMembers', 'GuildInvites'],
   partials: [],
-  permissions: ['ManageGuild', 'SendMessages'],
+  permissions: ['ManageGuild', 'SendMessages', 'EmbedLinks', 'ViewChannel', 'ReadMessageHistory'],
   commands: [require('./commands/invites')],
   events: require('./events/track'),
-  guide: ['Le bot a besoin de Gérer le serveur pour lire les invitations. /invites salon choisit le journal. /invites montre les compteurs. Les arrivées pendant que le bot est éteint sont comptées comme non attribuées : on ne devine pas l’auteur.'],
+  guide: [
+    'Le bot a besoin de l’intent Server Members (à activer dans le portail Discord, onglet Bot) et de la permission Gérer le serveur pour lire les invitations.',
+    '/invites configurer ouvre le choix du salon de journal, puis le panneau : messages d’arrivée et de départ, activation, couleur, embed ou texte, seuil des faux comptes.',
+    '/invites membre, /invites classement, /invites bonus et /invites reset gèrent les compteurs. Les arrivées pendant que le bot était éteint ne sont pas attribuées au hasard.',
+  ],
 };

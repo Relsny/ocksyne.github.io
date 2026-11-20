@@ -229,6 +229,19 @@
 <li>Au lancement, le fichier lanceur réenregistre tout seul les commandes slash (/tableau, /settings, /help). Si une commande n’apparaît pas, remplis DISCORD_GUILD_ID dans token.txt puis relance : l’enregistrement sur un serveur est immédiat. Sans identifiant de serveur, le déploiement est global et peut prendre jusqu’à une heure ; un redémarrage de Discord (Ctrl+R) aide parfois.</li>
 <li>À l’heure de retour, l’absence est retirée de tous les tableaux. Si un salon de logs est défini, un embed vert « De retour » y est publié. Le contrôle reprend après un redémarrage.</li>
 </ol>`
+        : slug === 'invites'
+        ? `<ol>
+<li>Dans le portail Discord (onglet Bot), activez l’intent <b>Server Members</b>. Sans cet intent, le bot ne voit pas les arrivées.</li>
+<li>Accordez au bot la permission <b>Gérer le serveur</b>, indispensable pour lire les invitations, ainsi que l’accès au salon du journal (voir le salon, envoyer des messages, intégrer des liens).</li>
+<li>Un membre qui peut gérer le serveur tape /invites configurer.</li>
+<li>Il choisit d’abord le salon où le journal des arrivées et des départs sera publié.</li>
+<li>Le panneau de configuration s’ouvre (vous seul le voyez) : messages d’arrivée et de départ personnalisables, activation ou désactivation, couleur des embeds, affichage en embed ou en texte simple, seuil des faux comptes, changement de salon.</li>
+<li>Vous pouvez utiliser les variables {membre}, {mention}, {inviteur}, {mention_inviteur}, {code}, {utilisations}, {invitations_inviteur}, {serveur}, {compte_cree}, {age_compte}, {reguliers}, {partis}, {faux} et {bonus}.</li>
+<li>/invites membre affiche les compteurs (total, réguliers, partis, faux, bonus). /invites classement montre le haut du tableau. /invites bonus ajoute ou retire des invitations bonus. /invites reset remet les compteurs à zéro, après confirmation.</li>
+<li>Quand quelqu’un arrive, le bot compare le cache des invitations pour trouver laquelle a été utilisée (y compris le lien personnalisé du serveur). Si plusieurs ont bougé, ou si l’invitation n’est plus lisible, l’inviteur reste « inconnu ». Une arrivée via une application (OAuth) est indiquée comme telle.</li>
+<li>Au démarrage, le bot resynchronise seulement le cache : les arrivées pendant l’arrêt ne sont pas attribuées au hasard.</li>
+<li>Quand un membre part, le départ est retranché à l’inviteur d’origine. Un compte plus jeune que le seuil (7 jours par défaut, réglable) est compté comme faux.</li>
+</ol>`
         : slug === 'antidoublons'
         ? `<ol>
 <li>Dans Discord, tape /antidoublons panel. Seul toi vois la réponse.</li>

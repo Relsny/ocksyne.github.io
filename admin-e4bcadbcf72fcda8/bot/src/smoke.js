@@ -78,6 +78,9 @@ const extraTests = [
   'modules/absences/lib/selftest.js',
   'modules/absences/lib/ui-constraints-test.js',
   'modules/absences/lib/flow-test.js',
+  'modules/invites/lib/selftest.js',
+  'modules/invites/lib/ui-constraints-test.js',
+  'modules/invites/lib/flow-test.js',
 ];
 for (const rel of extraTests) {
   const file = path.join(__dirname, '..', rel);
