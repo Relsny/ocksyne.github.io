@@ -15,6 +15,7 @@ const KINDS = {
 };
 const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.mp3': 'audio/mpeg' };
 const FX = ['none', 'custom', 'rain', 'drops', 'night', 'blur', 'hacker'];
+const RGB_DIRS = ['right', 'left', 'down', 'up', 'both'];
 
 function useDir(dir) {
   DIR = dir;
@@ -86,11 +87,14 @@ function cleanTheme(input) {
     intensity: num(input.intensity, 20, 200, 100),
     fx: FX.includes(input.fx) ? input.fx : 'none',
     fxInt: num(input.fxInt, 10, 200, 100),
-    tr: num(input.tr, 0, 90, 40),
+    tr: num(input.tr, 0, 90, 55),
     blur: num(input.blur, 0, 40, 14),
     tab: ['look', 'fx', 'snd'].includes(input.tab) ? input.tab : 'fx',
     sndOn: input.sndOn === true,
     sndVol: num(input.sndVol, 0, 100, 70),
+    rgb: input.rgb === true,
+    rgbSpd: num(input.rgbSpd, 1, 100, 35),
+    rgbDir: RGB_DIRS.includes(input.rgbDir) ? input.rgbDir : 'right',
   };
 }
 

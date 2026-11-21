@@ -26,12 +26,19 @@ async function main() {
   try {
     // Réglages : valeurs inconnues écartées, bornes respectées
     assert(store.readPrefs().theme === null, 'aucun thème au départ');
-    const saved = store.saveTheme({ color: '#FF8800', intensity: 999, fx: 'custom', fxInt: 5, tr: 50, blur: 12, tab: 'snd', sndOn: true, sndVol: 150, danger: '<script>' });
+    const saved = store.saveTheme({ color: '#FF8800', intensity: 999, fx: 'custom', fxInt: 5, tr: 50, blur: 12, tab: 'snd', sndOn: true, sndVol: 150, rgb: true, rgbSpd: 60, rgbDir: 'up', danger: '<script>' });
     assert(saved.ok && saved.theme.color === '#ff8800' && saved.theme.intensity === 200 && saved.theme.fxInt === 10, 'bornes du thème');
     assert(saved.theme.sndVol === 100 && saved.theme.tab === 'snd' && !('danger' in saved.theme), 'champs inconnus écartés');
     assert(store.cleanTheme({ fx: 'bidon', color: 'rouge', tab: 'x' }).fx === 'none', 'effet inconnu');
     assert(store.cleanTheme({ color: 'rouge' }).color === '#ffffff', 'couleur invalide');
     assert(!store.saveTheme('nope').ok, 'thème invalide refusé');
+    // Mode RGB : éteint par défaut, bornes et direction contrôlées
+    const rgb0 = store.cleanTheme({ color: '#ffffff' });
+    assert(rgb0.rgb === false && rgb0.rgbSpd === 35 && rgb0.rgbDir === 'right', 'RGB éteint par défaut');
+    const rgb1 = store.cleanTheme({ color: '#ffffff', rgb: true, rgbSpd: 900, rgbDir: 'both' });
+    assert(rgb1.rgb === true && rgb1.rgbSpd === 100 && rgb1.rgbDir === 'both', 'RGB borné');
+    assert(store.cleanTheme({ rgb: 'oui', rgbSpd: 0, rgbDir: 'diagonale' }).rgb === false && store.cleanTheme({ rgbSpd: 0 }).rgbSpd === 1 && store.cleanTheme({ rgbDir: 'diagonale' }).rgbDir === 'right', 'RGB : valeurs invalides écartées');
+    for (const d of ['right', 'left', 'down', 'up', 'both']) assert(store.cleanTheme({ rgbDir: d }).rgbDir === d, 'direction ' + d);
 
     // Fond : PNG, JPG, WEBP, GIF acceptés d'après les octets, le reste refusé
     for (const [name, buf, type] of [['a.png', PNG, 'image/png'], ['a.jpg', JPG, 'image/jpeg'], ['a.webp', WEBP, 'image/webp'], ['anim.gif', GIF, 'image/gif']]) {
@@ -57,7 +64,7 @@ async function main() {
 
     // Panneau : page avec les réglages déjà dedans, routes protégées par le jeton, fichiers servis avec le bon type
     const html = page();
-    assert(html.includes('"color":"#ff8800"') && html.includes('"name":"clic2.mp3"') && !html.includes('{{UI}}'), 'réglages dans la page');
+    assert(html.includes('"rgb":true') && html.includes('"rgbDir":"up"') && html.includes('"color":"#ff8800"') && html.includes('"name":"clic2.mp3"') && !html.includes('{{UI}}'), 'réglages dans la page');
     const started = await startLocalPanel({ page, routes: uiRoutes() });
     const base = `http://127.0.0.1:${started.port}`;
     const q = `?token=${started.token}`;

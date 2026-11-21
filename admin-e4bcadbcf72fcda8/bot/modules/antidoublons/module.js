@@ -16,6 +16,6 @@ module.exports = {
     '6. Le bouton rouge STOP arrête tout de suite.',
     '7. Ensuite, chaque nouveau doublon reçoit un message « Doublon détecté » avec le lien de l’original, puis il est supprimé.',
     '8. Si le bot redémarre alors que c’est activé, il rattrape les messages manqués puis reprend.',
-    '9. Le bouton Supplément règle la couleur, l’ambiance du fond (ou ton image / GIF) et un son de clic en .mp3, enregistrés dans data/antidoublons-ui/.',
+    '9. Le bouton Supplément règle la couleur (avec un mode RGB qui fait défiler toutes les couleurs), l’ambiance du fond (ou ton image / GIF) et un son de clic en .mp3, enregistrés dans data/antidoublons-ui/.',
   ],
 };
