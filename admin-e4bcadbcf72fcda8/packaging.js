@@ -321,6 +321,8 @@
 <li>Clique sur Activer. Le panneau demande une première confirmation : tout l’historique des salons choisis sera analysé, et tous les doublons seront supprimés (le plus ancien est gardé). Puis une seconde : les messages supprimés ne pourront pas être récupérés.</li>
 <li>L’analyse démarre tout de suite. Le tableau et l’historique montrent les messages lus et les doublons, retirés au fur et à mesure. À la fin, la surveillance en direct s’active.</li>
 <li>Le bouton rouge STOP arrête tout de suite.</li>
+<li>Le bouton Supplément (en haut, à côté du titre) règle la couleur, l’ambiance du fond (pluie, gouttes, nuit, flou, hacker, ou ton propre fond : une image PNG, JPG ou WEBP, ou un GIF, 5 Mo maximum) et un son de clic en .mp3 (aucun par défaut, 3 Mo maximum, avec volume, test et retrait). Tout est enregistré dans data/antidoublons-ui/, sur cet ordinateur seulement.</li>
+<li>Dans la carte Liens supprimés, un clic sur un lien ouvre la page d’origine dans un nouvel onglet.</li>
 <li>Ensuite, chaque nouveau doublon reçoit un message Doublon détecté avec le lien de l original, puis il est supprimé.</li>
 </ol>`
         : `<pre>${escapeHtml(body).slice(0, 3500)}</pre>`;

@@ -3,6 +3,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { startLocalPanel } = require('../../src/local-panel');
+const uiStore = require('./lib/ui-store');
 
 const sessions = new Map();
 
@@ -48,17 +49,54 @@ function page() {
   }
   const logoFile = findLogo();
   const logo = logoFile ? `data:image/png;base64,${fs.readFileSync(logoFile).toString('base64')}` : '';
+  const ui = JSON.stringify(uiStore.readPrefs()).replace(/</g, '\\u003c');
   return fs.readFileSync(path.join(__dirname, 'panel.html'), 'utf8')
     .replace('{{ICONS}}', JSON.stringify(icons).replace(/</g, '\\u003c'))
-    .replace('{{LOGO}}', logo);
+    .replace('{{LOGO}}', logo)
+    .replace('{{UI}}', () => ui);
+}
+
+function sendMedia(kind) {
+  return (_req, res) => {
+    const found = uiStore.mediaFilePath(kind);
+    if (!found) {
+      res.status(404).type('text/plain').send('Aucun fichier.');
+      return;
+    }
+    res.set({ 'Content-Type': found.type, 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-store' });
+    res.sendFile(found.file, { dotfiles: 'allow', headers: { 'Content-Type': found.type } });
+  };
+}
+
+function safe(fn) {
+  return (req, res) => {
+    try {
+      res.json(fn(req.body || {}));
+    } catch {
+      res.json({ ok: false, message: 'Enregistrement impossible sur cet ordinateur.' });
+    }
+  };
+}
+
+// Routes d'apparence : thème, fond personnalisé et son des clics (enregistrés dans data/antidoublons-ui/).
+function uiRoutes() {
+  return [
+    { method: 'get', path: '/api/ui', handler: safe(() => ({ ok: true, ...uiStore.readPrefs() })) },
+    { method: 'post', path: '/api/ui/theme', handler: safe((body) => uiStore.saveTheme(body.theme)) },
+    { method: 'post', path: '/api/ui/media', handler: safe((body) => uiStore.saveMedia(String(body.kind || ''), body)) },
+    { method: 'post', path: '/api/ui/media/remove', handler: safe((body) => uiStore.removeMedia(String(body.kind || ''))) },
+    { method: 'get', path: '/api/ui/media/bg', handler: sendMedia('bg') },
+    { method: 'get', path: '/api/ui/media/sound', handler: sendMedia('sound') },
+  ];
 }
 
 async function openDashboard(context) {
   const previous = sessions.get(context.guildId);
   if (previous) await previous.close();
   const started = await startLocalPanel({
-    page: page(),
+    page,
     routes: [
+      ...uiRoutes(),
       { method: 'get', path: '/api/state', handler: (_req, res) => res.json(context.getState()) },
       { method: 'post', path: '/api/config', handler: (req, res) => res.json(context.saveConfig(req.body || {})) },
       { method: 'post', path: '/api/rule34', handler: (req, res) => res.json(context.saveRule34 ? context.saveRule34(req.body || {}) : { ok: false }) },
@@ -72,7 +110,7 @@ async function openDashboard(context) {
   return started;
 }
 
-module.exports = { openDashboard, page };
+module.exports = { openDashboard, page, uiRoutes };
 
 if (require.main === module) {
   openDashboard({

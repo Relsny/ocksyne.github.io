@@ -94,6 +94,10 @@ const extraTests = [
   'modules/verif/lib/selftest.js',
   'modules/verif/lib/ui-constraints-test.js',
   'modules/verif/lib/flow-test.js',
+  'modules/antidoublons/lib/selftest.js',
+  'modules/antidoublons/lib/fullscan-test.js',
+  'modules/antidoublons/lib/delete-test.js',
+  'modules/antidoublons/lib/ui-test.js',
 ];
 for (const rel of extraTests) {
   const file = path.join(__dirname, '..', rel);

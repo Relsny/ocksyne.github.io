@@ -17,7 +17,7 @@ function startLocalPanel({ page, routes }) {
     next();
   });
   app.get('/', (_req, res) => {
-    res.type('html').send(page);
+    res.type('html').send(typeof page === 'function' ? page() : page);
   });
   for (const route of routes) app[route.method](route.path, route.handler);
 

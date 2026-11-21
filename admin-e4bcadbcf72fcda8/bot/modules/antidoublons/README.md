@@ -20,6 +20,16 @@ Deux modes d’image : Exact (empreinte identique) ou Avancé (ressemblance, si 
 
 Les messages de moins de 14 jours sont supprimés en lot. Les plus anciens partent un par un, avec une pause, à cause des limites de Discord.
 
+## Supplément (apparence du panneau)
+
+Le bouton **Supplément**, à côté du titre, ouvre trois onglets :
+
+- **Couleur** : couleur d’accent (sélecteur, code HTML, RVB, couleurs prêtes) et intensité.
+- **Ambiance** : Aucun, **Mon fond**, Pluie, Gouttes (condensation, sans relief), Nuit, Flou, Hacker, avec les curseurs d’intensité, de transparence du fond et de flou du verre. **Mon fond** accepte une image PNG, JPG ou WEBP, ou un GIF (5 Mo maximum), choisie depuis l’ordinateur, avec aperçu, remplacement et retrait. Pour ce fond, le curseur d’intensité règle la luminosité.
+- **Son** : aucun son par défaut. Un fichier **.mp3** (3 Mo maximum) est joué à chaque clic sur un bouton du panneau, avec interrupteur, volume, bouton Tester et retrait.
+
+Le panneau écoute sur un port différent à chaque lancement, le navigateur ne peut donc rien retenir : le bot garde lui-même les réglages, le fond et le son dans `data/antidoublons-ui/` (ce dossier reste sur l’ordinateur, jamais dans token.txt). Dans la carte **Liens supprimés**, un clic sur un lien ouvre la page d’origine dans un nouvel onglet.
+
 ## Après l’analyse
 
 Chaque nouveau doublon déclenche un embed « Doublon détecté » avec le lien de l’original, puis la suppression.

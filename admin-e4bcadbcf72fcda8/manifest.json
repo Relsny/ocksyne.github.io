@@ -95,6 +95,8 @@
       "modules/antidoublons/lib/normalizer.js",
       "modules/antidoublons/lib/selftest.js",
       "modules/antidoublons/lib/sources.js",
+      "modules/antidoublons/lib/ui-store.js",
+      "modules/antidoublons/lib/ui-test.js",
       "modules/antidoublons/module.js",
       "modules/antidoublons/panel.html",
       "modules/antidoublons/README.md",
