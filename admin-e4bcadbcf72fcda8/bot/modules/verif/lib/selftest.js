@@ -20,11 +20,14 @@ function assert(condition, message) {
 
 // --- Captcha : code
 assert([...captcha.ALPHABET].every((c) => captcha.FONT[c]), 'chaque caractère de l’alphabet a un dessin');
-assert(!/[01OI]/.test(captcha.ALPHABET), 'pas de caractères ambigus (0, 1, O, I)');
+assert(!/[0Oo1lI]/.test(captcha.ALPHABET), 'pas de caractères ambigus (0, O, o, 1, l, I)');
 const rand = captcha.seeded(7);
 const code = captcha.generateCode(5, rand);
 assert(code.length === 5 && [...code].every((c) => captcha.ALPHABET.includes(c)), 'code de 5 caractères valides');
-assert(captcha.normalizeCode(' k7-pq 2 ') === 'K7PQ2', 'saisie normalisée (casse, espaces, tirets)');
+assert(/[A-Z]/.test(code) && /[a-z]/.test(code) && /[0-9]/.test(code), 'chaque code a une majuscule, une minuscule et un chiffre');
+assert(Array.from({ length: 80 }, () => captcha.generateCode(5)).every((c) => /[A-Z]/.test(c) && /[a-z]/.test(c) && /[0-9]/.test(c) && !/[0Oo1lI]/.test(c)), 'tirages réels : classes et lisibilité');
+assert(captcha.normalizeCode(' k7-pQ 2 ') === 'k7pQ2', 'espaces et tirets retirés, casse conservée');
+assert(captcha.normalizeCode('Ab3') !== captcha.normalizeCode('ab3'), 'la casse est significative');
 const distinct = new Set(Array.from({ length: 200 }, () => captcha.generateCode(5))).size;
 assert(distinct > 190, 'codes aléatoires variés');
 
@@ -58,7 +61,8 @@ assert(!captcha.renderCaptcha('K7PQ2', captcha.seeded(1)).png.equals(captcha.ren
 assert(captcha.renderCaptcha('K7PQ2', captcha.seeded(1)).png.equals(png), 'tirage reproductible avec une graine');
 const ch = captcha.newChallenge();
 assert(captcha.hashCode(ch.code, ch.salt) === ch.hash && ch.hash.length === 64 && !ch.hash.includes(ch.code), 'code mémorisé sous forme de hachage salé');
-assert(captcha.hashCode(ch.code.toLowerCase(), ch.salt) === ch.hash, 'comparaison insensible à la casse');
+assert(ch.code !== ch.code.toLowerCase() || /[A-Z]/.test(ch.code) === false, 'sanity');
+assert(captcha.hashCode(ch.code === ch.code.toUpperCase() ? ch.code.toLowerCase() : ch.code.toUpperCase(), ch.salt) !== ch.hash, 'comparaison sensible à la casse');
 
 // --- Couleur, image
 assert(parseColor('#23a55a').value === 0x23A55A, 'couleur hexadécimale');
@@ -122,18 +126,22 @@ assert(store.get(gid).pending[uid].code === null, 'code invalidé après un éch
 engine.issueChallenge(gid, uid);
 assert(engine.checkAnswer(gid, uid, 'ZZZZZ').status === 'exhausted', 'deuxième échec : essais épuisés');
 store.update(gid, (s) => { s.pending[uid] = { deadline: null, attempts: 0, code: { salt: 'a', hash: captcha.hashCode('K7PQ2', 'a'), expires: Date.now() + 1000 } }; return s; });
-assert(engine.checkAnswer(gid, uid, ' k7pq2 ').status === 'ok', 'bon code, casse et espaces ignorés');
+assert(engine.checkAnswer(gid, uid, ' k7pq2 ').status === 'wrong', 'mauvaise casse refusée');
+store.update(gid, (s) => { s.pending[uid].attempts = 0; s.pending[uid].code = { salt: 'a', hash: captcha.hashCode('K7PQ2', 'a'), expires: Date.now() + 1000 }; return s; });
+assert(engine.checkAnswer(gid, uid, ' K7PQ2 ').status === 'ok', 'bon code, espaces ignorés, casse respectée');
 store.update(gid, (s) => { s.pending[uid].code.expires = Date.now() - 1; return s; });
 const expired = engine.checkAnswer(gid, uid, 'K7PQ2');
 assert(expired.status === 'expired' && store.get(gid).pending[uid].attempts === 0, 'code expiré : aucun essai perdu');
 
 // --- Message privé
 const member = makeMember(guild, uid);
-const kickDm = engine.dmEmbed(guild, { ...base, attempts: 3, dmText: 'Contactez-nous.', timeoutMin: 10 }, 'kick', 'Raison de test.').toJSON();
+const kickDm = engine.dmEmbed(guild, { ...base, attempts: 3, dmText: 'Contactez-nous.', timeoutMin: 10 }, 'kick', 'attempts').toJSON();
 assert(/expulsé\(e\)/.test(kickDm.title) && /Serveur test/.test(kickDm.title), 'MP : titre d’expulsion avec le nom du serveur');
-assert(/rejoindre à nouveau/.test(kickDm.description) && kickDm.fields[0].value === 'Contactez-nous.', 'MP : retour possible et texte personnalisé');
-const banDm = engine.dmEmbed(guild, { ...base, dmText: null }, 'ban', 'Raison de test.').toJSON();
-assert(/banni\(e\)/.test(banDm.title) && !/rejoindre à nouveau/.test(banDm.description) && !banDm.fields, 'MP : bannissement sans retour, sans texte personnalisé');
+assert(/Serveur test/.test(kickDm.description) && /3 essai/.test(kickDm.description) && /rejoindre/.test(kickDm.description), 'MP : texte par défaut complet (serveur, essais, retour)');
+assert(kickDm.fields[0].value === 'Contactez-nous.', 'ancien texte personnalisé encore ajouté');
+const banDm = engine.dmEmbed(guild, { ...base, dmText: null, timeoutMin: 10 }, 'ban', 'timeout').toJSON();
+assert(/banni\(e\)/.test(banDm.title) && /10 minute/.test(banDm.description) && /ne pouvez pas rejoindre/.test(banDm.description) && !banDm.fields, 'MP : bannissement, délai, pas de retour');
+assert(engine.defaultDmText('kick').includes('{serveur}') && engine.defaultDmText('ban').includes('{raison}'), 'modèle prêt à préremplir la modale');
 assert(member.id === uid, 'sanity');
 
 console.log(`VERIF SELFTEST OK (${checks} vérifications)`);

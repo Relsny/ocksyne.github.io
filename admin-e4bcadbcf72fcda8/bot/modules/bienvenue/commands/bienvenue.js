@@ -30,18 +30,32 @@ async function denyIfUnauthorized(interaction) {
   return true;
 }
 
-async function showPanel(interaction, { update = false } = {}) {
+
+function canUpdateOriginal(interaction) {
+  if (interaction.isChatInputCommand?.()) return false;
+  if (typeof interaction.update !== 'function') return false;
+  if (interaction.isModalSubmit?.()) return Boolean(interaction.isFromMessage?.() || interaction.message);
+  return true;
+}
+
+async function showPanel(interaction, { update = false, note = '' } = {}) {
   const payload = configPanel(store.get(interaction.guildId), interaction.guild);
-  if (update && typeof interaction.update === 'function' && !interaction.isModalSubmit()) {
-    await interaction.update({
-      content: payload.content,
-      embeds: payload.embeds,
-      components: payload.components,
-    });
+  if (note) payload.content = [payload.content, note].filter(Boolean).join('\n');
+  const body = {
+    content: payload.content ?? null,
+    embeds: payload.embeds,
+    components: payload.components,
+  };
+  if (interaction.replied || interaction.deferred) {
+    if (typeof interaction.editReply === 'function' && !interaction.isChatInputCommand?.()) {
+      await interaction.editReply(body);
+      return;
+    }
+    await interaction.followUp(payload);
     return;
   }
-  if (interaction.replied || interaction.deferred) {
-    await interaction.followUp(payload);
+  if ((update || canUpdateOriginal(interaction)) && canUpdateOriginal(interaction)) {
+    await interaction.update(body);
     return;
   }
   await interaction.reply(payload);
@@ -66,23 +80,23 @@ async function saveJoinChannel(interaction, channel, { updatePanel = true } = {}
 async function saveText(interaction, field, key, emptyMessage, okMessage, title) {
   const value = interaction.fields.getTextInputValue(field).trim();
   if (!value) {
-    await interaction.reply(replyCard(emptyMessage, title));
+    await showPanel(interaction, { note: `⚠️ ${emptyMessage}` });
     return;
   }
   store.update(interaction.guildId, (current) => ({ ...current, [key]: value }));
-  await interaction.reply(replyCard(okMessage, title));
+  await showPanel(interaction, { note: `✅ ${okMessage}` });
 }
 
 async function handleImageSubmit(interaction, role) {
   const uploaded = interaction.fields.getUploadedFiles?.('fichier');
   const attachment = uploaded?.first?.() || uploaded?.[0] || uploaded;
   if (!attachment) {
-    await interaction.reply(replyCard('Ajoutez une image ou un GIF (8 Mo maximum).', 'Bannière'));
+    await showPanel(interaction, { note: '⚠️ Ajoutez une image ou un GIF (8 Mo maximum).' });
     return;
   }
   const saved = await saveImageFromAttachment(interaction.guildId, attachment, role);
   if (!saved.ok) {
-    await interaction.reply(replyCard(saved.message, 'Bannière'));
+    await showPanel(interaction, { note: `⚠️ ${saved.message}` });
     return;
   }
   const key = role === 'leave' ? 'leaveImage' : 'joinImage';
@@ -92,12 +106,9 @@ async function handleImageSubmit(interaction, role) {
     }
     return { ...current, [key]: saved.image };
   });
-  await interaction.reply(replyCard(
-    role === 'leave'
-      ? 'La bannière du message de départ a été enregistrée. Elle sera jointe à chaque publication (le lien d’origine n’est pas conservé, il finirait par expirer).'
-      : 'La bannière du message d’accueil a été enregistrée. Elle sera jointe à chaque publication (le lien d’origine n’est pas conservé, il finirait par expirer).',
-    'Bannière',
-  ));
+  await showPanel(interaction, { note: role === 'leave'
+    ? '✅ La bannière du message de départ a été enregistrée. Elle sera jointe à chaque publication (le lien d’origine n’est pas conservé, il finirait par expirer).'
+    : '✅ La bannière du message d’accueil a été enregistrée. Elle sera jointe à chaque publication (le lien d’origine n’est pas conservé, il finirait par expirer).' });
 }
 
 module.exports = {
@@ -226,7 +237,7 @@ module.exports = {
       }
       const parsed = parseColor(id);
       if (!parsed.ok) {
-        await interaction.reply(replyCard(parsed.message, 'Couleur invalide'));
+        await showPanel(interaction, { note: `⚠️ ${parsed.message}` });
         return;
       }
       const key = kind === 'leave' ? 'leaveColor' : 'joinColor';
@@ -237,21 +248,21 @@ module.exports = {
       if (await denyIfUnauthorized(interaction)) return;
       const parsed = parseColor(interaction.fields.getTextInputValue('hex'));
       if (!parsed.ok) {
-        await interaction.reply(replyCard(parsed.message, 'Couleur invalide'));
+        await showPanel(interaction, { note: `⚠️ ${parsed.message}` });
         return;
       }
       store.update(interaction.guildId, (current) => ({ ...current, joinColor: parsed.value }));
-      await interaction.reply(replyCard(`La couleur du message d’accueil est maintenant ${parsed.hex}.`, 'Couleur'));
+      await showPanel(interaction, { note: `✅ La couleur du message d’accueil est maintenant ${parsed.hex}.` });
     },
     'bienvenue:hex-leave-submit': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
       const parsed = parseColor(interaction.fields.getTextInputValue('hex'));
       if (!parsed.ok) {
-        await interaction.reply(replyCard(parsed.message, 'Couleur invalide'));
+        await showPanel(interaction, { note: `⚠️ ${parsed.message}` });
         return;
       }
       store.update(interaction.guildId, (current) => ({ ...current, leaveColor: parsed.value }));
-      await interaction.reply(replyCard(`La couleur du message de départ est maintenant ${parsed.hex}.`, 'Couleur'));
+      await showPanel(interaction, { note: `✅ La couleur du message de départ est maintenant ${parsed.hex}.` });
     },
     'bienvenue:preview': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
@@ -315,7 +326,7 @@ module.exports = {
     'bienvenue:image-join-retirer': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
       if (!store.get(interaction.guildId).joinImage) {
-        await interaction.reply(replyCard('Aucune bannière d’accueil n’est configurée.', 'Bannière'));
+        await showPanel(interaction, { note: '⚠️ Aucune bannière d’accueil n’est configurée.' });
         return;
       }
       await interaction.reply(removeImageConfirm('join'));
@@ -323,7 +334,7 @@ module.exports = {
     'bienvenue:image-leave-retirer': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
       if (!store.get(interaction.guildId).leaveImage) {
-        await interaction.reply(replyCard('Aucune bannière de départ n’est configurée.', 'Bannière'));
+        await showPanel(interaction, { note: '⚠️ Aucune bannière de départ n’est configurée.' });
         return;
       }
       await interaction.reply(removeImageConfirm('leave'));

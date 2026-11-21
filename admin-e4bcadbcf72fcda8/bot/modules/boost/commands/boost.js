@@ -29,18 +29,32 @@ async function denyIfUnauthorized(interaction) {
   return true;
 }
 
-async function showPanel(interaction, { update = false } = {}) {
+
+function canUpdateOriginal(interaction) {
+  if (interaction.isChatInputCommand?.()) return false;
+  if (typeof interaction.update !== 'function') return false;
+  if (interaction.isModalSubmit?.()) return Boolean(interaction.isFromMessage?.() || interaction.message);
+  return true;
+}
+
+async function showPanel(interaction, { update = false, note = '' } = {}) {
   const payload = configPanel(store.get(interaction.guildId), interaction.guild);
-  if (update && typeof interaction.update === 'function' && !interaction.isModalSubmit()) {
-    await interaction.update({
-      content: payload.content,
-      embeds: payload.embeds,
-      components: payload.components,
-    });
+  if (note) payload.content = [payload.content, note].filter(Boolean).join('\n');
+  const body = {
+    content: payload.content ?? null,
+    embeds: payload.embeds,
+    components: payload.components,
+  };
+  if (interaction.replied || interaction.deferred) {
+    if (typeof interaction.editReply === 'function' && !interaction.isChatInputCommand?.()) {
+      await interaction.editReply(body);
+      return;
+    }
+    await interaction.followUp(payload);
     return;
   }
-  if (interaction.replied || interaction.deferred) {
-    await interaction.followUp(payload);
+  if ((update || canUpdateOriginal(interaction)) && canUpdateOriginal(interaction)) {
+    await interaction.update(body);
     return;
   }
   await interaction.reply(payload);
@@ -91,21 +105,21 @@ module.exports = {
       if (await denyIfUnauthorized(interaction)) return;
       const titre = interaction.fields.getTextInputValue('titre').trim();
       if (!titre) {
-        await interaction.reply(replyCard('Le titre ne peut pas être vide.', 'Titre'));
+        await showPanel(interaction, { note: '⚠️ Le titre ne peut pas être vide.' });
         return;
       }
       store.update(interaction.guildId, (current) => ({ ...current, title: titre.slice(0, 256) }));
-      await interaction.reply(replyCard('Le titre du message de boost a été enregistré.', 'Titre'));
+      await showPanel(interaction, { note: '✅ Le titre du message de boost a été enregistré.' });
     },
     'boost:texte-submit': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
       const texte = interaction.fields.getTextInputValue('texte').trim();
       if (!texte) {
-        await interaction.reply(replyCard('Le texte ne peut pas être vide.', 'Texte'));
+        await showPanel(interaction, { note: '⚠️ Le texte ne peut pas être vide.' });
         return;
       }
       store.update(interaction.guildId, (current) => ({ ...current, message: texte.slice(0, 1900) }));
-      await interaction.reply(replyCard('Le texte du message de boost a été enregistré.', 'Texte'));
+      await showPanel(interaction, { note: '✅ Le texte du message de boost a été enregistré.' });
     },
     'boost:toggle': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
@@ -121,7 +135,7 @@ module.exports = {
       if (await denyIfUnauthorized(interaction)) return;
       const parsed = parseColor(interaction.values?.[0]);
       if (!parsed.ok) {
-        await interaction.reply(replyCard(parsed.message, 'Couleur invalide'));
+        await showPanel(interaction, { note: `⚠️ ${parsed.message}` });
         return;
       }
       store.update(interaction.guildId, (current) => ({ ...current, color: parsed.value }));
@@ -135,11 +149,11 @@ module.exports = {
       if (await denyIfUnauthorized(interaction)) return;
       const parsed = parseColor(interaction.fields.getTextInputValue('hex'));
       if (!parsed.ok) {
-        await interaction.reply(replyCard(parsed.message, 'Couleur invalide'));
+        await showPanel(interaction, { note: `⚠️ ${parsed.message}` });
         return;
       }
       store.update(interaction.guildId, (current) => ({ ...current, color: parsed.value }));
-      await interaction.reply(replyCard(`La couleur de l’embed est maintenant ${parsed.hex}.`, 'Couleur'));
+      await showPanel(interaction, { note: `✅ La couleur de l’embed est maintenant ${parsed.hex}.` });
     },
     'boost:preview': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
@@ -178,12 +192,12 @@ module.exports = {
       const uploaded = interaction.fields.getUploadedFiles?.('fichier');
       const attachment = uploaded?.first?.() || uploaded?.[0] || uploaded;
       if (!attachment) {
-        await interaction.reply(replyCard('Ajoutez une image ou un GIF (8 Mo maximum).', 'Image'));
+        await showPanel(interaction, { note: '⚠️ Ajoutez une image ou un GIF (8 Mo maximum).' });
         return;
       }
       const saved = await saveImageFromAttachment(interaction.guildId, attachment);
       if (!saved.ok) {
-        await interaction.reply(replyCard(saved.message, 'Image'));
+        await showPanel(interaction, { note: `⚠️ ${saved.message}` });
         return;
       }
       store.update(interaction.guildId, (current) => {
@@ -192,12 +206,12 @@ module.exports = {
         }
         return { ...current, image: saved.image };
       });
-      await interaction.reply(replyCard('L’image du message de boost a été enregistrée. Elle sera jointe à chaque publication (le lien d’origine n’est pas conservé, il finirait par expirer).', 'Image'));
+      await showPanel(interaction, { note: '✅ L’image du message de boost a été enregistrée. Elle sera jointe à chaque publication (le lien d’origine n’est pas conservé, il finirait par expirer).' });
     },
     'boost:image-retirer': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
       if (!store.get(interaction.guildId).image) {
-        await interaction.reply(replyCard('Aucune image n’est configurée.', 'Image'));
+        await showPanel(interaction, { note: '⚠️ Aucune image n’est configurée.' });
         return;
       }
       await interaction.reply(removeImageConfirm());

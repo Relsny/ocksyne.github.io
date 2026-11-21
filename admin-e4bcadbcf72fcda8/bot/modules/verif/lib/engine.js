@@ -150,22 +150,56 @@ async function grantAccess(member) {
 
 // ---------- Sanction : message privé puis expulsion ou bannissement ----------
 
-function dmEmbed(guild, config, action, reason) {
-  const ban = action === 'ban';
-  const embed = new EmbedBuilder()
-    .setTitle(ban ? `🔨 Vous avez été banni(e) de ${guild.name}` : `👢 Vous avez été expulsé(e) de ${guild.name}`.slice(0, 256))
-    .setColor(0xED4245)
-    .setDescription(`${reason}\n\n${ban ? 'Ce bannissement a été appliqué automatiquement par la vérification du serveur.' : 'Vous pouvez rejoindre à nouveau le serveur et recommencer la vérification.'}`);
-  if (config.dmText) embed.addFields({ name: 'Message du serveur', value: config.dmText.slice(0, 1024) });
-  stamp(embed, 'Vérification', { keepColor: true });
-  return embed;
+const DEFAULT_DM_KICK = `Bonjour,
+
+Vous avez été expulsé(e) du serveur « {serveur} ».
+
+Raison : {raison}
+
+Vous pouvez rejoindre le serveur et recommencer la vérification. Si vous pensez qu’il s’agit d’une erreur, contactez un membre du staff.`;
+
+const DEFAULT_DM_BAN = `Bonjour,
+
+Vous avez été banni(e) du serveur « {serveur} ».
+
+Raison : {raison}
+
+Ce bannissement a été appliqué automatiquement. Vous ne pouvez pas rejoindre le serveur tant que le staff ne lève pas le bannissement. Si vous pensez qu’il s’agit d’une erreur, contactez un membre du staff.`;
+
+function defaultDmText(action) {
+  return action === 'ban' ? DEFAULT_DM_BAN : DEFAULT_DM_KICK;
 }
 
 function reasonText(cause, config) {
   if (cause === 'attempts') {
-    return `Vous avez utilisé tous vos essais (${config.attempts}) sans recopier correctement le code de vérification.`;
+    return `vous avez utilisé vos ${config.attempts} essai${config.attempts > 1 ? 's' : ''} sans recopier correctement le code de vérification`;
   }
-  return `Vous n’avez pas terminé la vérification dans le temps imparti (${formatMinutes(config.timeoutMin)}).`;
+  return `vous n’avez pas terminé la vérification dans le délai imparti (${formatMinutes(config.timeoutMin)})`;
+}
+
+function fillDmTemplate(template, guild, config, cause) {
+  return String(template || '')
+    .replaceAll('{serveur}', guild?.name || 'ce serveur')
+    .replaceAll('{raison}', reasonText(cause, config))
+    .replaceAll('{essais}', String(config.attempts))
+    .replaceAll('{delai}', config.timeoutMin > 0 ? formatMinutes(config.timeoutMin) : 'aucun')
+    .slice(0, 4096);
+}
+
+function storedDmText(config, action) {
+  const custom = action === 'ban' ? config.dmBan : config.dmKick;
+  return custom || defaultDmText(action);
+}
+
+function dmEmbed(guild, config, action, cause) {
+  const ban = action === 'ban';
+  const embed = new EmbedBuilder()
+    .setTitle(ban ? `🔨 Vous avez été banni(e) de ${guild.name}` : `👢 Vous avez été expulsé(e) de ${guild.name}`.slice(0, 256))
+    .setColor(0xED4245)
+    .setDescription(fillDmTemplate(storedDmText(config, action), guild, config, cause));
+  if (config.dmText) embed.addFields({ name: 'Message du serveur', value: config.dmText.slice(0, 1024) });
+  stamp(embed, 'Vérification', { keepColor: true });
+  return embed;
 }
 
 // Applique la sanction choisie. cause : 'attempts' | 'timeout'. Renvoie { done, action, dm, problem }.
@@ -192,7 +226,7 @@ async function punish(member, cause) {
 
   // Message privé avant la sanction ; un échec (MP fermés) ne bloque rien.
   try {
-    await member.user.send({ embeds: [dmEmbed(guild, config, action, reasonText(cause, config))] });
+    await member.user.send({ embeds: [dmEmbed(guild, config, action, cause)] });
     result.dm = 'envoyé';
   } catch {
     result.dm = 'impossible (messages privés fermés)';
@@ -312,6 +346,10 @@ module.exports = {
   clearPending,
   grantAccess,
   dmEmbed,
+  defaultDmText,
+  fillDmTemplate,
+  storedDmText,
+  reasonText,
   punish,
   onJoin,
   restoreDeadlines,

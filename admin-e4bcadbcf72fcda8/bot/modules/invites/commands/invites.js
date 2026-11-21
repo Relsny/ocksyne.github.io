@@ -28,18 +28,32 @@ async function denyIfUnauthorized(interaction) {
   return true;
 }
 
-async function showPanel(interaction, { update = false } = {}) {
+
+function canUpdateOriginal(interaction) {
+  if (interaction.isChatInputCommand?.()) return false;
+  if (typeof interaction.update !== 'function') return false;
+  if (interaction.isModalSubmit?.()) return Boolean(interaction.isFromMessage?.() || interaction.message);
+  return true;
+}
+
+async function showPanel(interaction, { update = false, note = '' } = {}) {
   const payload = configPanel(store.get(interaction.guildId), interaction.guild);
-  if (update && typeof interaction.update === 'function' && !interaction.isModalSubmit()) {
-    await interaction.update({
-      content: payload.content,
-      embeds: payload.embeds,
-      components: payload.components,
-    });
+  if (note) payload.content = [payload.content, note].filter(Boolean).join('\n');
+  const body = {
+    content: payload.content ?? null,
+    embeds: payload.embeds,
+    components: payload.components,
+  };
+  if (interaction.replied || interaction.deferred) {
+    if (typeof interaction.editReply === 'function' && !interaction.isChatInputCommand?.()) {
+      await interaction.editReply(body);
+      return;
+    }
+    await interaction.followUp(payload);
     return;
   }
-  if (interaction.replied || interaction.deferred) {
-    await interaction.followUp(payload);
+  if ((update || canUpdateOriginal(interaction)) && canUpdateOriginal(interaction)) {
+    await interaction.update(body);
     return;
   }
   await interaction.reply(payload);
@@ -106,21 +120,21 @@ module.exports = {
       if (await denyIfUnauthorized(interaction)) return;
       const texte = interaction.fields.getTextInputValue('texte').trim();
       if (!texte) {
-        await interaction.reply(replyCard('Le message d’arrivée ne peut pas être vide.', 'Message d’arrivée'));
+        await showPanel(interaction, { note: '⚠️ Le message d’arrivée ne peut pas être vide.' });
         return;
       }
       store.update(interaction.guildId, (current) => ({ ...current, joinMessage: texte }));
-      await interaction.reply(replyCard('Le message d’arrivée a été enregistré. Il sera utilisé pour les prochaines arrivées.', 'Message d’arrivée'));
+      await showPanel(interaction, { note: '✅ Le message d’arrivée a été enregistré. Il sera utilisé pour les prochaines arrivées.' });
     },
     'invite:leave-submit': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
       const texte = interaction.fields.getTextInputValue('texte').trim();
       if (!texte) {
-        await interaction.reply(replyCard('Le message de départ ne peut pas être vide.', 'Message de départ'));
+        await showPanel(interaction, { note: '⚠️ Le message de départ ne peut pas être vide.' });
         return;
       }
       store.update(interaction.guildId, (current) => ({ ...current, leaveMessage: texte }));
-      await interaction.reply(replyCard('Le message de départ a été enregistré. Il sera utilisé pour les prochains départs.', 'Message de départ'));
+      await showPanel(interaction, { note: '✅ Le message de départ a été enregistré. Il sera utilisé pour les prochains départs.' });
     },
     'invite:toggle-joins': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
@@ -141,7 +155,7 @@ module.exports = {
       if (await denyIfUnauthorized(interaction)) return;
       const parsed = parseColor(interaction.values?.[0]);
       if (!parsed.ok) {
-        await interaction.reply(replyCard(parsed.message, 'Couleur invalide'));
+        await showPanel(interaction, { note: `⚠️ ${parsed.message}` });
         return;
       }
       store.update(interaction.guildId, (current) => ({ ...current, color: parsed.value }));
@@ -155,11 +169,11 @@ module.exports = {
       if (await denyIfUnauthorized(interaction)) return;
       const parsed = parseColor(interaction.fields.getTextInputValue('hex'));
       if (!parsed.ok) {
-        await interaction.reply(replyCard(parsed.message, 'Couleur invalide'));
+        await showPanel(interaction, { note: `⚠️ ${parsed.message}` });
         return;
       }
       store.update(interaction.guildId, (current) => ({ ...current, color: parsed.value }));
-      await interaction.reply(replyCard(`La couleur des embeds est maintenant ${parsed.hex}.`, 'Couleur'));
+      await showPanel(interaction, { note: `✅ La couleur des embeds est maintenant ${parsed.hex}.` });
     },
     'invite:fake': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;
@@ -169,13 +183,13 @@ module.exports = {
       if (await denyIfUnauthorized(interaction)) return;
       const days = Math.trunc(Number(String(interaction.fields.getTextInputValue('jours') || '').replace(',', '.')));
       if (!Number.isFinite(days) || days < 0 || days > 365) {
-        await interaction.reply(replyCard('Indiquez un nombre de jours entre 0 et 365. 0 désactive le filtre des faux comptes.', 'Seuil des faux comptes'));
+        await showPanel(interaction, { note: '⚠️ Indiquez un nombre de jours entre 0 et 365. 0 désactive le filtre des faux comptes.' });
         return;
       }
       store.update(interaction.guildId, (current) => ({ ...current, fakeDays: days }));
-      await interaction.reply(replyCard(days === 0
-        ? 'Le filtre des faux comptes est désactivé.'
-        : `Un compte de moins de ${days} jour${days > 1 ? 's' : ''} sera maintenant compté comme faux.`, 'Seuil des faux comptes'));
+      await showPanel(interaction, { note: days === 0
+        ? '✅ Le filtre des faux comptes est désactivé.'
+        : `✅ Un compte de moins de ${days} jour${days > 1 ? 's' : ''} sera maintenant compté comme faux.` });
     },
     'invite:reset-messages': async (interaction) => {
       if (await denyIfUnauthorized(interaction)) return;

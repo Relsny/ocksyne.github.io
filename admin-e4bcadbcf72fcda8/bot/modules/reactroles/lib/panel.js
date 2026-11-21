@@ -150,6 +150,20 @@ function jumpUrl(guildId, channelId, messageId) {
 }
 
 // Publie ou met à jour le panneau. Renvoie { ok, message, created, error }.
+function isUnknownMessage(error) {
+  return Number(error?.code) === 10008 || /Unknown Message/i.test(String(error?.message || ''));
+}
+
+async function fetchLiveMessage(channel, messageId) {
+  if (!channel?.messages || !messageId) return null;
+  try {
+    return await channel.messages.fetch(messageId);
+  } catch (error) {
+    if (isUnknownMessage(error)) return null;
+    throw error;
+  }
+}
+
 async function publishPanel(guild, panel, channel) {
   const payload = buildPanelMessage(panel, guild);
   try {
@@ -157,12 +171,15 @@ async function publishPanel(guild, panel, channel) {
       const liveChannelId = panel.messageChannelId || panel.channelId;
       const sameChannel = liveChannelId === channel.id;
       const previousChannel = sameChannel ? channel : await fetchChannel(guild, liveChannelId);
-      const old = previousChannel?.messages
-        ? await previousChannel.messages.fetch(panel.messageId).catch(() => null)
-        : null;
+      let old = await fetchLiveMessage(previousChannel, panel.messageId);
       if (old && sameChannel) {
-        const edited = await old.edit({ ...payload, attachments: [] });
-        return { ok: true, message: edited || old, created: false };
+        try {
+          const edited = await old.edit({ ...payload, attachments: [] });
+          return { ok: true, message: edited || old, created: false };
+        } catch (error) {
+          if (!isUnknownMessage(error)) throw error;
+          old = null;
+        }
       }
       if (old) await old.delete().catch(() => {});
     }

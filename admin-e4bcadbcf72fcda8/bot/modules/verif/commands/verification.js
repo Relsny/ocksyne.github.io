@@ -26,33 +26,45 @@ async function denyIfUnauthorized(interaction) {
   return true;
 }
 
-function fromMessage(interaction) {
-  return typeof interaction.isFromMessage === 'function' && interaction.isFromMessage();
+// discord.js 14 : isFromMessage() n'existe que sur les validations de modale, pas sur les boutons.
+// On se fie à update() (composants) ou au message d'origine (modale ouverte depuis un bouton).
+function canUpdateOriginal(interaction) {
+  if (interaction.isChatInputCommand?.()) return false;
+  if (typeof interaction.update !== 'function') return false;
+  if (interaction.isModalSubmit?.()) return Boolean(interaction.isFromMessage?.() || interaction.message);
+  return true;
 }
 
 function updatePayload(payload) {
-  return { content: payload.content ?? null, embeds: payload.embeds || [], components: payload.components || [] };
+  return {
+    content: payload.content ?? null,
+    embeds: payload.embeds || [],
+    components: payload.components || [],
+    files: payload.files || [],
+    attachments: payload.attachments || [],
+  };
 }
 
-// Affiche l'écran : remplace le message courant quand c'est possible, sinon répond (éphémère).
+// Affiche l'écran en remplaçant le message courant (jamais un nouveau message à chaque clic).
 async function show(interaction, payload) {
+  const body = updatePayload(payload);
   if (interaction.deferred || interaction.replied) {
-    if (typeof interaction.editReply === 'function' && fromMessage(interaction)) {
-      await interaction.editReply(updatePayload(payload));
+    if (typeof interaction.editReply === 'function' && !interaction.isChatInputCommand?.()) {
+      await interaction.editReply(body);
       return;
     }
     await interaction.followUp({ ...payload, content: payload.content ?? undefined, flags: EPHEMERAL });
     return;
   }
-  if (fromMessage(interaction) && typeof interaction.update === 'function') {
-    await interaction.update(updatePayload(payload));
+  if (canUpdateOriginal(interaction)) {
+    await interaction.update(body);
     return;
   }
   await interaction.reply({ ...payload, content: payload.content ?? undefined, flags: EPHEMERAL });
 }
 
 async function deferEdit(interaction) {
-  if (fromMessage(interaction) && typeof interaction.deferUpdate === 'function' && !interaction.deferred && !interaction.replied) {
+  if (canUpdateOriginal(interaction) && typeof interaction.deferUpdate === 'function' && !interaction.deferred && !interaction.replied) {
     await interaction.deferUpdate();
   }
 }
@@ -96,7 +108,15 @@ function finishCard(text, title = 'Vérification') {
   return { embeds: payload.embeds, files: payload.files, components: [], attachments: [] };
 }
 
+async function ackEphemeral(interaction) {
+  // On acquitte en moins de 3 s, avant de fabriquer l’image. On ne touche jamais au panneau public (pas d’update).
+  if (interaction.deferred || interaction.replied) return;
+  await interaction.deferReply({ flags: EPHEMERAL });
+}
+
 async function showChallenge(interaction, note, { edit }) {
+  if (edit) await deferEdit(interaction);
+  else await ackEphemeral(interaction);
   const issued = engine.issueChallenge(interaction.guildId, interaction.user.id);
   const message = ui.challengeMessage(issued.png, {
     remaining: issued.remaining,
@@ -104,30 +124,62 @@ async function showChallenge(interaction, note, { edit }) {
     color: issued.config.color,
     note,
   });
-  if (edit) {
-    await interaction.editReply({ ...message, attachments: [] });
-    return;
-  }
-  await interaction.reply({ ...message, flags: EPHEMERAL });
+  await interaction.editReply({ ...message, attachments: [] });
 }
 
 async function startVerification(interaction) {
-  const config = store.get(interaction.guildId);
-  const member = interaction.member;
-  if (!config.enabled || !config.verifiedRoleId) {
-    await interaction.reply(replyCard('La vérification n’est pas active pour le moment. Réessayez plus tard ou prévenez le staff.', 'Vérification'));
-    return;
+  try {
+    const config = store.get(interaction.guildId);
+    const member = interaction.member;
+    const already = async (text) => {
+      if (interaction.deferred || interaction.replied) await interaction.editReply(finishCard(text));
+      else await interaction.reply({ ...replyCard(text, 'Vérification'), flags: EPHEMERAL });
+    };
+    if (!config.enabled || !config.verifiedRoleId) {
+      await already('La vérification n’est pas active pour le moment. Réessayez plus tard ou prévenez le staff.');
+      return;
+    }
+    if (member?.roles?.cache?.has(config.verifiedRoleId)) {
+      await already('Vous êtes déjà vérifié(e). Bienvenue !');
+      return;
+    }
+    const entry = config.pending[interaction.user.id];
+    if (entry && config.attempts - entry.attempts <= 0) {
+      await already('Vous avez utilisé tous vos essais. Contactez le staff du serveur pour être vérifié(e).');
+      return;
+    }
+    await showChallenge(interaction, '', { edit: false });
+  } catch (error) {
+    const text = 'Je n’ai pas pu préparer le captcha. Vérifiez que j’ai la permission **Joindre des fichiers** dans ce salon, puis réessayez.';
+    try {
+      if (interaction.deferred || interaction.replied) await interaction.editReply(finishCard(text));
+      else await interaction.reply({ ...replyCard(text, 'Vérification'), flags: EPHEMERAL });
+    } catch { /* déjà signalé par Discord */ }
+    console.error('Vérification (bouton) :', error);
   }
-  if (member.roles.cache.has(config.verifiedRoleId)) {
-    await interaction.reply(replyCard('Vous êtes déjà vérifié(e). Bienvenue !', 'Vérification'));
-    return;
+}
+
+// Après une réussite : retire du salon un message où le membre a recopié le code (s’il l’a aussi envoyé).
+async function cleanupTypedCodes(interaction, member, typed) {
+  const { normalizeCode } = require('../lib/captcha');
+  const code = normalizeCode(typed);
+  if (!code) return;
+  const channels = new Map();
+  if (interaction.channel) channels.set(interaction.channel.id, interaction.channel);
+  const config = store.get(member.guild.id);
+  const panel = await fetchChannel(member.guild, config.messageChannelId || config.channelId);
+  if (panel) channels.set(panel.id, panel);
+  for (const channel of channels.values()) {
+    try {
+      const recent = await channel.messages.fetch({ limit: 25 });
+      const list = recent?.values ? [...recent.values()] : Object.values(recent || {});
+      for (const msg of list) {
+        if (msg.author?.id === member.id && (normalizeCode(msg.content) === code || String(msg.content || '').includes(code))) {
+          await msg.delete().catch(() => {});
+        }
+      }
+    } catch { /* lecture ou suppression impossible : on passe */ }
   }
-  const entry = config.pending[interaction.user.id];
-  if (entry && config.attempts - entry.attempts <= 0) {
-    await interaction.reply(replyCard('Vous avez utilisé tous vos essais. Contactez le staff du serveur pour être vérifié(e).', 'Vérification'));
-    return;
-  }
-  await showChallenge(interaction, '', { edit: false });
 }
 
 async function submitCode(interaction) {
@@ -154,9 +206,11 @@ async function submitCode(interaction) {
       return;
     }
     const used = (config.pending[member.id]?.attempts || 0) + 1;
+    const typed = modalText(interaction, 'code');
     engine.clearPending(guild.id, member.id);
     await engine.writeLog(guild, 'success', member, [['Essai', `${used} sur ${config.attempts}`], ...(access.problems.length ? [['À corriger', access.problems.join('\n')]] : [])]);
     await reply(finishCard('✅ Code correct. Vous êtes vérifié(e) : le serveur est maintenant ouvert pour vous.'));
+    await cleanupTypedCodes(interaction, member, typed);
     return;
   }
 
@@ -369,7 +423,12 @@ const handlers = {
   'verification:publish': guarded(publish),
   'verification:preview': guarded(async (interaction) => {
     const message = buildPanelMessage(store.get(interaction.guildId), { disabled: true });
-    await interaction.reply({ ...message, content: 'Aperçu : voici le panneau tel que vos membres le verront (bouton inactif). Rien n’est publié.', flags: EPHEMERAL });
+    const back = ui.previewBackRow();
+    await show(interaction, {
+      ...message,
+      content: 'Aperçu : voici le panneau tel que vos membres le verront (bouton inactif). Rien n’est publié.',
+      components: [...(message.components || []), back],
+    });
   }),
   'verification:toggle': guarded(async (interaction) => {
     const config = store.get(interaction.guildId);
@@ -390,7 +449,7 @@ const handlers = {
       : '✅ Vérification activée. Pensez à publier le panneau pour que les nouveaux membres puissent cliquer.');
   }),
   'verification:check': guarded(async (interaction) => {
-    await interaction.reply(replyCard(checkReport(interaction), 'Vérification · contrôle'));
+    await showMain(interaction, checkReport(interaction));
   }),
 
   // Réglages
@@ -484,9 +543,14 @@ const handlers = {
   }),
   'verification:dm': guarded((interaction) => interaction.showModal(ui.buildDmModal(store.get(interaction.guildId)))),
   'verification:dm-submit': guarded(async (interaction) => {
-    const value = modalText(interaction, 'texte').trim();
-    patch(interaction, (state) => { state.dmText = value || null; });
-    await showSettings(interaction, value ? '✅ Texte enregistré : il sera ajouté au message privé envoyé avant l’expulsion ou le bannissement.' : '✅ Texte retiré : seul le message standard sera envoyé.');
+    const kick = modalText(interaction, 'kick').trim();
+    const ban = modalText(interaction, 'ban').trim();
+    const same = (value, action) => value === engine.defaultDmText(action);
+    patch(interaction, (state) => {
+      state.dmKick = kick && !same(kick, 'kick') ? kick : null;
+      state.dmBan = ban && !same(ban, 'ban') ? ban : null;
+    });
+    await showSettings(interaction, '✅ Textes des messages privés enregistrés. Ils seront envoyés avant l’expulsion ou le bannissement (un texte vidé reprend le modèle par défaut).');
   }),
 };
 

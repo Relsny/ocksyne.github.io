@@ -8,7 +8,7 @@ const {
 const { PRESETS, toHex } = require('./style');
 const { MIN_ATTEMPTS, MAX_ATTEMPTS, MAX_TIMEOUT_MIN } = require('./store');
 const { titleOf, descriptionOf, DEFAULT_TITLE } = require('./panel');
-const { formatMinutes, CODE_TTL_MS } = require('./engine');
+const { formatMinutes, CODE_TTL_MS, defaultDmText, storedDmText } = require('./engine');
 const { stamp } = require('../../../src/brand');
 
 const CHANNEL_TYPES = [ChannelType.GuildText, ChannelType.GuildAnnouncement];
@@ -78,7 +78,7 @@ function statusEmbed(config, guild, { settings = false } = {}) {
       { name: 'Si les essais sont épuisés', value: actionLabel(config.failAction), inline: true },
       { name: 'Délai pour se vérifier', value: config.timeoutMin > 0 ? formatMinutes(config.timeoutMin) : 'aucun (désactivé)', inline: true },
       { name: 'Si le délai est dépassé', value: config.timeoutMin > 0 ? actionLabel(config.timeoutAction) : 'sans objet', inline: true },
-      { name: 'Message privé avant la sanction', value: config.dmText ? short(config.dmText, 200) : 'texte standard seul', inline: false },
+      { name: 'Message privé avant la sanction', value: short(`Expulsion : ${storedDmText(config, 'kick')}`.replaceAll('\n', ' '), 200) + '\n' + short(`Bannissement : ${storedDmText(config, 'ban')}`.replaceAll('\n', ' '), 200), inline: false },
     );
   if (!settings) {
     embed.addFields(
@@ -214,17 +214,23 @@ function buildDelayModal(config) {
 }
 
 function buildDmModal(config) {
-  return textModal({
-    customId: 'verification:dm-submit',
-    title: 'Texte du message privé',
-    fieldId: 'texte',
-    label: 'Texte ajouté au message privé',
-    placeholder: 'Facultatif. Ex. Contactez le staff si c’est une erreur.',
-    value: config.dmText,
-    paragraph: true,
-    max: 900,
-    required: false,
-  });
+  const modal = new ModalBuilder().setCustomId('verification:dm-submit').setTitle('Message privé avant sanction');
+  const vars = 'Variables : {serveur}, {raison}, {essais}, {delai}. Vide = défaut.';
+  for (const [id, label, action] of [
+    ['kick', 'Texte en cas d’expulsion', 'kick'],
+    ['ban', 'Texte en cas de bannissement', 'ban'],
+  ]) {
+    const input = new TextInputBuilder()
+      .setCustomId(id)
+      .setLabel(label)
+      .setStyle(TextInputStyle.Paragraph)
+      .setRequired(false)
+      .setMaxLength(1000)
+      .setPlaceholder(vars);
+    fillValue(input, storedDmText(config, action), 1000);
+    modal.addComponents(new ActionRowBuilder().addComponents(input));
+  }
+  return modal;
 }
 
 function buildImageModal() {
@@ -242,7 +248,7 @@ function buildImageModal() {
 }
 
 function buildAnswerModal() {
-  return textModal({ customId: 'verification:submit', title: 'Vérification', fieldId: 'code', label: 'Code lu sur l’image', placeholder: 'Ex. K7PQ2', value: null, max: 12, min: 3 });
+  return textModal({ customId: 'verification:submit', title: 'Vérification', fieldId: 'code', label: 'Code lu sur l’image', placeholder: 'Respectez la casse. Ex. K7pQ2', value: null, max: 12, min: 3 });
 }
 
 function removeImageConfirm() {
@@ -257,12 +263,18 @@ function removeImageConfirm() {
   };
 }
 
+function previewBackRow() {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId('verification:back').setEmoji('↩️').setLabel('Retour au panneau').setStyle(ButtonStyle.Secondary),
+  );
+}
+
 // Écran vu par le membre : image du captcha + boutons.
 function challengeMessage(png, { remaining, max, color, note = '' }) {
   const embed = new EmbedBuilder()
     .setTitle('🔐 Recopiez le code')
     .setColor(color)
-    .setDescription(`${note ? `${note}\n\n` : ''}Cliquez sur **Saisir le code**, puis recopiez les caractères de l’image (majuscules ou minuscules, sans espaces).\n\n**Essais restants : ${remaining} sur ${max}.** Le code est valable ${Math.round(CODE_TTL_MS / 60_000)} minutes.`)
+    .setDescription(`${note ? `${note}\n\n` : ''}Cliquez sur **Saisir le code**, puis recopiez les caractères de l’image **en respectant la casse** (majuscules, minuscules et chiffres, sans espaces).\n\n**Essais restants : ${remaining} sur ${max}.** Le code est valable ${Math.round(CODE_TTL_MS / 60_000)} minutes.`)
     .setImage('attachment://captcha.png');
   stamp(embed, 'Vérification', { keepColor: true });
   return {
@@ -329,6 +341,7 @@ module.exports = {
   buildImageModal,
   buildAnswerModal,
   removeImageConfirm,
+  previewBackRow,
   challengeMessage,
   allBuilders,
 };

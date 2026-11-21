@@ -79,7 +79,26 @@ function makeChannel(guild, id, name = `salon-${id}`, { missing = [] } = {}) {
     toString: () => `<#${id}>`,
     permissionsFor: () => ({ has: (flag) => !missing.includes(flag) }),
   };
-  channel.messages = { async fetch(messageId) { return channel.store.get(String(messageId)) || null; } };
+  channel.messages = {
+    async fetch(arg) {
+      if (arg && typeof arg === 'object') {
+        const list = [...channel.store.values()].slice(-(arg.limit || 25)).reverse();
+        return new Map(list.map((msg) => [msg.id, msg]));
+      }
+      return channel.store.get(String(arg)) || null;
+    },
+  };
+  channel.postUser = (author, content) => {
+    const message = {
+      id: `${id}u${channel.store.size + 1}`,
+      content,
+      author: { id: author.id },
+      deleted: false,
+      async delete() { message.deleted = true; channel.store.delete(message.id); },
+    };
+    channel.store.set(message.id, message);
+    return message;
+  };
   channel.send = async (payload) => {
     const message = {
       id: `${id}0${channel.sends.length + 1}`,
@@ -144,6 +163,8 @@ function makeMember(guild, id, {
 // Interaction fidèle aux règles d'acquittement de Discord (une seule réponse, deferUpdate puis editReply…).
 function makeInteraction({ guild, member, user }, o = {}) {
   const staffPerms = o.perms || [PermissionFlagsBits.ManageRoles];
+  const isModal = Boolean(o.modal || o.fields || o.uploads);
+  const isChat = Boolean(o.chat);
   const interaction = {
     guild,
     guildId: guild.id,
@@ -152,9 +173,12 @@ function makeInteraction({ guild, member, user }, o = {}) {
     memberPermissions: { has: (flag) => staffPerms.includes(flag) || staffPerms.includes('all') },
     customId: o.customId || '',
     values: o.values || [],
-    message: { id: o.messageId || 'live-message' },
+    message: o.message || { id: o.messageId || 'live-message' },
+    channel: o.channel || null,
     channels: { first: () => o.selectedChannel || null },
     options: { getSubcommand: () => o.subcommand || 'configurer' },
+    isModalSubmit: () => isModal,
+    isMessageComponent: () => Boolean(o.fromMessage) && !isChat && !isModal,
     fields: {
       getTextInputValue: (name) => {
         if (o.fields && name in o.fields) return o.fields[name];
@@ -164,8 +188,7 @@ function makeInteraction({ guild, member, user }, o = {}) {
     },
     replied: false,
     deferred: false,
-    isChatInputCommand: () => Boolean(o.chat),
-    isFromMessage: () => Boolean(o.fromMessage),
+    isChatInputCommand: () => isChat,
     _replies: [],
     _updates: [],
     _edits: [],
@@ -216,6 +239,7 @@ function makeInteraction({ guild, member, user }, o = {}) {
       return interaction._edits.at(-1) || interaction._updates.at(-1) || interaction._replies.at(-1) || interaction._followUps.at(-1) || null;
     },
   };
+  if (isModal) interaction.isFromMessage = () => o.fromMessage !== false;
   return interaction;
 }
 

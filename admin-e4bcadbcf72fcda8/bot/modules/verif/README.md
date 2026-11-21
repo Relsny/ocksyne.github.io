@@ -15,18 +15,18 @@ Les nouveaux membres cliquent sur un bouton, lisent un code sur une image (captc
 ## Ce que voit le membre
 
 1. Il clique sur **Me vérifier** : une image avec un code lui est envoyée, visible de lui seul.
-2. Il clique sur **Saisir le code** et le recopie (majuscules ou minuscules, peu importe). **Nouveau code** change l’image sans perdre d’essai.
+2. Il clique sur **Saisir le code** et le recopie **en respectant la casse**. Le code mélange des majuscules, des minuscules et des chiffres (les caractères ambigus comme 0, O, 1 ou l sont évités). **Nouveau code** change l’image sans perdre d’essai.
 3. Bon code : il reçoit le rôle « Vérifié », et le rôle « non vérifié » lui est retiré.
 4. Mauvais code : un essai est consommé et une nouvelle image est proposée. Un code qui a expiré (5 minutes) ne coûte aucun essai.
 
 ## Réglages du staff
 
-- **Panneau public** : titre, description, couleur (menu ou code hexadécimal), image (photo ou GIF, 8 Mo maximum, enregistrée dans `data/verif-images/` et jointe à chaque publication), bouton rouge **Retirer l’image** avec confirmation. **Publier / Mettre à jour** modifie le message sur place, et le déplace si le salon change. **Aperçu** ne publie rien.
+- **Panneau public** : titre, description, couleur (menu ou code hexadécimal), image (photo ou GIF, 8 Mo maximum, enregistrée dans `data/verif-images/` et jointe à chaque publication), bouton rouge **Retirer l’image** avec confirmation. **Publier / Mettre à jour** modifie le message sur place, et le déplace si le salon change. Si vous supprimez le message publié, **Publier** en envoie un nouveau. **Aperçu** ne publie rien et se fait sur le même écran de configuration.
 - **Rôles** : « Vérifié » (obligatoire) et « non vérifié » (facultatif : donné à l’arrivée, retiré à la réussite). Les deux doivent être différents.
 - **Essais autorisés** : de **1 à 6**.
 - **Si les essais sont épuisés** : expulsion ou bannissement.
 - **Délai** : en minutes (1 à 1440), 0 pour ne jamais sanctionner la lenteur. **Si le délai est dépassé** : expulsion ou bannissement, choix séparé du précédent. Les échéances sont enregistrées dans `data/verification.json` et survivent à un redémarrage. Après un arrêt du bot, les retards bénéficient de 5 minutes de grâce pour ne sanctionner personne injustement.
-- **Message privé** : avant toute expulsion ou tout bannissement, le bot envoie au membre un message expliquant la raison (essais épuisés ou délai dépassé), le nom du serveur et si un retour est possible. Un texte personnalisé peut y être ajouté. Si les messages privés sont fermés, la sanction est appliquée quand même et le journal le précise.
+- **Message privé** : un texte complet est déjà rédigé (nom du serveur, raison, nombre d’essais ou délai, comment revenir après une expulsion). La fenêtre de réglage est préremplie avec ce texte : vous pouvez le laisser tel quel ou le modifier. Les variables {serveur}, {raison}, {essais} et {delai} sont remplacées automatiquement. Si les messages privés sont fermés, la sanction est appliquée quand même et le journal le précise.
 - **Journal** : un salon où sont notés les arrivées, vérifications réussies, échecs, expulsions, bannissements et erreurs.
 - **Activer / Désactiver** et **Vérifier** : le contrôle explique en français chaque problème (rôle plus haut que le bot, permission Gérer les rôles, Expulser ou Bannir manquante, salon sans droit d’écriture, intent).
 

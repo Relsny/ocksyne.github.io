@@ -63,8 +63,10 @@ function channelProblems(channel, guild, { needsFiles = false } = {}) {
     [PermissionFlagsBits.ViewChannel, 'Voir le salon'],
     [PermissionFlagsBits.SendMessages, 'Envoyer des messages'],
     [PermissionFlagsBits.EmbedLinks, 'Intégrer des liens'],
+    // Le captcha est toujours envoyé en image : la permission est indispensable, même sans image de panneau.
+    [PermissionFlagsBits.AttachFiles, 'Joindre des fichiers'],
   ];
-  if (needsFiles) needs.push([PermissionFlagsBits.AttachFiles, 'Joindre des fichiers']);
+  if (needsFiles) { /* déjà exigé ci-dessus */ }
   const missing = needs.filter(([flag]) => !perms.has(flag)).map(([, label]) => label);
   return missing.length ? [`Dans ${channel}, il manque à mon rôle : ${missing.join(', ')}.`] : [];
 }

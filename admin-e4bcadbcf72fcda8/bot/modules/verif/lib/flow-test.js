@@ -143,8 +143,15 @@ async function run() {
   assert(cfg().failAction === 'ban' && cfg().timeoutAction === 'ban', 'bascule en bannissement (choix séparés)');
   await click('verification:fail-action');
   assert(cfg().failAction === 'kick' && cfg().timeoutAction === 'ban', 'essais : expulsion, délai : bannissement');
-  await click('verification:dm-submit', { fields: { texte: 'Contactez le staff si c’est une erreur.' } });
-  assert(cfg().dmText === 'Contactez le staff si c’est une erreur.', 'texte du message privé');
+  const dmOpen = await click('verification:dm');
+  const dmFields = dmOpen._modals[0].components.map((row) => row.components[0]);
+  assert(dmFields[0].custom_id === 'kick' && dmFields[1].custom_id === 'ban', 'modale : un texte pour l’expulsion, un pour le bannissement');
+  assert(/expulsé/.test(dmFields[0].value) && /{serveur}/.test(dmFields[0].value) && /{raison}/.test(dmFields[0].value) && /rejoindre/.test(dmFields[0].value), 'modale préremplie avec le texte d’expulsion par défaut');
+  assert(/banni/.test(dmFields[1].value) && /{serveur}/.test(dmFields[1].value) && !/rejoindre le serveur et recommencer/.test(dmFields[1].value), 'modale préremplie avec le texte de bannissement par défaut');
+  await click('verification:dm-submit', { fields: { kick: dmFields[0].value, ban: dmFields[1].value } });
+  assert(cfg().dmKick == null && cfg().dmBan == null, 'enregistrer le modèle par défaut ne crée pas de copie inutile');
+  await click('verification:dm-submit', { fields: { kick: 'Contactez le staff si c’est une erreur. ({serveur})', ban: '' } });
+  assert(cfg().dmKick === 'Contactez le staff si c’est une erreur. ({serveur})' && cfg().dmBan == null, 'texte d’expulsion personnalisé, bannissement par défaut');
 
   // ---- Titre, description, couleur, image
   await click('verification:title-submit', { fields: { titre: ' Bienvenue ! ' } });
@@ -197,10 +204,10 @@ async function run() {
   const noKick = await click('verification:toggle');
   assert(!cfg().enabled && /Expulser des membres/.test(text(noKick._updates[0])), 'activation refusée : permission Expulser manquante');
   const report = await click('verification:check');
-  assert(/Expulser/.test(text(report._replies[0])) && /Server Members/.test(text(report._replies[0])), 'contrôle : permission manquante et rappel de l’intent');
+  assert(/Expulser/.test(text(report._updates[0])) && /Server Members/.test(text(report._updates[0])), 'contrôle : permission manquante et rappel de l’intent, même message');
   guild.members.me.permissions = realPerms;
   const okReport = await click('verification:check');
-  assert(!/⚠️ Il me manque/.test(text(okReport._replies[0])) && /peut être donné/.test(text(okReport._replies[0])), 'contrôle : tout est en ordre');
+  assert(!/⚠️ Il me manque/.test(text(okReport._updates[0])) && /peut être donné/.test(text(okReport._updates[0])), 'contrôle : tout est en ordre, panneau remplacé sur place');
   const on = await click('verification:toggle');
   assert(cfg().enabled && /activée/.test(text(on._updates[0])), 'vérification activée');
   assert(JSON.stringify(rowsOf(on._updates[0])).includes('Désactiver'), 'bouton devenu « Désactiver »');
@@ -217,13 +224,35 @@ async function run() {
   await click('verification:publish');
   assert(panelCh.sends.length === 1 && live.edits.length === 1 && live.edits[0].attachments.length === 0, 'mise à jour sur place, pièces jointes réinitialisées');
   const prev = await click('verification:preview');
-  assert(prev._replies[0].components[0].toJSON().components[0].disabled === true, 'aperçu : bouton inactif');
+  assert(prev._updates[0] && prev._replies.length === 0, 'aperçu : même message, pas un nouveau');
+  assert(prev._updates[0].components[0].toJSON().components[0].disabled === true, 'aperçu : bouton inactif');
+  const backFromPrev = await click('verification:back');
+  assert(/Vérification anti-bot/.test(text(backFromPrev._updates[0])), 'retour au panneau depuis l’aperçu');
   await click('verification:channel', { selectedChannel: otherCh });
   await click('verification:publish');
   assert(live.deleted && otherCh.sends.length === 1, 'changement de salon : ancien message supprimé');
   await click('verification:channel', { selectedChannel: panelCh });
   await click('verification:publish');
   assert(panelCh.sends.length === 2, 'republié dans le salon d’origine');
+
+  // ---- Message public supprimé (10008) : on peut republier
+  const gone = panelCh.sends.at(-1);
+  const failEdit = async () => { const err = new Error('Unknown Message'); err.code = 10008; throw err; };
+  gone.edit = failEdit;
+  const origFetch = panelCh.messages.fetch.bind(panelCh.messages);
+  panelCh.messages.fetch = async (id) => (String(id) === String(gone.id) ? gone : origFetch(id));
+  const beforeCount = panelCh.sends.length;
+  const againPub = await click('verification:publish');
+  assert(panelCh.sends.length === beforeCount + 1 && /publié/.test(text(againPub._updates[0] || againPub._edits.at(-1) || {})), 'message supprimé : un nouveau panneau est publié');
+  assert(cfg().messageId === panelCh.sends.at(-1).id, 'nouvel identifiant mémorisé');
+  panelCh.messages.fetch = origFetch;
+
+  // Clics staff : toujours le même message, jamais une pile de pages
+  const stack = await click('verification:settings');
+  assert(stack._updates.length === 1 && stack._replies.length === 0 && stack._followUps.length === 0, 'Réglages : mise à jour sur place');
+  const back = await click('verification:back');
+  assert(back._updates.length === 1 && back._replies.length === 0, 'Retour : mise à jour sur place');
+  assert(typeof back.isFromMessage !== 'function', 'les boutons n’ont pas isFromMessage (comme discord.js 14)');
 
   // ---- Arrivées
   const join = events.find((e) => e.name === Events.GuildMemberAdd);
@@ -240,12 +269,14 @@ async function run() {
   assert(!cfg().pending[robot.id], 'bot ignoré');
 
   // ---- Réussite
-  let r = await memberClick(ada, 'verification:start', { fromMessage: false });
+  // Le bouton public a update() : on doit quand même répondre en éphémère, jamais remplacer le panneau.
+  let r = await memberClick(ada, 'verification:start', { fromMessage: true, channel: panelCh, message: panelCh.sends.at(-1) });
   let code = nextCode();
-  const first = r._replies[0];
-  assert(first.flags === MessageFlags.Ephemeral && first.files[0].name === 'captcha.png', 'image du captcha envoyée en éphémère');
-  assert(first.embeds[0].toJSON().image.url === 'attachment://captcha.png' && /2 sur 2/.test(text(first)), 'embed avec image et essais restants');
-  assert(first.files[0].attachment.subarray(0, 4).toString('hex') === '89504e47', 'la pièce jointe est un PNG');
+  assert(r.deferred && r._deferFlags === MessageFlags.Ephemeral && r._updates.length === 0, 'acquittement en moins de 3 s, panneau public intact');
+  const first = r._edits[0];
+  assert(first.files[0].name === 'captcha.png' && first.files[0].attachment.subarray(0, 4).toString('hex') === '89504e47', 'image du captcha via AttachmentBuilder');
+  assert(first.embeds[0].toJSON().image.url === 'attachment://captcha.png' && /2 sur 2/.test(text(first)) && /casse/.test(text(first)), 'embed avec image, essais, casse');
+  assert(panelCh.sends.at(-1).payload.components[0].toJSON().components[0].custom_id === 'verification:start', 'le bouton public n’a pas été remplacé');
   const enter = await memberClick(ada, 'verification:enter');
   assert(enter._modals[0].title === 'Vérification' && enter._modals[0].components[0].components[0].custom_id === 'code', 'modale de saisie');
   r = await memberClick(ada, 'verification:submit', { fields: { code: 'ZZZZZ' } });
@@ -253,12 +284,27 @@ async function run() {
   assert(/Il vous reste \*\*1 essai\*\*/.test(text(r._edits.at(-1))) && r._edits.at(-1).files[0].name === 'captcha.png' && r._edits.at(-1).attachments.length === 0, 'mauvais code : nouvel essai, nouvelle image');
   assert(cfg().pending[ada.id].attempts === 1, 'essai compté');
   assert(/Code incorrect/.test(JSON.stringify(logCh.sends.at(-1).payload.embeds[0].toJSON())), 'journal : échec');
-  r = await memberClick(ada, 'verification:submit', { fields: { code: ` ${code.toLowerCase()} ` } });
+  const leaked = panelCh.postUser(ada, `voilà le code ${code}`);
+  r = await memberClick(ada, 'verification:submit', { fields: { code: ` ${code} ` }, channel: panelCh });
   assert(ada.roles.cache.has(verified.id) && !ada.roles.cache.has(unverified.id), 'bon code : Vérifié donné, « non vérifié » retiré');
+  assert(leaked.deleted, 'le message du membre qui recopiait le code dans le salon est supprimé');
   assert(!cfg().pending[ada.id] && /vérifié\(e\)/.test(text(r._edits.at(-1))) && r._edits.at(-1).components.length === 0, 'dossier clos, message de réussite');
   assert(/Membre vérifié/.test(JSON.stringify(logCh.sends.at(-1).payload.embeds[0].toJSON())), 'journal : réussite');
   r = await memberClick(ada, 'verification:start', { fromMessage: false });
   assert(/déjà vérifié/.test(text(r._replies[0])), 'déjà vérifié');
+
+  // ---- Casse : un code presque identique est refusé
+  const caseMember = newMember('00');
+  await join.execute(caseMember);
+  r = await memberClick(caseMember, 'verification:start', { fromMessage: true, channel: panelCh });
+  code = nextCode();
+  const flipped = [...code].map((ch) => (ch === ch.toUpperCase() ? ch.toLowerCase() : ch.toUpperCase())).join('');
+  assert(flipped !== code, 'le retournement de casse change bien le code');
+  r = await memberClick(caseMember, 'verification:submit', { fields: { code: flipped } });
+  assert(/incorrect/.test(text(r._edits.at(-1))) && !caseMember.roles.cache.has(verified.id), 'mauvaise casse : essai refusé');
+  code = nextCode();
+  r = await memberClick(caseMember, 'verification:submit', { fields: { code } });
+  assert(caseMember.roles.cache.has(verified.id), 'le code exact (casse comprise) est accepté');
 
   // ---- Code expiré et nouveau code : aucun essai perdu
   const bea = newMember('02');
@@ -290,7 +336,8 @@ async function run() {
   let res = await exhaust(cleo, 'Cléo');
   assert(cleo.kicked && !cleo.banned && cleo.kicked.dmsBefore === 1, 'essais épuisés : MP envoyé AVANT l’expulsion');
   const dm = cleo.dms[0].embeds[0].toJSON();
-  assert(/expulsé\(e\)/.test(dm.title) && /Serveur de test/.test(dm.title) && /2/.test(dm.description) && /Contactez le staff/.test(dm.fields[0].value), 'MP : expulsion, nom du serveur, raison, texte du staff');
+  assert(/expulsé\(e\)/.test(dm.title) && /Serveur de test/.test(dm.title), 'MP : titre d’expulsion avec le nom du serveur');
+  assert(/Contactez le staff/.test(dm.description) && /Serveur de test/.test(dm.description), 'MP : texte préécrit (personnalisé) envoyé avant la sanction');
   assert(/expulsé\(e\)/.test(text(res._edits.at(-1))) && !cfg().pending[cleo.id], 'message au membre, dossier clos');
   assert(/Membre expulsé/.test(JSON.stringify(logCh.sends.at(-1).payload.embeds[0].toJSON())) && /envoyé/.test(JSON.stringify(logCh.sends.at(-1).payload.embeds[0].toJSON())), 'journal : expulsion et MP envoyé');
 
@@ -299,7 +346,8 @@ async function run() {
   const dan = newMember('04');
   res = await exhaust(dan, 'Dan');
   assert(dan.banned && !dan.kicked && dan.banned.dmsBefore === 1, 'essais épuisés : MP avant le bannissement');
-  assert(/banni\(e\)/.test(dan.dms[0].embeds[0].toJSON().title) && /banni\(e\)/.test(text(res._edits.at(-1))), 'MP et message : bannissement');
+  assert(/banni\(e\)/.test(dan.dms[0].embeds[0].toJSON().title) && /Serveur de test/.test(dan.dms[0].embeds[0].toJSON().description) && /ne pouvez pas rejoindre/.test(dan.dms[0].embeds[0].toJSON().description), 'MP : texte de bannissement par défaut complet');
+  assert(/banni\(e\)/.test(text(res._edits.at(-1))), 'message au membre : bannissement');
   assert(/Membre banni/.test(JSON.stringify(logCh.sends.at(-1).payload.embeds[0].toJSON())), 'journal : bannissement');
 
   const eve = newMember('05', { dmClosed: true });
@@ -363,7 +411,7 @@ async function run() {
   assert(dueCount >= 3 && await engine.sweep(client, t1 + 11 * 60_000) === dueCount, 'après l’échéance : tous les dossiers échus sont traités');
   assert(bea.banned, 'membre jamais revenu cliquer : sanctionné au délai');
   assert(kim.banned && kim.banned.dmsBefore === 1, 'délai dépassé : bannissement (choix séparé), MP avant');
-  assert(/temps imparti/.test(kim.dms[0].embeds[0].toJSON().description) && /banni\(e\)/.test(kim.dms[0].embeds[0].toJSON().title), 'MP : délai dépassé');
+  assert(/délai imparti/.test(kim.dms[0].embeds[0].toJSON().description) && /banni\(e\)/.test(kim.dms[0].embeds[0].toJSON().title), 'MP : délai dépassé');
   assert(!lou.kicked && !lou.banned, 'vérifié à la main par le staff : jamais sanctionné');
   assert(!cfg().pending[lou.id] && !cfg().pending[max.id] && !cfg().pending[kim.id], 'dossiers clos (parti, vérifié, sanctionné)');
   await click('verification:timeout-action');

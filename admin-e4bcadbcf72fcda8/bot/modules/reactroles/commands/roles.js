@@ -31,8 +31,12 @@ async function denyIfUnauthorized(interaction) {
   return true;
 }
 
-function fromMessage(interaction) {
-  return typeof interaction.isFromMessage === 'function' && interaction.isFromMessage();
+// discord.js 14 : isFromMessage() n'existe que sur les validations de modale, pas sur les boutons.
+function canUpdateOriginal(interaction) {
+  if (interaction.isChatInputCommand?.()) return false;
+  if (typeof interaction.update !== 'function') return false;
+  if (interaction.isModalSubmit?.()) return Boolean(interaction.isFromMessage?.() || interaction.message);
+  return true;
 }
 
 function updatePayload(payload) {
@@ -40,28 +44,31 @@ function updatePayload(payload) {
     content: payload.content ?? null,
     embeds: payload.embeds || [],
     components: payload.components || [],
+    files: payload.files || [],
+    attachments: payload.attachments || [],
   };
 }
 
-// Affiche l'écran : remplace le message courant quand c'est possible, sinon répond (éphémère).
+// Affiche l'écran en remplaçant le message courant (jamais un nouveau message à chaque clic).
 async function show(interaction, payload) {
+  const body = updatePayload(payload);
   if (interaction.deferred || interaction.replied) {
-    if (typeof interaction.editReply === 'function' && fromMessage(interaction)) {
-      await interaction.editReply(updatePayload(payload));
+    if (typeof interaction.editReply === 'function' && !interaction.isChatInputCommand?.()) {
+      await interaction.editReply(body);
       return;
     }
     await interaction.followUp({ ...payload, content: payload.content ?? undefined, flags: EPHEMERAL });
     return;
   }
-  if (fromMessage(interaction) && typeof interaction.update === 'function') {
-    await interaction.update(updatePayload(payload));
+  if (canUpdateOriginal(interaction)) {
+    await interaction.update(body);
     return;
   }
   await interaction.reply({ ...payload, content: payload.content ?? undefined, flags: EPHEMERAL });
 }
 
 async function deferEdit(interaction) {
-  if (fromMessage(interaction) && typeof interaction.deferUpdate === 'function' && !interaction.deferred && !interaction.replied) {
+  if (canUpdateOriginal(interaction) && typeof interaction.deferUpdate === 'function' && !interaction.deferred && !interaction.replied) {
     await interaction.deferUpdate();
   }
 }

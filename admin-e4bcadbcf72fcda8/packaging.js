@@ -293,9 +293,9 @@
 <li>Le panneau de configuration s’ouvre (vous seul le voyez) : titre, description, couleur (menu ou code hexadécimal), image facultative (photo ou GIF, 8 Mo maximum, enregistrée par le bot), rôles, essais, sanctions, délai, message privé et journal.</li>
 <li>Réglages : choisissez le rôle « Vérifié » (obligatoire), le rôle « non vérifié » (facultatif, retiré à la réussite), le nombre d’essais autorisés (de 1 à 6) et le salon du journal.</li>
 <li>Choisissez la sanction quand les essais sont épuisés (expulsion ou bannissement), puis séparément la sanction quand le délai est dépassé. Le délai se règle en minutes (0 = aucune sanction pour lenteur) et survit à un redémarrage du bot.</li>
-<li>Avant toute expulsion ou tout bannissement, le bot envoie un message privé au membre avec la raison et le nom du serveur. Vous pouvez y ajouter votre propre texte. Si les messages privés sont fermés, la sanction est appliquée quand même et le journal le précise.</li>
+<li>Avant toute expulsion ou tout bannissement, le bot envoie un message privé déjà rédigé (nom du serveur, raison, essais ou délai, et comment revenir après une expulsion). La fenêtre est préremplie : vous pouvez laisser ce texte ou le modifier. Si les messages privés sont fermés, la sanction est appliquée quand même et le journal le précise.</li>
 <li>Cliquez sur Vérifier pour contrôler les rôles et les permissions, sur Publier le panneau, puis sur Activer. Les administrateurs, le propriétaire et les bots ne sont jamais sanctionnés.</li>
-<li>Seul le salon de vérification doit être visible par les nouveaux membres : le bot ne modifie pas les permissions des salons. Le membre clique sur le bouton, reçoit une image avec un code, puis le recopie dans la fenêtre qui s’ouvre.</li>
+<li>Seul le salon de vérification doit être visible par les nouveaux membres : le bot ne modifie pas les permissions des salons. Le membre clique sur le bouton, reçoit une image avec un code (majuscules, minuscules et chiffres, à recopier en respectant la casse), puis le saisit dans la fenêtre qui s’ouvre. Si vous supprimez le panneau publié, vous pouvez le republier à tout moment.</li>
 </ol>`
         : slug === 'autostart'
 

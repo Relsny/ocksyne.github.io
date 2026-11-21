@@ -9,7 +9,7 @@ const { configProblems } = require('./engine');
 const { channelProblems } = require('./perms');
 
 const DEFAULT_TITLE = 'Vérification';
-const DEFAULT_DESCRIPTION = 'Pour accéder au serveur, cliquez sur le bouton ci-dessous, puis recopiez le code affiché sur l’image.';
+const DEFAULT_DESCRIPTION = 'Pour accéder au serveur, cliquez sur le bouton ci-dessous, puis recopiez le code affiché sur l’image. Le code mélange des majuscules, des minuscules et des chiffres : respectez la casse.';
 
 function titleOf(config) {
   return config.title || DEFAULT_TITLE;
@@ -54,7 +54,22 @@ function jumpUrl(guildId, channelId, messageId) {
   return `https://discord.com/channels/${guildId}/${channelId}/${messageId}`;
 }
 
+function isUnknownMessage(error) {
+  return Number(error?.code) === 10008 || /Unknown Message/i.test(String(error?.message || ''));
+}
+
+async function fetchMessage(channel, messageId) {
+  if (!channel?.messages || !messageId) return null;
+  try {
+    return await channel.messages.fetch(messageId);
+  } catch (error) {
+    if (isUnknownMessage(error)) return null;
+    throw error;
+  }
+}
+
 // Publie ou met à jour le panneau. Renvoie { ok, message, created, error }.
+// Si le message publié a été supprimé (erreur 10008), l’identifiant est oublié et un nouveau message est envoyé.
 async function publishPanel(guild, config, channel) {
   const payload = buildPanelMessage(config);
   try {
@@ -62,15 +77,21 @@ async function publishPanel(guild, config, channel) {
       const liveChannelId = config.messageChannelId || config.channelId;
       const same = liveChannelId === channel.id;
       const previous = same ? channel : await fetchChannel(guild, liveChannelId);
-      const old = previous?.messages ? await previous.messages.fetch(config.messageId).catch(() => null) : null;
+      let old = await fetchMessage(previous, config.messageId);
       if (old && same) {
-        const edited = await old.edit({ ...payload, attachments: [] });
-        return { ok: true, message: edited || old, created: false };
+        try {
+          const edited = await old.edit({ ...payload, attachments: [] });
+          return { ok: true, message: edited || old, created: false };
+        } catch (error) {
+          // Message encore en cache mais déjà supprimé sur Discord : on republie.
+          if (!isUnknownMessage(error)) throw error;
+          old = null;
+        }
       }
       if (old) await old.delete().catch(() => {});
     }
     const message = await channel.send(payload);
-    return { ok: true, message, created: true };
+    return { ok: true, message, created: true, republished: Boolean(config.messageId) };
   } catch (error) {
     return { ok: false, error: `Discord a refusé la publication : ${error?.message || 'erreur inconnue'}.` };
   }
@@ -85,5 +106,7 @@ module.exports = {
   publishProblems,
   fetchChannel,
   jumpUrl,
+  isUnknownMessage,
+  fetchMessage,
   publishPanel,
 };
