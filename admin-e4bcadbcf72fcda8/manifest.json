@@ -287,8 +287,20 @@
       "modules/tickets/README.md"
     ],
     "verif": [
-      "modules/verif/commands/verif.js",
+      "modules/verif/commands/verification.js",
       "modules/verif/events/watch.js",
+      "modules/verif/lib/captcha.js",
+      "modules/verif/lib/engine.js",
+      "modules/verif/lib/flow-test.js",
+      "modules/verif/lib/image.js",
+      "modules/verif/lib/mocks.js",
+      "modules/verif/lib/panel.js",
+      "modules/verif/lib/perms.js",
+      "modules/verif/lib/selftest.js",
+      "modules/verif/lib/store.js",
+      "modules/verif/lib/style.js",
+      "modules/verif/lib/ui-constraints-test.js",
+      "modules/verif/lib/ui.js",
       "modules/verif/module.js",
       "modules/verif/README.md"
     ],

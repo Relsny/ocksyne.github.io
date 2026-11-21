@@ -285,6 +285,18 @@
 <li>Pour l’image, envoyez une photo ou un GIF (8 Mo maximum). Le fichier est enregistré par le bot et rattaché à chaque publication. Le bouton rouge « Retirer l’image » n’apparaît que si une image est en place.</li>
 <li>Auto-rôle : tapez /roles auto. Choisissez les rôles des humains et ceux des bots (listes séparées), le délai (0 pour immédiat, ou 30, 10m, 2h… jusqu’à 24 h), le salon du journal des attributions, puis cliquez sur Activer. Le bouton Vérifier contrôle chaque rôle. Les attributions en attente survivent à un redémarrage.</li>
 </ol>`
+        : slug === 'verif'
+        ? `<ol>
+<li>Dans le portail Discord (onglet Bot), activez l’intent <b>Server Members</b>. Sans cet intent, le bot ne voit pas les arrivées et ne peut pas suivre le délai des nouveaux membres.</li>
+<li>Placez le rôle du bot <b>au-dessus</b> du rôle « Vérifié » et du rôle « non vérifié » (Paramètres du serveur, Rôles). Donnez-lui aussi les permissions Gérer les rôles, et Expulser ou Bannir selon la sanction que vous choisirez.</li>
+<li>Un membre qui peut gérer le serveur tape /verification configurer, puis choisit le salon où le bouton « Me vérifier » sera publié.</li>
+<li>Le panneau de configuration s’ouvre (vous seul le voyez) : titre, description, couleur (menu ou code hexadécimal), image facultative (photo ou GIF, 8 Mo maximum, enregistrée par le bot), rôles, essais, sanctions, délai, message privé et journal.</li>
+<li>Réglages : choisissez le rôle « Vérifié » (obligatoire), le rôle « non vérifié » (facultatif, retiré à la réussite), le nombre d’essais autorisés (de 1 à 6) et le salon du journal.</li>
+<li>Choisissez la sanction quand les essais sont épuisés (expulsion ou bannissement), puis séparément la sanction quand le délai est dépassé. Le délai se règle en minutes (0 = aucune sanction pour lenteur) et survit à un redémarrage du bot.</li>
+<li>Avant toute expulsion ou tout bannissement, le bot envoie un message privé au membre avec la raison et le nom du serveur. Vous pouvez y ajouter votre propre texte. Si les messages privés sont fermés, la sanction est appliquée quand même et le journal le précise.</li>
+<li>Cliquez sur Vérifier pour contrôler les rôles et les permissions, sur Publier le panneau, puis sur Activer. Les administrateurs, le propriétaire et les bots ne sont jamais sanctionnés.</li>
+<li>Seul le salon de vérification doit être visible par les nouveaux membres : le bot ne modifie pas les permissions des salons. Le membre clique sur le bouton, reçoit une image avec un code, puis le recopie dans la fenêtre qui s’ouvre.</li>
+</ol>`
         : slug === 'autostart'
 
         ? `<ol>

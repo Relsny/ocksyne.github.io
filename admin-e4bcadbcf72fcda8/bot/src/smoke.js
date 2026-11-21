@@ -91,6 +91,9 @@ const extraTests = [
   'modules/reactroles/lib/selftest.js',
   'modules/reactroles/lib/ui-constraints-test.js',
   'modules/reactroles/lib/flow-test.js',
+  'modules/verif/lib/selftest.js',
+  'modules/verif/lib/ui-constraints-test.js',
+  'modules/verif/lib/flow-test.js',
 ];
 for (const rel of extraTests) {
   const file = path.join(__dirname, '..', rel);
