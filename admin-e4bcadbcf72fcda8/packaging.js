@@ -36,7 +36,7 @@
 
   const INTENTS = {
     bienvenue: 'Server Members',
-    autorole: 'Server Members',
+    reactroles: 'Server Members (pour l’auto-rôle)',
     verif: 'Server Members',
     logs: 'Server Members, Message Content',
     moderation: 'Server Members',
@@ -272,6 +272,18 @@
 <li>Pour une bannière, envoyez une photo ou un GIF (8 Mo maximum) depuis Image d’accueil ou Image de départ. Les GIF restent animés. Le fichier est enregistré par le bot (un lien CDN finirait par expirer) et rattaché à chaque publication. Pour l’enlever, choisissez « Retirer la bannière d’accueil » ou « Retirer la bannière de départ » dans le menu des couleurs, puis confirmez.</li>
 <li>Le message de départ est optionnel. Il peut utiliser le même salon que l’accueil, ou un autre (bouton Salon de départ). Le message privé de bienvenue est également optionnel : s’il est refusé (MP fermés), l’accueil public est tout de même publié.</li>
 <li>Le bouton Tester / aperçu vous montre les messages concernés, sans les publier et sans envoyer de MP. Les bots sont ignorés par défaut ; vous pouvez les inclure.</li>
+</ol>`
+        : slug === 'reactroles'
+        ? `<ol>
+<li>Placez d’abord le rôle du bot <b>au-dessus</b> de tous les rôles qu’il doit distribuer (Paramètres du serveur, Rôles). C’est une règle de Discord : un bot ne peut pas donner un rôle plus haut que le sien.</li>
+<li>Pour l’auto-rôle uniquement, activez l’intent <b>Server Members</b> dans le portail Discord (onglet Bot). Les panneaux de rôles fonctionnent sans lui.</li>
+<li>Un membre qui peut gérer les rôles tape /roles configurer, puis choisit le salon où le panneau sera publié.</li>
+<li>Le panneau de configuration s’ouvre (vous seul le voyez) : titre, description, couleur (menu ou code hexadécimal), image facultative, affichage en boutons ou en menu déroulant, choix unique ou multiple, et jusqu’à 25 rôles.</li>
+<li>Pour ajouter un rôle, cliquez sur Ajouter un rôle, choisissez-le, puis donnez-lui si vous voulez un texte (45 caractères maximum) et un emoji. Les rôles refusés (trop hauts pour le bot, gérés par une intégration, administrateur, plus hauts que le vôtre) sont expliqués en français.</li>
+<li>Cliquez sur Publier le panneau. Pour modifier un panneau déjà publié, changez ce que vous voulez puis cliquez sur Mettre à jour le panneau : le message est modifié sur place. Aperçu montre le rendu sans rien publier.</li>
+<li>En choix unique, prendre un rôle retire les autres rôles du même panneau. Avec le menu déroulant, la sélection devient l’état exact des rôles du panneau.</li>
+<li>Pour l’image, envoyez une photo ou un GIF (8 Mo maximum). Le fichier est enregistré par le bot et rattaché à chaque publication. Le bouton rouge « Retirer l’image » n’apparaît que si une image est en place.</li>
+<li>Auto-rôle : tapez /roles auto. Choisissez les rôles des humains et ceux des bots (listes séparées), le délai (0 pour immédiat, ou 30, 10m, 2h… jusqu’à 24 h), le salon du journal des attributions, puis cliquez sur Activer. Le bouton Vérifier contrôle chaque rôle. Les attributions en attente survivent à un redémarrage.</li>
 </ol>`
         : slug === 'autostart'
 

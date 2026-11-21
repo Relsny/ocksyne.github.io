@@ -9,7 +9,7 @@ const { parseDuration } = require('./text');
 const { optionalSnowflake, parseTokenText } = require('./token');
 
 const EXPECTED = [
-  'absences', 'anniv', 'antidoublons', 'antiraid', 'autorole', 'autostart', 'avatars',
+  'absences', 'anniv', 'antidoublons', 'antiraid', 'autostart', 'avatars',
   'bienvenue', 'boost', 'candid', 'compteurs', 'custom', 'economie', 'embed', 'giveaways',
   'invites', 'logs', 'moderation', 'osu', 'rappels', 'reactroles', 'sondages', 'stream',
   'suggestions', 'tickets', 'verif', 'warns', 'xp',
@@ -88,6 +88,9 @@ const extraTests = [
   'modules/bienvenue/lib/selftest.js',
   'modules/bienvenue/lib/ui-constraints-test.js',
   'modules/bienvenue/lib/flow-test.js',
+  'modules/reactroles/lib/selftest.js',
+  'modules/reactroles/lib/ui-constraints-test.js',
+  'modules/reactroles/lib/flow-test.js',
 ];
 for (const rel of extraTests) {
   const file = path.join(__dirname, '..', rel);

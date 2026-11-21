@@ -106,12 +106,6 @@
       "modules/antiraid/module.js",
       "modules/antiraid/README.md"
     ],
-    "autorole": [
-      "modules/autorole/commands/autorole.js",
-      "modules/autorole/events/join.js",
-      "modules/autorole/module.js",
-      "modules/autorole/README.md"
-    ],
     "autostart": [
       "modules/autostart/lib/selftest.js",
       "modules/autostart/macos/ACTIVER le démarrage automatique (Mac).command",
@@ -255,6 +249,18 @@
     ],
     "reactroles": [
       "modules/reactroles/commands/roles.js",
+      "modules/reactroles/events/join.js",
+      "modules/reactroles/lib/auto.js",
+      "modules/reactroles/lib/flow-test.js",
+      "modules/reactroles/lib/image.js",
+      "modules/reactroles/lib/mocks.js",
+      "modules/reactroles/lib/panel.js",
+      "modules/reactroles/lib/perms.js",
+      "modules/reactroles/lib/selftest.js",
+      "modules/reactroles/lib/store.js",
+      "modules/reactroles/lib/style.js",
+      "modules/reactroles/lib/ui-constraints-test.js",
+      "modules/reactroles/lib/ui.js",
       "modules/reactroles/module.js",
       "modules/reactroles/README.md"
     ],
