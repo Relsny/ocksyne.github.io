@@ -558,7 +558,7 @@
       if (n === 0) hint = 'Clique sur les modules qui t\'intéressent. Dès ' + DATA.libreMin + ' modules : −50 % (Pack Libre).';
       else {
         const better = DATA.packs.filter(p => ids.every(i => p.modules.includes(i)) && p.price < total).sort((a, b) => a.price - b.price)[0];
-        if (better) hint = 'Le <b>' + better.name + '</b> contient tout ça (et plus) pour <b>' + better.price + ' €</b>.';
+        if (better) hint = 'Le <b>' + better.name + '</b> contient tout ça' + (better.modules.length > ids.length ? ' (et plus)' : '') + ' pour <b>' + better.price + ' €</b>.';
         else if (!libre) hint = 'Encore <b>' + (DATA.libreMin - n) + '</b> module' + (DATA.libreMin - n > 1 ? 's' : '') + ' et tu passes en Pack Libre à −50 %.';
         else hint = 'Pack Libre activé : tu paies la moitié du prix des modules.';
       }

@@ -7,7 +7,7 @@
    ========================================================================== */
 :root{
   --bg:#09090b; --bg2:#0d0d10; --card:#111114; --card2:#17171b; --line:#232328;
-  --text:#f5f5f7; --muted:#a1a1ab; --dim:#6e6e7a;
+  --text:#f5f5f7; --muted:#a1a1ab; --dim:#8a8a96;
   --accent:#5865F2; --accent-l:#8b93ff; --accent2:#8b93ff;
   --violet:#7b5cff; --pink:#EB459E; --green:#23A55A; --yellow:#FEE75C; --red:#ED4245;
   --grad:linear-gradient(120deg,#ffffff 0%,#d4d6ff 40%,#8b93ff 100%);
@@ -222,7 +222,7 @@ h2{font-size:clamp(32px,4.4vw,56px);letter-spacing:-.04em;line-height:1.04;margi
 .aud>div{background:var(--card);border:1px solid var(--hair);border-radius:16px;padding:24px 14px 20px;text-align:center;font-weight:600;font-family:var(--display);font-size:16.5px;letter-spacing:-.01em;transition:transform .5s var(--ease),border-color .3s}
 .aud>div>span{display:grid;place-items:center;width:52px;height:52px;margin:0 auto 14px;border-radius:14px;font-size:24px;background:rgba(255,255,255,.03);border:1px solid var(--hair2);transition:transform .6s var(--ease)}
 .aud small{display:block;color:var(--muted);font:400 13px/1.45 var(--body);margin-top:6px;letter-spacing:0}
-@media (hover:hover){.aud>div:hover{transform:translate3d(0,-4px,0);border-color:var(--hair2)}.aud>div:hover>span{transform:translate3d(0,-2px,0) scale(1.06)}}
+@media (hover:hover){.aud>div:hover{border-color:var(--hair2)}}
 
 /* Modules */
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:32px}
@@ -236,7 +236,7 @@ h2{font-size:clamp(32px,4.4vw,56px);letter-spacing:-.04em;line-height:1.04;margi
 .mod.hide{display:none}
 .pop{animation:pop .65s var(--ease) both;animation-delay:var(--d,0s)}
 @keyframes pop{from{opacity:0;transform:translate3d(0,18px,0)}to{opacity:1;transform:none}}
-@media (hover:hover){.mod:hover{transform:translate3d(0,-4px,0);border-color:var(--hair2)}.mod:hover .mod-ico{transform:scale(1.06)}}
+@media (hover:hover){.mod:hover{border-color:var(--hair2)}}
 .mod-head{padding:22px 24px 0;display:flex;align-items:flex-start;gap:14px}
 .mod-ico{flex:none;width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--hair2);display:grid;place-items:center;font-size:22px;transition:transform .6s var(--ease)}
 .mod-title{flex:1;min-width:0}
@@ -248,10 +248,10 @@ h2{font-size:clamp(32px,4.4vw,56px);letter-spacing:-.04em;line-height:1.04;margi
 .mod-list{list-style:none;padding:14px 24px 0;margin:0;display:flex;flex-wrap:wrap;gap:6px}
 .mod-list li{font-size:12.5px;border:1px solid var(--hair);padding:3px 10px;border-radius:6px;color:#c4c4cc}
 .mod-demo{position:relative;overflow:hidden;margin:18px 14px 0;background:#313338;border-radius:12px;padding:10px 0;flex:1;box-shadow:0 0 0 1px rgba(255,255,255,.05)}
-html.js .mod-demo::before{content:"";position:absolute;inset:0;z-index:5;background:#1a1a1e;transition:opacity .6s}
-html.js .mod-demo::after{content:"";position:absolute;inset:0;z-index:6;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.05) 50%,transparent 70%);transform:translate3d(-100%,0,0);animation:shimmer 1.4s linear infinite;transition:opacity .6s}
-@keyframes shimmer{to{transform:translate3d(100%,0,0)}}
-html.js .mod-demo.loaded::before,html.js .mod-demo.loaded::after{opacity:0;pointer-events:none}
+
+
+
+
 .mod-demo-label{font-size:11px;color:#949ba4;font-weight:700;padding:0 16px 4px}
 .mod-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 24px 20px}
 .mod-foot small{color:var(--dim);font-size:13px}
@@ -267,7 +267,7 @@ html.js .mod-demo.loaded::before,html.js .mod-demo.loaded::after{opacity:0;point
 /* Packs */
 .packs{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:stretch}
 .pack{border-radius:22px;padding:32px 28px 28px;display:flex;flex-direction:column;transition:transform .55s var(--ease),border-color .35s}
-@media (hover:hover){.pack:hover{transform:translate3d(0,-6px,0);border-color:var(--hair2)}}
+@media (hover:hover){.pack:hover{border-color:var(--hair2)}}
 .pack.feat{border-color:transparent;background:var(--card)}
 .pack.feat .fx{background:rgba(139,147,255,.28)}
 .pack.feat .fx .cone{position:absolute;left:50%;top:50%;width:230%;height:230%;z-index:0;background:conic-gradient(from 0deg,transparent 0 62%,rgba(139,147,255,.9) 80%,#fff 88%,transparent 96%);animation:spin 6s linear infinite}
@@ -292,7 +292,7 @@ html.js .mod-demo.loaded::before,html.js .mod-demo.loaded::after{opacity:0;point
 .packs-sub{margin:80px 0 0;font-size:26px;font-weight:600;letter-spacing:-.025em}
 .tpacks{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px}
 .tpack{border-radius:18px;padding:24px;display:flex;flex-direction:column;transition:transform .5s var(--ease),border-color .35s}
-@media (hover:hover){.tpack:hover{transform:translate3d(0,-4px,0);border-color:var(--hair2)}}
+@media (hover:hover){.tpack:hover{border-color:var(--hair2)}}
 .tpack-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
 .tpack h4{margin:0;font-size:18px;font-weight:600;letter-spacing:-.015em}
 .tpack .p{font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
@@ -326,8 +326,8 @@ html.js .mod-demo.loaded::before,html.js .mod-demo.loaded::after{opacity:0;point
 .hint{position:relative;font-size:13.5px;color:#bfc0cc;background:rgba(255,255,255,.025);border:1px solid var(--hair);border-radius:10px;padding:11px 14px 11px 16px;margin:18px 0;overflow:hidden}
 .hint::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:2px;border-radius:2px;background:var(--accent-l)}
 .hint b{color:#fff;font-weight:600}
-.summary textarea{width:100%;height:120px;background:#0b0b0e;color:#c9c9d2;border:1px solid var(--hair);border-radius:10px;padding:12px;font:12.5px/1.55 var(--mono);resize:none;margin:8px 0 14px;transition:border-color .25s}
-.summary textarea:focus{outline:none;border-color:rgba(139,147,255,.5)}
+.summary textarea{width:100%;height:auto;min-height:120px;max-height:min(50vh,420px);field-sizing:content;background:#0b0b0e;color:#c9c9d2;border:1px solid var(--hair);border-radius:10px;padding:12px;font:12.5px/1.55 var(--mono);resize:none;margin:8px 0 14px;transition:border-color .25s}
+.summary textarea:focus{border-color:rgba(139,147,255,.5)}
 .summary .btn{width:100%}
 .summary.flash::before{content:"";position:absolute;inset:-1px;border-radius:inherit;border:1.5px solid #fff;z-index:3;pointer-events:none;animation:flash 1.1s ease-out forwards}
 @keyframes flash{0%{opacity:.9}100%{opacity:0}}
@@ -336,7 +336,7 @@ html.js .mod-demo.loaded::before,html.js .mod-demo.loaded::after{opacity:0;point
 /* Options */
 .opts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .opt{border-radius:16px;padding:24px;transition:transform .5s var(--ease),border-color .3s}
-@media (hover:hover){.opt:hover{transform:translate3d(0,-4px,0);border-color:var(--hair2)}}
+@media (hover:hover){.opt:hover{border-color:var(--hair2)}}
 .opt b{display:block;font:600 16.5px var(--display);letter-spacing:-.015em}
 .opt .op{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:-.035em;margin:6px 0 8px;color:#fff;font-variant-numeric:tabular-nums;width:fit-content}
 .opt p{margin:0;color:var(--muted);font-size:14.5px}
@@ -352,7 +352,7 @@ html.js .steps.in::before{transform:scaleX(1)}
 .step p{margin:0;color:var(--muted);font-size:14.5px}
 .promise{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .promise>div{border:1px solid var(--hair);border-radius:16px;padding:24px;background:var(--card);transition:transform .5s var(--ease),border-color .3s}
-@media (hover:hover){.promise>div:hover{transform:translate3d(0,-4px,0);border-color:var(--hair2)}.promise>div:hover>span{transform:scale(1.06)}}
+@media (hover:hover){.promise>div:hover{border-color:var(--hair2)}}
 .promise span{display:grid;place-items:center;width:46px;height:46px;border-radius:12px;font-size:22px;background:rgba(255,255,255,.03);border:1px solid var(--hair2);transition:transform .6s var(--ease)}
 .promise b{display:block;font:600 16.5px var(--display);letter-spacing:-.015em;margin:16px 0 6px}
 .promise p{margin:0;color:var(--muted);font-size:14.5px}
