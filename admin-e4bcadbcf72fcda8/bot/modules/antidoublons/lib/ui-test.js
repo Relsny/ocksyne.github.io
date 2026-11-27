@@ -96,6 +96,11 @@ async function main() {
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+  const panel = fs.readFileSync(path.join(__dirname, '..', 'panel.html'), 'utf8');
+  for (const id of ['rule-content', 'rule-videos', 'sens', 'content-slide', 'legacy-slide']) assert(panel.includes(`id="${id}"`), `panneau : ${id}`);
+  assert(panel.includes('contentMatch:$(') && panel.includes('contentSensitivity:S.level') && panel.includes('contentVideos:$('), 'panneau : réglages du contenu envoyés au bot');
+  for (const level of ['strict', 'balanced', 'loose']) assert(panel.includes(`data-level="${level}"`), `panneau : sensibilité ${level}`);
+  assert(/Détection par le contenu/.test(panel) && !/Detection par le contenu/.test(panel), 'panneau : texte français');
   console.log('ANTI-DOUBLONS UI TEST OK');
 }
 

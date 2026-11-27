@@ -11,7 +11,7 @@ module.exports = {
     '1. Invite le bot avec la permission Gérer les messages, et active l’intent Message Content.',
     '2. Tape /antidoublons panel. Un bouton ouvre le panneau, visible seulement par toi.',
     '3. Coche un salon, plusieurs salons, ou des catégories entières. Plus il y en a, plus l’analyse est longue.',
-    '4. Choisis textes, liens (tous les sites ou une liste, y compris des sites adultes) et images/GIF.',
+    '4. Choisis textes, liens (tous les sites ou une liste, y compris des sites adultes) et images/GIF/vidéos. La détection par le contenu compare les fichiers eux-mêmes : deux médias identiques sont repérés même avec un lien ou un nom différent (sensibilité réglable, vidéos comparées avec ffmpeg).',
     '5. Clique sur Activer et confirme deux fois. Tout l’historique est analysé tout de suite, les doublons plus récents sont supprimés, puis la surveillance en direct s’active.',
     '6. Le bouton rouge STOP arrête tout de suite.',
     '7. Ensuite, chaque nouveau doublon reçoit un message « Doublon détecté » avec le lien de l’original, puis il est supprimé.',

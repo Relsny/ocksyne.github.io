@@ -98,6 +98,7 @@ const extraTests = [
   'modules/antidoublons/lib/fullscan-test.js',
   'modules/antidoublons/lib/delete-test.js',
   'modules/antidoublons/lib/ui-test.js',
+  'modules/antidoublons/lib/media-test.js',
 ];
 for (const rel of extraTests) {
   const file = path.join(__dirname, '..', rel);

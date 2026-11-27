@@ -27,8 +27,12 @@ const {
 const {
     analyzeLink,
     analyzeDirectMedia,
+    analyzeContentLink,
+    canAnalyzeContentLink,
     canAnalyzeLink
 } = require("./mediaFingerprint");
+
+const contentLib = require("../lib/media");
 
 // ==========================
 // MÉMOIRE TEMPORAIRE
@@ -218,12 +222,20 @@ function isDirectMediaUrl(link) {
 
 async function safelyAnalyzeMedia(link) {
 
-    if (config.fingerprintMedia === false) {
-        return null;
-    }
-
     const fingerprintable =
         isFingerprintableLink(link);
+
+    // Fichier direct, page Tenor / Giphy / Imgur / Streamable : on compare le contenu lui-même
+    const contentLink =
+        !fingerprintable &&
+        canAnalyzeContentLink(link);
+
+    if (
+        config.fingerprintMedia === false &&
+        !contentLink
+    ) {
+        return null;
+    }
 
     const directMedia =
         !fingerprintable &&
@@ -231,7 +243,8 @@ async function safelyAnalyzeMedia(link) {
 
     if (
         !fingerprintable &&
-        !directMedia
+        !directMedia &&
+        !contentLink
     ) {
         return null;
     }
@@ -248,12 +261,19 @@ async function safelyAnalyzeMedia(link) {
                 ? await analyzeLink(
                     link
                 )
-                : await analyzeDirectMedia(
-                    link,
-                    {
-                        platform: "direct-media"
-                    }
-                );
+                : contentLink
+                    ? await analyzeContentLink(
+                        link,
+                        {
+                            ordered: true
+                        }
+                    )
+                    : await analyzeDirectMedia(
+                        link,
+                        {
+                            platform: "direct-media"
+                        }
+                    );
 
         if (
             !analysis ||
@@ -382,6 +402,7 @@ async function safelyAnalyzeAttachment(
                 attachment.url,
                 {
                     platform: "attachment",
+                    ordered: true,
                     postId: attachment.id || null,
                     contentType:
                         attachment.contentType ||
@@ -421,6 +442,75 @@ async function safelyAnalyzeAttachment(
         return null;
 
     }
+
+}
+
+// ==========================
+// APERÇUS INTÉGRÉS (embeds)
+// ==========================
+
+function getEmbedMediaSources(message) {
+
+    try {
+
+        if (!config.content?.enabled) {
+            return [];
+        }
+
+        return contentLib
+            .collectSources(
+                message,
+                config.content
+            )
+            .filter(source => source.origin === "embed");
+
+    } catch {
+
+        return [];
+
+    }
+
+}
+
+async function warnAndDeleteContentDuplicate(message, old) {
+
+    if (!canDeleteMessages(message)) {
+        logger.error(
+            "❌ Permission Gérer les messages manquante"
+        );
+        await reportMissingPermission(message);
+        return false;
+    }
+
+    let warningMessage = null;
+
+    if (config.sendWarning !== false) {
+        const embed = createDuplicateEmbed({
+            message,
+            old,
+            remainingSeconds: Math.max(
+                1,
+                Math.ceil(deleteDelay() / 1000)
+            )
+        });
+        warningMessage = await message.reply({
+            embeds: [embed],
+            allowedMentions: {
+                repliedUser: false
+            }
+        }).catch(() => null);
+    }
+
+    if (config.deleteDuplicate !== false) {
+        await startDeletionCountdown({
+            message,
+            warningMessage,
+            old,
+            delay: deleteDelay()
+        });
+    }
+
+    return true;
 
 }
 
@@ -1400,12 +1490,20 @@ async function execute(message) {
                 message
             );
 
+        const embedSources =
+            getEmbedMediaSources(
+                message
+            );
+
         if (
             !links.length &&
-            !mediaAttachments.length
+            !mediaAttachments.length &&
+            !embedSources.length
         ) {
             return;
         }
+
+        let linkMediaAnalyzed = false;
 
         if (links.length) {
             logger.debug(
@@ -1541,6 +1639,10 @@ async function execute(message) {
                     await safelyAnalyzeMedia(
                         link
                     );
+
+                if (mediaAnalysis) {
+                    linkMediaAnalyzed = true;
+                }
 
                 // ==========================
                 // RECHECK APRÈS await
@@ -2061,6 +2163,69 @@ async function execute(message) {
 
         }
 
+
+        // ==========================
+        // APERÇUS INTÉGRÉS : MÊME CONTENU, AUTRE LIEN
+        // ==========================
+        // (utile quand la page d'un GIF Tenor / Giphy / Imgur n'a pas pu être lue :
+        //  Discord donne alors lui-même le fichier dans l'aperçu)
+        if (
+            !linkMediaAnalyzed &&
+            embedSources.length
+        ) {
+            for (
+                let index = 0;
+                index < embedSources.length;
+                index++
+            ) {
+                try {
+                    const embedKey =
+                        `discord-embed://${message.id}/${index}`;
+                    const analysis =
+                        await contentLib.analyzeSource(
+                            embedSources[index],
+                            {
+                                options: config.content,
+                                ordered: true
+                            }
+                        );
+                    if (!analysis) {
+                        continue;
+                    }
+                    const old = findMediaDuplicate(
+                        analysis,
+                        message.guild.id,
+                        embedKey,
+                        message.id
+                    );
+                    if (old) {
+                        logger.info(
+                            "⚠️ DOUBLON MÉDIA (aperçu intégré) :",
+                            embedKey
+                        );
+                        if (
+                            await warnAndDeleteContentDuplicate(
+                                message,
+                                old
+                            )
+                        ) {
+                            return;
+                        }
+                        continue;
+                    }
+                    registerNewLink(
+                        message,
+                        embedKey,
+                        analysis
+                    );
+                } catch (error) {
+                    logger.error(
+                        "❌ Erreur traitement aperçu intégré :",
+                        error.message
+                    );
+                }
+            }
+        }
     }
 
     catch (error) {

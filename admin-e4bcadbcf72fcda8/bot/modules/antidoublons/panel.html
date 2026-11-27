@@ -198,6 +198,14 @@ main{max-width:1240px;margin:0 auto;padding:calc(24px*var(--d)) 24px 36px}
 .seg{position:relative;display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:14px;background:#070708;border:1px solid var(--line)}
 .seg-thumb{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:10px;background:var(--acc-g);box-shadow:0 8px 18px -8px rgba(var(--acc-rgb),calc(.8*var(--int)));transition:transform .28s cubic-bezier(.3,.9,.3,1)}
 .seg[data-mode=advanced] .seg-thumb{transform:translateX(100%)}
+.seg3{grid-template-columns:repeat(3,1fr)}
+.seg3 .seg-thumb{width:calc(33.3333% - 2.6667px)}
+.seg3[data-level=balanced] .seg-thumb{transform:translateX(100%)}
+.seg3[data-level=loose] .seg-thumb{transform:translateX(200%)}
+.imgopts .rule .ico{width:34px;height:34px;font-size:17px}
+.imgopts .rule.sub{padding:calc(6px*var(--d)) 0 calc(12px*var(--d))}
+.imgopts .slide>.in>.pad{padding:4px 4px 0}
+.imgopts .slide>.in>.pad>.rule.sub{margin-top:14px;padding-bottom:0}
 .seg button{position:relative;z-index:1;height:40px;padding:0 8px;border:0;border-radius:10px;background:none;color:var(--muted);font-weight:650;font-size:14px;transition:color .2s}
 .seg button[aria-checked=true]{color:var(--acc-ink)}
 .thr{padding-top:16px}
@@ -757,7 +765,7 @@ html[data-fx=custom]:not([data-fx=none]) #fx{display:none}
 .sp-tab[aria-selected=true]{color:var(--text)}
 
 /* Tuiles de style */
-.fx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.fx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .fx-t{position:relative;display:flex;flex-direction:column;gap:7px;padding:6px 6px 8px;border-radius:calc(14px*var(--rr));border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted);font-weight:650;font-size:12px;text-align:center;transition:border-color .28s var(--ease),color .28s var(--ease),transform .28s var(--ease),box-shadow .32s var(--ease)}
 .fx-t:hover{border-color:var(--line-2);color:var(--text);transform:translate3d(0,-1px,0)}
 .fx-t:active{transform:translate3d(0,0,0) scale(.97);transition-duration:.12s}
@@ -773,6 +781,8 @@ html[data-fx=custom]:not([data-fx=none]) #fx{display:none}
 .fx-t[data-fx=night] .fx-pv{background:linear-gradient(#04051a,#1a1238 62%,#33203a)}
 .fx-t[data-fx=blur] .fx-pv{background:linear-gradient(135deg,#312e81,#be185d)}
 .fx-t[data-fx=hacker] .fx-pv{background:#010805}
+.fx-t[data-fx=synthwave] .fx-pv{background:radial-gradient(circle at 50% 44%,#ff7ac8 0 11px,transparent 12px),linear-gradient(#0b0220 0 58%,#1a0838 58% 100%)}
+.fx-t[data-fx=constellation] .fx-pv{background:radial-gradient(circle at 24% 30%,#c9d4ff 0 1.5px,transparent 2.5px),radial-gradient(circle at 70% 24%,#c9d4ff 0 2px,transparent 3px),radial-gradient(circle at 52% 70%,#c9d4ff 0 1.5px,transparent 2.5px),#05050f}
 .fx-hint{margin:12px 0 0;min-height:36px;color:var(--faint);font-size:12px;line-height:1.5}
 .sp-sec{transition:opacity .35s var(--ease)}
 .sp-sec[data-dim=true]{opacity:.42;pointer-events:none}
@@ -808,7 +818,7 @@ var t=(u&&u.theme)||JSON.parse(localStorage.getItem('dcas-antidoublons-theme')||
 if(t&&/^#[0-9a-f]{6}$/i.test(t.color)){var d=document.documentElement,c=t.color;d.style.setProperty('--acc',c);d.style.setProperty('--acc-rgb',parseInt(c.slice(1,3),16)+','+parseInt(c.slice(3,5),16)+','+parseInt(c.slice(5,7),16));if(t.intensity)d.style.setProperty('--int',String(t.intensity/100));
 var bg=u&&u.media&&u.media.bg,tk=new URLSearchParams(location.search).get('token');
 if(bg&&tk)d.style.setProperty('--bgimg','url("/api/ui/media/bg?token='+encodeURIComponent(tk)+'&v='+encodeURIComponent(bg.v)+'")');
-if(/^(rain|drops|night|blur|hacker|custom)$/.test(t.fx)&&(t.fx!=='custom'||bg||!u)){d.dataset.fx=t.fx;var tr=Number(t.tr),bl=Number(t.blur),fi=Number(t.fxInt);d.style.setProperty('--fxi',String(isFinite(fi)&&fi>0?fi/100:1));d.style.setProperty('--glass',String(Math.max(.05,1-(isFinite(tr)?tr:40)/100)));d.style.setProperty('--blur',((isFinite(bl)?bl:14)+(t.fx==='blur'?10:0))+'px');}}}catch(e){}
+if(/^(rain|drops|night|blur|hacker|synthwave|constellation|custom)$/.test(t.fx)&&(t.fx!=='custom'||bg||!u)){d.dataset.fx=t.fx;var tr=Number(t.tr),bl=Number(t.blur),fi=Number(t.fxInt);d.style.setProperty('--fxi',String(isFinite(fi)&&fi>0?fi/100:1));d.style.setProperty('--glass',String(Math.max(.05,1-(isFinite(tr)?tr:40)/100)));d.style.setProperty('--blur',((isFinite(bl)?bl:14)+(t.fx==='blur'?10:0))+'px');}}}catch(e){}
 </script>
 </head>
 <body>
@@ -1068,18 +1078,33 @@ if(/^(rain|drops|night|blur|hacker|custom)$/.test(t.fx)&&(t.fx!=='custom'||bg||!
           <label class="rule"><span class="ico"><svg class="ic"><use href="#i-link"/></svg></span><span class="tx"><b>Liens normalisés</b><small>Le même lien, même écrit autrement.</small></span><span class="sw"><input id="rule-links" type="checkbox" role="switch" checked><i></i></span></label>
           <label class="rule"><span class="ico"><svg class="ic"><use href="#i-image"/></svg></span><span class="tx"><b>Images et GIF</b><small>Les mêmes images ou GIF envoyés plusieurs fois.</small></span><span class="sw"><input id="rule-images" type="checkbox" role="switch" checked><i></i></span></label>
           <div class="imgopts" id="imgopts">
-            <p class="lbl" id="mode-label">Comparaison des images</p>
-            <div class="seg" id="modes" role="radiogroup" aria-labelledby="mode-label" data-mode="exact">
-              <span class="seg-thumb"></span>
-              <button type="button" role="radio" aria-checked="true" data-mode="exact">Exact</button>
-              <button type="button" role="radio" aria-checked="false" data-mode="advanced">Avancé (ressemblance)</button>
-            </div>
-            <div class="slide" id="thr-slide"><div class="in"><div class="pad"><div class="thr">
-              <div class="thr-h"><label for="threshold">Seuil de ressemblance</label><output id="threshold-label" for="threshold">10</output></div>
-              <input type="range" id="threshold" min="0" max="20" value="10">
-              <div class="thr-ends"><span>Strict</span><span>Large</span></div>
-            </div></div></div></div>
-            <p class="note-s">Exact compare l’empreinte identique. Avancé ajoute la ressemblance (sharp) et les images des vidéos (ffmpeg), s’ils sont installés.</p>
+            <label class="rule sub" for="rule-content"><span class="ico"><svg class="ic"><use href="#i-search"/></svg></span><span class="tx"><b>Détection par le contenu</b><small>Compare les fichiers eux-mêmes (images, GIF, vidéos), pas seulement leurs liens. Deux médias identiques sont repérés même avec des liens ou des noms différents : le plus ancien est conservé, le plus récent est supprimé.</small></span><span class="sw"><input id="rule-content" type="checkbox" role="switch" checked><i></i></span></label>
+            <div class="slide open" id="content-slide"><div class="in"><div class="pad">
+              <p class="lbl" id="sens-label">Sensibilité</p>
+              <div class="seg seg3" id="sens" role="radiogroup" aria-labelledby="sens-label" data-level="balanced">
+                <span class="seg-thumb"></span>
+                <button type="button" role="radio" aria-checked="false" data-level="strict">Stricte</button>
+                <button type="button" role="radio" aria-checked="true" data-level="balanced">Équilibrée</button>
+                <button type="button" role="radio" aria-checked="false" data-level="loose">Large</button>
+              </div>
+              <p class="note-s" id="sens-note"></p>
+              <label class="rule sub" for="rule-videos"><span class="ico"><svg class="ic"><use href="#i-play"/></svg></span><span class="tx"><b>Vidéos et GIF animés</b><small>Compare aussi les vidéos, même recompressées ou redimensionnées.</small></span><span class="sw"><input id="rule-videos" type="checkbox" role="switch" checked><i></i></span></label>
+              <p class="note-s">Les liens directs, les pages Tenor, Giphy, Imgur et Streamable et les aperçus de Discord sont ouverts pour comparer le fichier lui-même. Les vidéos YouTube, TikTok ou Instagram ne peuvent pas être téléchargées : elles restent comparées par leur lien.</p>
+            </div></div></div>
+            <div class="slide" id="legacy-slide" inert><div class="in"><div class="pad">
+              <p class="lbl" id="mode-label">Comparaison des images</p>
+              <div class="seg" id="modes" role="radiogroup" aria-labelledby="mode-label" data-mode="exact">
+                <span class="seg-thumb"></span>
+                <button type="button" role="radio" aria-checked="true" data-mode="exact">Exact</button>
+                <button type="button" role="radio" aria-checked="false" data-mode="advanced">Avancé (ressemblance)</button>
+              </div>
+              <div class="slide" id="thr-slide"><div class="in"><div class="pad"><div class="thr">
+                <div class="thr-h"><label for="threshold">Seuil de ressemblance</label><output id="threshold-label" for="threshold">10</output></div>
+                <input type="range" id="threshold" min="0" max="20" value="10">
+                <div class="thr-ends"><span>Strict</span><span>Large</span></div>
+              </div></div></div></div>
+              <p class="note-s">Exact compare l’empreinte identique. Avancé ajoute la ressemblance (sharp) et les images des vidéos (ffmpeg), s’ils sont installés.</p>
+            </div></div></div>
           </div>
         </div>
       </section>
@@ -1232,7 +1257,7 @@ const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: r
 const S = {
   guild:{}, categories:[], channels:[], members:[],
   selCh:new Set(), selCat:new Set(), collapsed:new Set(), query:'',
-  sources:{}, mode:'exact', ignUsers:[], ignChannels:[],
+  sources:{}, mode:'exact', level:'balanced', ignUsers:[], ignChannels:[],
   perms:new Map(), active:false, total:0, r34:false, r34Edit:false,
   idleUntil:0, loaded:false
 };
@@ -1339,6 +1364,7 @@ function payload(){
     rules:{
       text:$('rule-text').checked, links:$('rule-links').checked, images:$('rule-images').checked,
       imageMode:S.mode, imageThreshold:Number($('threshold').value),
+      contentMatch:$('rule-content').checked, contentSensitivity:S.level, contentVideos:$('rule-videos').checked,
       sources, domains:lines('domains'),
       ignoredUsers:[...S.ignUsers], ignoredChannels:[...S.ignChannels]
     }
@@ -1517,6 +1543,23 @@ function setMode(mode){
   seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-checked', b.dataset.mode === S.mode));
   setSlide($('thr-slide'), S.mode === 'advanced');
 }
+const LEVEL_NOTE = {
+  strict: 'Stricte : seulement les copies quasi identiques (même fichier, recompression légère, changement de taille). Aucun risque de confusion.',
+  balanced: 'Équilibrée : copies, images redimensionnées ou recompressées, petites retouches. Recommandé.',
+  loose: 'Large : repère aussi les images retouchées (couleurs, contraste). Risque plus élevé de supprimer deux images voisines.'
+};
+const LEVELS = ['strict','balanced','loose'];
+function setLevel(level){
+  S.level = LEVELS.includes(level) ? level : 'balanced';
+  const seg = $('sens'); seg.dataset.level = S.level;
+  seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-checked', b.dataset.level === S.level));
+  $('sens-note').textContent = LEVEL_NOTE[S.level];
+}
+function syncContent(){
+  const on = $('rule-content').checked;
+  setSlide($('content-slide'), on);
+  setSlide($('legacy-slide'), !on);
+}
 function syncImages(){ $('imgopts').classList.toggle('off', !$('rule-images').checked); $('imgopts').toggleAttribute('inert', !$('rule-images').checked); }
 function paintRange(){ const r = $('threshold'); r.style.setProperty('--p', ((r.value - r.min) / (r.max - r.min) * 100) + '%'); $('threshold-label').textContent = r.value; }
 $('modes').addEventListener('click', e=>{ const b = e.target.closest('button'); if (b) { setMode(b.dataset.mode); refreshDirty(); } });
@@ -1526,6 +1569,16 @@ $('modes').addEventListener('keydown', e=>{
   $('modes').querySelector('[aria-checked=true]').focus(); refreshDirty();
 });
 $('threshold').addEventListener('input', ()=>{ paintRange(); refreshDirty(); });
+$('rule-content').addEventListener('change', ()=>{ syncContent(); refreshDirty(); });
+$('rule-videos').addEventListener('change', refreshDirty);
+$('sens').addEventListener('click', e=>{ const b = e.target.closest('button'); if (b) { setLevel(b.dataset.level); refreshDirty(); } });
+$('sens').addEventListener('keydown', e=>{
+  if (!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) return;
+  e.preventDefault();
+  const step = (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : 1;
+  setLevel(LEVELS[Math.min(2, Math.max(0, LEVELS.indexOf(S.level) + step))]);
+  $('sens').querySelector('[aria-checked=true]').focus(); refreshDirty();
+});
 $('rule-images').addEventListener('change', ()=>{ syncImages(); refreshDirty(); });
 ['rule-text','rule-links'].forEach(id=>$(id).addEventListener('change', refreshDirty));
 $('domains').addEventListener('input', refreshDirty);
@@ -1722,7 +1775,7 @@ function recap(){
   const p = payload(), r = p.rules;
   const nCh = p.channelIds.length;
   const apps = APPS.filter(a=>S.sources[a[0]]).length + MATURE.filter(a=>S.sources[a[0]]).length + (S.sources.custom ? 1 : 0);
-  const rules = [r.text && 'textes', r.links && 'liens', r.images && (S.mode === 'advanced' ? 'images (ressemblance)' : 'images')].filter(Boolean);
+  const rules = [r.text && 'textes', r.links && 'liens', r.images && (r.contentMatch ? (r.contentVideos ? 'images, GIF et vidéos (contenu)' : 'images et GIF (contenu)') : (S.mode === 'advanced' ? 'images (ressemblance)' : 'images'))].filter(Boolean);
   $('recap').innerHTML =
     '<div><dt>Salons</dt><dd'+(nCh?'':' class="warn"')+'>'+(nCh ? nCh+' '+plural(nCh,'salon','salons') : 'Aucun salon choisi')+'</dd></div>'
     + '<div><dt>Applications</dt><dd>'+apps+' '+plural(apps,'active','actives')+'</dd></div>'
@@ -1882,7 +1935,7 @@ function lum(c){ const f = c.map(v=>{ v /= 255; return v <= .03928 ? v/12.92 : M
 function cleanTheme(t){
   const num = (v,a,b,d)=>{ if (v === undefined || v === null || v === '') return d; v = Number(v); return Number.isFinite(v) ? clampN(v,a,b) : d; };
   return { color: validHex(t.color) || THEME_DEF.color, intensity: num(t.intensity,20,200,100),
-    fx: ['custom','rain','drops','night','blur','hacker'].includes(t.fx) ? t.fx : 'none', fxInt: num(t.fxInt,10,200,100), tr: num(t.tr,0,90,55), blur: num(t.blur,0,40,14),
+    fx: ['custom','rain','drops','night','blur','hacker','synthwave','constellation'].includes(t.fx) ? t.fx : 'none', fxInt: num(t.fxInt,10,200,100), tr: num(t.tr,0,90,55), blur: num(t.blur,0,40,14),
     tab: TABS.includes(t.tab) ? t.tab : 'fx', sndOn: t.sndOn === true, sndVol: num(t.sndVol,0,100,70),
     rgb: t.rgb === true, rgbSpd: num(t.rgbSpd,1,100,35), rgbDir: RGB_DIRS.some(d=>d[0] === t.rgbDir) ? t.rgbDir : 'right' };
 }
@@ -2015,8 +2068,8 @@ $('rgb').addEventListener('input', e=>{
 /* ---- Mode RGB : la couleur d'accent parcourt toutes les teintes en boucle ---- */
 const RGBM = (()=>{
   const mq = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : {matches:false};
-  const root = document.documentElement.style, N = 6, SPAN = 300, ANG = {right:90, left:270, down:180, up:0};
-  let raf = 0, hue = 0, last = 0, acc = 0, on = false;
+  const root = document.documentElement.style, N = 6, SPAN = 50, ANG = {right:90, left:270, down:180, up:0};
+  let raf = 0, hue = 0, last = 0, acc = 0, on = false, onPaint = null;
   function hslRgb(h, sat, l){
     h = (((h % 360) + 360) % 360)/360;
     const q = l < .5 ? l*(1+sat) : l+sat-l*sat, p = 2*l-q;
@@ -2047,6 +2100,7 @@ const RGBM = (()=>{
     root.setProperty('--acc-ink', '#0a0a0a');
     root.setProperty('--acc-g', g);
     root.setProperty('--acc-gh', (theme.rgbDir === 'right' || theme.rgbDir === 'left') ? g : 'linear-gradient(90deg,'+rgbHex(c)+','+rgbHex(c)+')');
+    if (onPaint) onPaint(c);
   }
   const degPerSec = ()=>10*Math.pow(30, (theme.rgbSpd-1)/99);
   function loop(ts){
@@ -2075,7 +2129,7 @@ const RGBM = (()=>{
     paintRgb();
   }
   if (mq.addEventListener) mq.addEventListener('change', ()=>{ if (on) begin(); });
-  return {sync, get on(){ return on; }, get hue(){ return hue; }};
+  return {sync, get on(){ return on; }, get hue(){ return hue; }, get color(){ return hslRgb(hue, .92, .6); }, set onPaint(f){ onPaint = f; }};
 })();
 function paintRgb(){
   $('rgbm-on').checked = !!theme.rgb;
@@ -2254,7 +2308,9 @@ const FX_INFO = {
   drops:['Gouttes','Condensation sur une vitre : des gouttelettes se forment, grossissent, fusionnent et glissent.'],
   night:['Nuit','Ciel étoilé qui scintille, étoiles filantes, halo de lune, aurore et collines endormies.'],
   blur:['Flou','Grandes taches de couleur qui dérivent et se déforment lentement derrière un verre dépoli.'],
-  hacker:['Hacker','Pluie de code façon Matrix : colonnes de caractères qui tombent, avec profondeur et glitch.']
+  hacker:['Hacker','Pluie de code façon Matrix : colonnes de caractères qui tombent, avec profondeur et glitch.'],
+  synthwave:['Synthwave','Soleil rayé, montagnes et grille en relief sous un ciel d’étoiles filantes.'],
+  constellation:['Constellation','Étoiles reliées par des fils lumineux, avec des signaux qui voyagent de l’une à l’autre.']
 };
 const FX_MODES = Object.keys(FX_INFO);
 /* ================= Moteur d'effets : canvas + requestAnimationFrame =================
@@ -2892,6 +2948,558 @@ function createFx(cv, opt){
     return {init, frame, recolor, stats:()=>({n:drawn})};
   })();
 
+  /* ------------- Thème « skins » : Synthwave et Constellation -------------
+     Rendu repris de anti-doublons-skins, branché sur la couleur, l'intensité et le mode RGB
+     du panneau. Les réglages de palette du thème d'origine ne sont pas repris : le panneau a déjà les siens. */
+  (function(){
+    const clamp = (v,a,b)=>v<a?a:v>b?b:v;
+    const smooth = (a,b,x)=>{ const t = clamp((x-a)/(b-a),0,1); return t*t*(3-2*t); };
+    const S = { mode:'grad', dir:'right', angle:90, grad:['#ff2bd6','#7a5cff','#00e5ff'], custom:[], solid:'#7c5cff' };
+    const ctx = g, layer = document.createElement('canvas');
+    const mips = [0,1,2,3].map(()=>{ const c = document.createElement('canvas'); return {c, x:c.getContext('2d')}; });
+    let lx = null, CW = 1, CH = 1, vignette = null, grainPat = null, tm = 0;
+    const WHITE = [255, 255, 255], BLACK = [0, 0, 0];
+    function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+    function toHex(c) { return '#' + c.map(v => Math.round(clamp(v, 0, 255)).toString(16).padStart(2, '0')).join(''); }
+    function hsl(h, s, l) {
+      h = (((h % 360) + 360) % 360) / 360;
+      const q = l < .5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+      const f = t => { if (t < 0) t += 1; if (t > 1) t -= 1;
+        return t < 1 / 6 ? p + (q - p) * 6 * t : t < .5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
+      return [f(h + 1 / 3) * 255, f(h) * 255, f(h - 1 / 3) * 255];
+    }
+    const mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+    const lighten = (c, t) => mix(c, WHITE, t);
+    const darken = (c, t) => mix(c, BLACK, t);
+    const rgba = (c, a) => 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + (a === undefined ? 1 : a) + ')';
+
+    function cyc(list, u) {
+      const n = list.length; u -= Math.floor(u);
+      const f = u * n, i = Math.floor(f) % n;
+      return mix(list[i], list[(i + 1) % n], f - Math.floor(f));
+    }
+    function lin(list, u) {
+      u = clamp(u, 0, 1);
+      const n = list.length - 1, f = u * n, i = Math.min(Math.floor(f), n - 1);
+      return mix(list[i], list[i + 1], f - i);
+    }
+
+    const PAL = { custom: [], grad: [], solid: [0, 0, 0] };
+    function rebuildPal() {
+      PAL.custom = S.custom.map(hexToRgb);
+      PAL.grad = S.grad.map(hexToRgb);
+      PAL.solid = hexToRgb(S.solid);
+    }
+    let phase = 0;   // décalage des modes animés (0 → 1)
+
+    // Couleur pour un paramètre u (cyclique pour RGB/Custom +, linéaire pour Dégradé)
+    function paletteU(u) {
+      switch (S.mode) {
+        case 'rgb': return hsl(u * 360, 1, .6);
+        case 'custom': return cyc(PAL.custom, u);
+        case 'grad': return lin(PAL.grad, u);
+        default: return PAL.solid;
+      }
+    }
+    // Paramètre u pour un point de l'écran (pixels CSS)
+    function uAt(x, y) {
+      if (S.mode === 'solid') return 0;
+      if (S.mode === 'grad') {
+        const a = S.angle * Math.PI / 180, vx = Math.sin(a), vy = -Math.cos(a);
+        const len = Math.abs(W * vx) + Math.abs(H * vy) || 1;
+        return clamp(((x - W / 2) * vx + (y - H / 2) * vy) / len + .5, 0, 1);
+      }
+      let p;
+      switch (S.dir) {
+        case 'right': p = x / W; break;
+        case 'left': p = 1 - x / W; break;
+        case 'down': p = y / H; break;
+        default: p = 1 - y / H;
+      }
+      return p - phase;
+    }
+    const colorAt = (x, y) => paletteU(uAt(x, y));
+
+    const mouse = { x: 0, y: 0, on: false };
+
+    function hGrad(g, y, a) {
+      const gr = g.createLinearGradient(0, 0, W, 0);
+      for (let i = 0; i <= 8; i++) gr.addColorStop(i / 8, rgba(colorAt(W * i / 8, y), a));
+      return gr;
+    }
+
+    function composite(glow) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(layer, 0, 0);
+      // Halo lumineux : réductions successives de la couche lumineuse
+      let src = layer;
+      for (const m of mips) {
+        m.x.clearRect(0, 0, m.c.width, m.c.height);
+        m.x.drawImage(src, 0, 0, m.c.width, m.c.height);
+        src = m.c;
+      }
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = .30 * glow; ctx.drawImage(mips[1].c, 0, 0, CW, CH);
+      ctx.globalAlpha = .40 * glow; ctx.drawImage(mips[2].c, 0, 0, CW, CH);
+      ctx.globalAlpha = .52 * glow; ctx.drawImage(mips[3].c, 0, 0, CW, CH);
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+      // Vignette + grain (évite les bandes dans les dégradés)
+      ctx.fillStyle = vignette; ctx.fillRect(0, 0, CW, CH);
+      const ox = (Math.random() * 256) | 0, oy = (Math.random() * 256) | 0;
+      ctx.translate(-ox, -oy);
+      ctx.fillStyle = grainPat; ctx.fillRect(ox, oy, CW, CH);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+    /* ---------- Étoiles filantes (partagées) ---------- */
+    const Shots = {
+      list: [],
+      update(dt, k, maxY) {
+        if (Math.random() < dt * (.12 + .38 * k) && this.list.length < 4) {
+          const left = Math.random() < .5, a = (16 + Math.random() * 24) * Math.PI / 180;
+          const sp = (650 + Math.random() * 450) * (.6 + .4 * k);
+          this.list.push({ x: Math.random() * W, y: Math.random() * maxY * .55,
+            vx: Math.cos(a) * sp * (left ? -1 : 1), vy: Math.sin(a) * sp,
+            life: 0, max: .7 + Math.random() * .6, len: 110 + Math.random() * 150 });
+        }
+        for (let i = this.list.length - 1; i >= 0; i--) {
+          const s = this.list[i];
+          s.life += dt; s.x += s.vx * dt; s.y += s.vy * dt;
+          if (s.life >= s.max || s.y > maxY) this.list.splice(i, 1);
+        }
+      },
+      draw(g) {
+        g.lineCap = 'round';
+        for (const s of this.list) {
+          const a = Math.sin(Math.PI * (s.life / s.max));
+          const v = Math.hypot(s.vx, s.vy) || 1;
+          const tx = s.x - s.vx / v * s.len, ty = s.y - s.vy / v * s.len;
+          const c = lighten(colorAt(s.x, s.y), .35);
+          const gr = g.createLinearGradient(tx, ty, s.x, s.y);
+          gr.addColorStop(0, rgba(c, 0)); gr.addColorStop(1, rgba(c, .9 * a));
+          g.strokeStyle = gr; g.lineWidth = 1.6;
+          g.beginPath(); g.moveTo(tx, ty); g.lineTo(s.x, s.y); g.stroke();
+          g.fillStyle = rgba(WHITE, .9 * a);
+          g.beginPath(); g.arc(s.x, s.y, 1.4, 0, TAU); g.fill();
+        }
+      }
+    };
+
+    /* ---------- Effet : Synthwave ---------- */
+    function makeRidge() {
+      const N = 1024, a = new Float32Array(N), comps = [];
+      [1, 2, 3, 4, 6, 9, 13, 19, 27].forEach(f => comps.push({ f, a: 1 / Math.pow(f, .95), p: Math.random() * TAU }));
+      let mn = 1e9, mx = -1e9;
+      for (let i = 0; i < N; i++) {
+        const u = i / N; let h = 0;
+        for (const c of comps) h += c.a * Math.pow(1 - Math.abs(Math.sin(Math.PI * c.f * u + c.p)), 1.5);
+        a[i] = h; if (h < mn) mn = h; if (h > mx) mx = h;
+      }
+      for (let i = 0; i < N; i++) a[i] = (a[i] - mn) / (mx - mn || 1);
+      return a;
+    }
+    function sampleRidge(a, u) {
+      u -= Math.floor(u);
+      const f = u * a.length, i = f | 0, t = f - i;
+      return a[i] * (1 - t) + a[(i + 1) % a.length] * t;
+    }
+    // Relief : vallée plate au centre, collines sur les côtés. k = intensité (hauteur + vitesse des vagues)
+    function terrain(X, Z, t, k) {
+      const ax = X < 0 ? -X : X;
+      if (ax < 1.5) return 0;
+      const m = smooth(1.5, 6.5, ax);
+      const n = (Math.sin(X * .53 + Z * .37) * .5 + Math.sin(X * .21 - Z * .58 + 1.3) * .33 + Math.sin(X * 1.17 + Z * .93 + 2.1) * .17) * .5 + .5;
+      const w = Math.sin(Z * .75 + X * .33 - t * 2.4) * .5 + .5;
+      return m * (n * n * 1.25 + w * .32) * (.35 + .65 * k);
+    }
+
+    const Synth = {
+      stars: [], ridges: [], t: 0, cam: 0, par: 0, buf: null,
+      resize() {
+        const n = Math.round(clamp(W * H / 1500, 300, 1600));
+        this.stars = [];
+        for (let i = 0; i < n; i++) {
+          this.stars.push({ x: Math.random() * W, y: Math.pow(Math.random(), 1.25) * H * .62,
+            s: .3 + Math.pow(Math.random(), 5) * 1.7, ph: Math.random() * TAU, f: .5 + Math.random() * 2.5, tint: Math.random() < .3 });
+        }
+        if (!this.ridges.length) this.ridges = [makeRidge(), makeRidge()];
+      },
+      mount(L, arr, base, amp, shift, alpha, lw, cH) {
+        const step = 4, pts = [];
+        for (let x = -step; x <= W + step; x += step) {
+          const e = .3 + .7 * smooth(.04, .34, Math.abs(x / W - .5));
+          pts.push(x, base - sampleRidge(arr, (x + shift) / (W * 1.7)) * amp * e);
+        }
+        L.beginPath(); L.moveTo(pts[0], base + 3);
+        for (let i = 0; i < pts.length; i += 2) L.lineTo(pts[i], pts[i + 1]);
+        L.lineTo(pts[pts.length - 2], base + 3); L.closePath();
+        const fg = L.createLinearGradient(0, base - amp, 0, base);
+        fg.addColorStop(0, rgba(darken(cH, .86))); fg.addColorStop(1, rgba(darken(cH, .95)));
+        L.fillStyle = fg; L.fill();
+        L.beginPath(); L.moveTo(pts[0], pts[1]);
+        for (let i = 2; i < pts.length; i += 2) L.lineTo(pts[i], pts[i + 1]);
+        L.strokeStyle = hGrad(L, base - amp * .5, alpha); L.lineWidth = lw; L.lineJoin = 'round'; L.stroke();
+      },
+      draw(dt, k, time) {
+        const g = ctx, L = lx;
+        this.t += dt * k;
+        this.cam += dt * 1.4 * k;
+        const tgt = mouse.on ? (mouse.x / W - .5) : 0;
+        this.par += (tgt - this.par) * Math.min(1, dt * 2);
+        const hy = Math.round(H * .6), F = H - hy, vpx = W / 2 - this.par * W * .06;
+        const cH = colorAt(W / 2, hy);
+
+        // Ciel
+        const sky = g.createLinearGradient(0, 0, 0, hy);
+        sky.addColorStop(0, '#020107'); sky.addColorStop(.5, rgba(darken(cH, .93))); sky.addColorStop(1, rgba(darken(cH, .6)));
+        g.fillStyle = sky; g.fillRect(0, 0, W, hy + 2);
+        g.fillStyle = '#020106'; g.fillRect(0, hy, W, H - hy);
+
+        // Étoiles
+        for (const s of this.stars) {
+          s.x -= dt * k * (2 + s.s * 3); if (s.x < 0) s.x += W;
+          const tw = .5 + .5 * Math.sin(time * s.f + s.ph);
+          const fade = clamp((hy - s.y) / (hy * .5), 0, 1);
+          const a = (.25 + .75 * tw) * fade * (.45 + .3 * s.s);
+          if (a < .02) continue;
+          g.fillStyle = s.tint ? rgba(lighten(colorAt(s.x, s.y), .45), a) : 'rgba(235,235,255,' + a.toFixed(3) + ')';
+          if (s.s < 1) g.fillRect(s.x, s.y, s.s * 1.3, s.s * 1.3);
+          else { g.beginPath(); g.arc(s.x, s.y, s.s, 0, TAU); g.fill(); }
+        }
+
+        // Soleil : couleurs, halo
+        const R = Math.min(W * .19, H * .26), cx = W / 2 - this.par * W * .02, cy = hy - R * .38;
+        const uc = uAt(cx, cy);
+        const top = lighten(paletteU(uc - .22), .3), bot = paletteU(uc + .22), midc = mix(top, bot, .5);
+        const halo = g.createRadialGradient(cx, cy, R * .5, cx, cy, R * 3.2);
+        halo.addColorStop(0, rgba(midc, .42)); halo.addColorStop(.35, rgba(bot, .14)); halo.addColorStop(1, rgba(bot, 0));
+        g.fillStyle = halo; g.fillRect(0, 0, W, hy + 2);
+        const hz = g.createLinearGradient(0, hy - H * .18, 0, hy);
+        hz.addColorStop(0, rgba(cH, 0)); hz.addColorStop(1, rgba(cH, .22));
+        g.fillStyle = hz; g.fillRect(0, hy - H * .18, W, H * .18);
+
+        // Couche lumineuse
+        Shots.update(dt, k, hy - 10); Shots.draw(L);
+        const pulse = 1 + Math.sin(this.t * 1.3) * .012;
+        const sg = L.createLinearGradient(0, cy - R, 0, cy + R);
+        sg.addColorStop(0, rgba(top)); sg.addColorStop(.55, rgba(mix(top, bot, .6))); sg.addColorStop(1, rgba(bot));
+        L.fillStyle = sg; L.beginPath(); L.arc(cx, cy, R * pulse, 0, TAU); L.fill();
+        L.globalCompositeOperation = 'destination-out';
+        const bands = 9, off = (this.t * .18) % 1;
+        for (let i = 0; i < bands; i++) {
+          const p = (i + off) / bands; if (p < .08) continue;
+          L.fillRect(cx - R - 4, cy - R * .02 + p * R * 1.02, 2 * R + 8, R * (.008 + p * p * .11));
+        }
+        L.globalCompositeOperation = 'source-over';
+
+        // Montagnes
+        this.mount(L, this.ridges[0], hy, H * .2, this.t * 4 + this.par * W * .03, .55, 1, cH);
+        this.mount(L, this.ridges[1], hy, H * .11, this.t * 9 + this.par * W * .06, .85, 1.3, cH);
+
+        // Sol + ligne d'horizon
+        const fl = L.createLinearGradient(0, hy, 0, H);
+        fl.addColorStop(0, rgba(darken(cH, .82))); fl.addColorStop(.25, rgba(darken(cH, .94))); fl.addColorStop(1, '#020106');
+        L.fillStyle = fl; L.fillRect(0, hy, W, H - hy);
+        L.strokeStyle = hGrad(L, hy, .95); L.lineWidth = 1.5;
+        L.beginPath(); L.moveTo(0, hy + .5); L.lineTo(W, hy + .5); L.stroke();
+
+        // Grille 3D en relief
+        const cell = .5, rows = 46, zmin = .3, zFar = rows * cell;
+        const C = Math.min(160, Math.ceil(((W * .5 + 120) * zFar / F) / cell));
+        const cols = 2 * C + 1, need = (rows + 2) * cols;
+        if (!this.buf || this.buf.px.length < need) this.buf = { px: new Float32Array(need), py: new Float32Array(need), z: new Float32Array(rows + 2) };
+        const { px, py, z } = this.buf;
+        const base = Math.floor(this.cam / cell);
+        let nr = 0;
+        for (let j = 1; j <= rows + 1; j++) {
+          const Zw = (base + j) * cell, d = Zw - this.cam;
+          if (d < zmin) continue;
+          z[nr] = d;
+          const o = nr * cols, s = F / d;
+          for (let i = 0; i < cols; i++) {
+     const X = (i - C) * cell;
+     px[o + i] = vpx + X * s;
+     py[o + i] = hy + (1 - terrain(X, Zw, this.t, k)) * s;
+          }
+          nr++;
+        }
+        const floorCol = rgba(darken(cH, .93));
+        L.lineCap = 'round'; L.lineJoin = 'round';
+        for (let r = nr - 1; r >= 1; r--) {
+          const of = r * cols, on = (r - 1) * cols, zf = z[r];
+          L.beginPath(); L.moveTo(px[of], py[of]);
+          for (let i = 1; i < cols; i++) L.lineTo(px[of + i], py[of + i]);
+          for (let i = cols - 1; i >= 0; i--) L.lineTo(px[on + i], py[on + i]);
+          L.closePath(); L.fillStyle = floorCol; L.fill();
+          const fade = Math.pow(clamp(1 - (zf - 2) / (zFar - 2), 0, 1), 1.35);
+          if (fade < .01) continue;
+          L.beginPath(); L.moveTo(px[of], py[of]);
+          for (let i = 1; i < cols; i++) L.lineTo(px[of + i], py[of + i]);
+          for (let i = 0; i < cols; i++) { L.moveTo(px[of + i], py[of + i]); L.lineTo(px[on + i], py[on + i]); }
+          L.globalAlpha = fade;
+          L.strokeStyle = hGrad(L, (py[of + C] + py[on + C]) / 2, 1);
+          L.lineWidth = clamp(2.4 / Math.sqrt(zf), .5, 2.4);
+          L.stroke();
+          L.globalAlpha = 1;
+        }
+      }
+    };
+
+    /* ---------- Effet : Constellation ---------- */
+    const Const = {
+      nodes: [], dust: [], pulses: [], shocks: [], t: 0, D: 120,
+      head: null, next: null, nb: [], buckets: [], binCol: null, NB: 36, AL: 6,
+      resize() {
+        const N = Math.round(clamp(W * H / 3600, 90, 520));
+        this.D = clamp(Math.min(W, H) * .14, 95, 165);
+        this.nodes = [];
+        for (let i = 0; i < N; i++) {
+          const a = Math.random() * TAU;
+          this.nodes.push({ x: Math.random() * W, y: Math.random() * H, vx: 0, vy: 0, dx: Math.cos(a), dy: Math.sin(a),
+            r: .7 + Math.pow(Math.random(), 3) * 2.1, d: .35 + Math.random() * .65, ph: Math.random() * TAU, f: .6 + Math.random() * 2, ci: 0, cj: 0 });
+        }
+        this.dust = [];
+        const nd = Math.round(clamp(W * H / 700, 600, 3500));
+        for (let i = 0; i < nd; i++) {
+          this.dust.push({ x: Math.random() * W, y: Math.random() * H, s: Math.random() < .92 ? .6 : 1.1,
+            a: .08 + Math.random() * .35, ph: Math.random() * TAU, f: .3 + Math.random() * 1.5 });
+        }
+        this.next = new Int32Array(N);
+        this.nb = this.nodes.map(() => []);
+        this.buckets = [];
+        for (let i = 0; i < this.NB * this.AL; i++) this.buckets.push([]);
+        this.binCol = new Array(this.NB);
+        this.pulses = []; this.shocks = [];
+      },
+      shock(x, y) {
+        this.shocks.push({ x, y, r: 0, a: 1 });
+        for (const n of this.nodes) {
+          const dx = n.x - x, dy = n.y - y, d = Math.hypot(dx, dy);
+          if (d < 280 && d > 1) { const f = (1 - d / 280) * 320; n.vx += dx / d * f; n.vy += dy / d * f; }
+        }
+      },
+      draw(dt, k, time) {
+        const g = ctx, L = lx, D = this.D, D2 = D * D, nodes = this.nodes, N = nodes.length;
+        this.t += dt * k;
+
+        // Fond profond + nébuleuses aux couleurs du thème
+        const bg = g.createLinearGradient(0, 0, 0, H);
+        bg.addColorStop(0, '#020208'); bg.addColorStop(1, '#05040f');
+        g.fillStyle = bg; g.fillRect(0, 0, W, H);
+        g.globalCompositeOperation = 'lighter';
+        for (let i = 0; i < 3; i++) {
+          const nx = W * (.5 + .38 * Math.sin(time * .021 + i * 2.1)), ny = H * (.5 + .32 * Math.cos(time * .017 + i * 1.7));
+          const rr = Math.max(W, H) * (.42 + .08 * i), c = colorAt(nx, ny);
+          const gr = g.createRadialGradient(nx, ny, 0, nx, ny, rr);
+          gr.addColorStop(0, rgba(c, .13)); gr.addColorStop(.5, rgba(c, .045)); gr.addColorStop(1, rgba(c, 0));
+          g.fillStyle = gr; g.fillRect(0, 0, W, H);
+        }
+        g.globalCompositeOperation = 'source-over';
+        g.fillStyle = '#fff';
+        for (const s of this.dust) {
+          g.globalAlpha = s.a * (.55 + .45 * Math.sin(time * s.f + s.ph));
+          g.fillRect(s.x, s.y, s.s, s.s);
+        }
+        g.globalAlpha = 1;
+
+        // Mouvement : dérive (vitesse) + champ de courants (agitation), tous deux réglés par l'intensité
+        const sp = 18 * k, ag = 30 * k, e = Math.min(1, dt * 1.6), mR = 200, mR2 = mR * mR;
+        for (const n of nodes) {
+          const ang = (Math.sin(n.x * .0029 + this.t * .55) + Math.cos(n.y * .0037 - this.t * .47)) * Math.PI + n.ph;
+          const tx = n.dx * sp * n.d + Math.cos(ang) * ag, ty = n.dy * sp * n.d + Math.sin(ang) * ag;
+          n.vx += (tx - n.vx) * e; n.vy += (ty - n.vy) * e;
+          if (mouse.on) {
+            const mx = mouse.x - n.x, my = mouse.y - n.y, d2 = mx * mx + my * my;
+     if (d2 < mR2 && d2 > 1) {
+       const d = Math.sqrt(d2), f = (d < 60 ? -(1 - d / 60) * 260 : (1 - d / mR) * 55) * dt;
+       n.vx += mx / d * f; n.vy += my / d * f;
+            }
+          }
+          n.x += n.vx * dt; n.y += n.vy * dt;
+          const m = 40;
+          if (n.x < -m) n.x += W + 2 * m; else if (n.x > W + m) n.x -= W + 2 * m;
+          if (n.y < -m) n.y += H + 2 * m; else if (n.y > H + m) n.y -= H + 2 * m;
+        }
+
+        // Grille spatiale pour trouver les voisins rapidement
+        const gc = Math.ceil((W + 80) / D) + 1, gr = Math.ceil((H + 80) / D) + 1, cells = gc * gr;
+        if (!this.head || this.head.length < cells) this.head = new Int32Array(cells);
+        const head = this.head, next = this.next;
+        head.fill(-1, 0, cells);
+        for (let i = 0; i < N; i++) {
+          const n = nodes[i];
+          n.ci = clamp(((n.x + 40) / D) | 0, 0, gc - 1);
+          n.cj = clamp(((n.y + 40) / D) | 0, 0, gr - 1);
+          const c = n.cj * gc + n.ci;
+          next[i] = head[c]; head[c] = i;
+        }
+
+        const NB = this.NB, AL = this.AL, B = this.buckets;
+        for (const b of B) b.length = 0;
+        for (const l of this.nb) l.length = 0;
+        const cyclic = S.mode === 'rgb' || S.mode === 'custom';
+        const OFF = [[0, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
+        for (let i = 0; i < N; i++) {
+          const a = nodes[i];
+          for (let o = 0; o < 5; o++) {
+            const cx = a.ci + OFF[o][0], cy = a.cj + OFF[o][1];
+            if (cx < 0 || cy < 0 || cx >= gc || cy >= gr) continue;
+            let j = head[cy * gc + cx];
+     while (j !== -1) {
+       if (o !== 0 || j > i) {
+         const b = nodes[j], dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy;
+         if (d2 < D2) {
+           const q = 1 - Math.sqrt(d2) / D, qq = q * q;
+           if (qq > .03) {
+      const lvl = Math.min(AL - 1, Math.floor(qq * AL));
+             let u = uAt((a.x + b.x) * .5, (a.y + b.y) * .5);
+      if (cyclic) u -= Math.floor(u);
+      const bin = clamp(Math.floor(u * NB), 0, NB - 1);
+             B[bin * AL + lvl].push(a.x, a.y, b.x, b.y);
+             if (this.nb[i].length < 10) this.nb[i].push(j);
+             if (this.nb[j].length < 10) this.nb[j].push(i);
+           }
+                }
+              }
+              j = next[j];
+            }
+          }
+        }
+
+        // Liens, regroupés par couleur et opacité (rapide même avec beaucoup de lignes)
+        for (let b = 0; b < NB; b++) this.binCol[b] = lighten(paletteU((b + .5) / NB), .12);
+        L.lineCap = 'round';
+        for (let b = 0; b < NB; b++) for (let l = 0; l < AL; l++) {
+          const arr = B[b * AL + l]; if (!arr.length) continue;
+          const lv = (l + .5) / AL;
+          L.strokeStyle = rgba(this.binCol[b], .08 + lv * .75);
+          L.lineWidth = .45 + lv * 1.1;
+          L.beginPath();
+          for (let i = 0; i < arr.length; i += 4) { L.moveTo(arr[i], arr[i + 1]); L.lineTo(arr[i + 2], arr[i + 3]); }
+          L.stroke();
+        }
+
+        // Liens vers la souris
+        if (mouse.on) {
+          const mc = lighten(colorAt(mouse.x, mouse.y), .25);
+          L.lineWidth = .9;
+          for (const n of nodes) {
+            const dx = n.x - mouse.x, dy = n.y - mouse.y, d2 = dx * dx + dy * dy;
+     if (d2 < mR2) {
+              const q = 1 - Math.sqrt(d2) / mR;
+       L.strokeStyle = rgba(mc, q * q * .85);
+       L.beginPath(); L.moveTo(mouse.x, mouse.y); L.lineTo(n.x, n.y); L.stroke();
+            }
+          }
+        }
+
+        Shots.update(dt, k, H); Shots.draw(L);
+
+        // Signaux lumineux qui voyagent d'étoile en étoile
+        const want = Math.round(3 + 9 * k);
+        let tries = 0;
+        while (this.pulses.length < want && tries++ < 20) {
+          const a = (Math.random() * N) | 0, l = this.nb[a];
+          if (l.length) this.pulses.push({ a, b: l[(Math.random() * l.length) | 0], p: 0 });
+        }
+        if (this.pulses.length > want) this.pulses.length = want;
+        for (let i = this.pulses.length - 1; i >= 0; i--) {
+          const P = this.pulses[i], A = nodes[P.a], Bn = nodes[P.b];
+          const dx = Bn.x - A.x, dy = Bn.y - A.y, d = Math.hypot(dx, dy) || 1;
+          if (d > D * 1.15) { this.pulses.splice(i, 1); continue; }
+          P.p += dt * 170 * k / d;
+          if (P.p >= 1) {
+            const opts = this.nb[P.b].filter(x => x !== P.a);
+            if (!opts.length) { this.pulses.splice(i, 1); continue; }
+            P.a = P.b; P.b = opts[(Math.random() * opts.length) | 0]; P.p = 0;
+            continue;
+          }
+          const x = A.x + dx * P.p, y = A.y + dy * P.p, t0 = Math.max(0, P.p - .35);
+          const sx = A.x + dx * t0, sy = A.y + dy * t0;
+          const c = lighten(colorAt(x, y), .5);
+          if (P.p - t0 > .001) {
+            const lg = L.createLinearGradient(sx, sy, x, y);
+     lg.addColorStop(0, rgba(c, 0)); lg.addColorStop(1, rgba(c, .95));
+            L.strokeStyle = lg; L.lineWidth = 1.7;
+            L.beginPath(); L.moveTo(sx, sy); L.lineTo(x, y); L.stroke();
+          }
+          L.fillStyle = rgba(WHITE, .95);
+          L.beginPath(); L.arc(x, y, 1.5, 0, TAU); L.fill();
+        }
+
+        // Étoiles
+        for (const n of nodes) {
+          const tw = .6 + .4 * Math.sin(time * n.f + n.ph);
+          const c = lighten(colorAt(n.x, n.y), .45);
+          const r = n.r * (.85 + .15 * tw) * (.7 + .3 * n.d);
+          L.fillStyle = rgba(c, .55 + .45 * tw);
+          L.beginPath(); L.arc(n.x, n.y, r, 0, TAU); L.fill();
+          if (n.r > 2.4) {
+            const s = r * 5;
+            L.strokeStyle = rgba(c, .35 * tw); L.lineWidth = .6;
+            L.beginPath(); L.moveTo(n.x - s, n.y); L.lineTo(n.x + s, n.y); L.moveTo(n.x, n.y - s); L.lineTo(n.x, n.y + s); L.stroke();
+          }
+        }
+
+        // Ondes de clic
+        for (let i = this.shocks.length - 1; i >= 0; i--) {
+          const s = this.shocks[i];
+          s.r += dt * 520; s.a -= dt * 1.1;
+          if (s.a <= 0) { this.shocks.splice(i, 1); continue; }
+          L.strokeStyle = rgba(lighten(colorAt(s.x, s.y), .3), s.a * .6); L.lineWidth = 1.5;
+          L.beginPath(); L.arc(s.x, s.y, s.r, 0, TAU); L.stroke();
+        }
+      }
+    };
+
+
+    function build(){
+      CW = cv.width; CH = cv.height; layer.width = CW; layer.height = CH; lx = layer.getContext('2d');
+      let w = CW, h = CH;
+      for (const m of mips){ w = Math.max(1, Math.round(w/2)); h = Math.max(1, Math.round(h/2)); m.c.width = w; m.c.height = h; m.x.imageSmoothingEnabled = true; m.x.imageSmoothingQuality = 'high'; }
+      vignette = g.createRadialGradient(CW/2, CH*.45, Math.min(CW,CH)*.3, CW/2, CH/2, Math.hypot(CW,CH)*.62);
+      vignette.addColorStop(0, 'rgba(0,0,0,0)'); vignette.addColorStop(1, 'rgba(0,0,0,.55)');
+      if (!grainPat){
+        const gc = document.createElement('canvas'); gc.width = gc.height = 256;
+        const gx = gc.getContext('2d'), d = gx.createImageData(256,256);
+        for (let i=0;i<d.data.length;i+=4){ const v = Math.random(), w2 = v > .5 ? 255 : 0; d.data[i] = d.data[i+1] = d.data[i+2] = w2; d.data[i+3] = Math.abs(v-.5)*2*13; }
+        gx.putImageData(d,0,0); grainPat = g.createPattern(gc,'repeat');
+      }
+    }
+    /* Palette des scènes. Mode RGB : la teinte avance, avec un léger dégradé (même écart que celui de l'interface)
+       qui coule dans le sens choisi. Sinon : trois teintes dérivées de la couleur ; sans couleur marquée (blanc par défaut), palette néon d'origine. */
+    const ANGS = {right:90, left:270, down:180, up:0, both:180};
+    function recolor(){
+      let list = [[255,43,214],[122,92,255],[0,229,255]];
+      S.angle = 90;
+      if (theme.rgb){
+        const h = rgb2hsl(col)[0], SP = 50;
+        list = [h, h-SP/2, h-SP].map(x=>hsl2rgb(x, .92, .6)); S.angle = ANGS[theme.rgbDir] || 90;
+      } else if (satOf(col) > .28){
+        const hh = rgb2hsl(col); list = [hh[0]-45, hh[0], hh[0]+55].map(x=>hsl2rgb(x, Math.max(hh[1],.8), cl(hh[2],.5,.62)));
+      }
+      S.grad = list.map(toHex); rebuildPal();
+    }
+    function skinScene(E, glow){
+      return {
+        init(){ build(); E.resize(); recolor(); },
+        frame(dt){ tm += dt; lx.setTransform(dpr,0,0,dpr,0,0); lx.clearRect(0,0,W,H); E.draw(dt, inten, tm); composite(glow); },
+        recolor, stats:()=>({})
+      };
+    }
+    SCENES.synthwave = skinScene(Synth, .45);
+    SCENES.constellation = skinScene(Const, 1.15);
+    if (!mini){
+      window.addEventListener('pointermove', e=>{ if (mq.matches) return; mouse.x = e.clientX; mouse.y = e.clientY; mouse.on = true; }, {passive:true});
+      document.addEventListener('pointerleave', ()=>{ mouse.on = false; });
+    }
+  })();
+
   /* ------------------------------ MOTEUR ------------------------------ */
   function resize(){
     if (mini){ W = opt.w || MINI_W; H = opt.h || MINI_H; dpr = 1; ar = cl((W*H)/(1440*800), .02, 2.4); }
@@ -2956,6 +3564,9 @@ function createFx(cv, opt){
     stats:()=>Object.assign({mode, dpr, W, H}, scene && scene.stats ? scene.stats() : {})};
 }
 const FX = createFx($('fx'));
+/* Mode RGB : la couleur qui tourne alimente aussi le fond animé. Les effets qui reconstruisent des images à chaque changement de couleur (Hacker, Gouttes, Nuit) sont rafraîchis moins souvent. */
+(()=>{ let t = 0; const HEAVY = {hacker:1, drops:1, night:1};
+  RGBM.onPaint = c=>{ const eff = effFx(); if (eff === 'none' || eff === 'custom') return; const now = performance.now(); if (now - t < (HEAVY[eff] ? 250 : 66)) return; t = now; FX.set(eff, theme.fxInt/100, c); }; })();
 window.__dcasFx = { stats:()=>FX.stats(), running:()=>FX.running, rgb:()=>({on:RGBM.on, hue:RGBM.hue}) }; /* lecture seule : sert aux tests automatiques */
 
 /* ---- Réglages d'ambiance (interface) ---- */
@@ -2967,7 +3578,7 @@ function applyFx(){
   st.setProperty('--glass', String(Math.max(.05, 1 - theme.tr/100)));
   st.setProperty('--blur', (theme.blur + (eff === 'blur' ? 10 : 0)) + 'px');
   st.setProperty('--fxi', String(theme.fxInt/100));
-  FX.set(eff, theme.fxInt/100, hexRgb(theme.color));
+  FX.set(eff, theme.fxInt/100, RGBM.on ? RGBM.color : hexRgb(theme.color));
   if (typeof miniColor === 'function') miniColor();
   paintFx();
 }
@@ -3316,6 +3927,10 @@ async function load(){
   document.querySelectorAll('.tile input').forEach(box=>{ box.checked = !!S.sources[box.closest('.tile').dataset.id]; });
 
   setMode(r.imageMode === undefined || r.imageMode === 'exact' ? 'exact' : 'advanced');
+  $('rule-content').checked = r.contentMatch !== false;
+  $('rule-videos').checked = r.contentVideos !== false;
+  setLevel(r.contentSensitivity);
+  syncContent();
   setSlide($('custom-slide'), S.sources.custom);
   paintRange(); syncImages(); paintTiles();
   drawServer(); renderTree(); renderIgnore(); renderHeader(); renderInsights();

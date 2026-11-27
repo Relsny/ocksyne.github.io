@@ -3,6 +3,7 @@
 const crypto = require('node:crypto');
 const { normalizeLink, sourceEnabled } = require('./lib/normalizer');
 const { hammingDistance } = require('./lib/fingerprint');
+const media = require('./lib/media');
 
 const IMAGE = /\.(png|jpe?g|gif|webp)$/i;
 
@@ -92,6 +93,64 @@ function see(hashes, key, record) {
   };
 }
 
+// Empreintes visuelles déjà vues (images, GIF, vidéos) : liste en mémoire, reconstruite depuis `hashes` au besoin.
+const mediaIndexes = new WeakMap();
+
+function mediaIndex(hashes) {
+  let list = mediaIndexes.get(hashes);
+  if (!list) {
+    list = [];
+    for (const [key, value] of Object.entries(hashes)) {
+      if (key.startsWith('mprint:') && value && value.print) list.push(value);
+    }
+    mediaIndexes.set(hashes, list);
+  }
+  return list;
+}
+
+function visualPart(analysis) {
+  return {
+    mediaDuration: analysis?.mediaDuration ?? null,
+    mediaFingerprints: (analysis?.mediaFingerprints || []).filter((item) => item && (item.kind === 'image' || item.kind === 'video-frame')),
+  };
+}
+
+// Même contenu visuel qu'un média déjà vu ? Le plus ancien est conservé, le plus récent est signalé.
+function considerMedia(record, hashes, rules, hits) {
+  const options = media.optionsFromRules(rules);
+  if (!options.enabled) return;
+  const index = mediaIndex(hashes);
+  let counter = 0;
+  for (const item of record.mediaPrints || []) {
+    const print = visualPart(item.analysis);
+    counter += 1;
+    if (!print.mediaFingerprints.length) continue;
+    const sha = (item.analysis.mediaFingerprints || []).find((entry) => entry.kind === 'sha256');
+    if (sha && hits.some((hit) => hit.key === `file:${sha.hash}`)) continue;
+    let oldest = null;
+    for (const previous of index) {
+      if (previous.messageId === record.id) continue;
+      if (!media.matchAnalyses(print, previous.print, options).matched) continue;
+      if (!oldest || BigInt(previous.messageId) < BigInt(oldest.messageId)) oldest = previous;
+    }
+    const entry = {
+      messageId: record.id,
+      channelId: record.channelId,
+      createdAt: record.createdAt || 0,
+      print,
+    };
+    if (oldest) {
+      const currentIsOlder = BigInt(record.id) < BigInt(oldest.messageId);
+      hits.push(currentIsOlder
+        ? { duplicateId: oldest.messageId, duplicateChannel: oldest.channelId, originalId: record.id, originalChannel: record.channelId, createdAt: oldest.createdAt || 0, kind: 'ressemblance', key: 'mprint' }
+        : { duplicateId: record.id, duplicateChannel: record.channelId, originalId: oldest.messageId, originalChannel: oldest.channelId, createdAt: record.createdAt || 0, kind: 'ressemblance', key: 'mprint' });
+      if (!currentIsOlder) continue;
+    }
+    hashes[`mprint:${record.id}:${counter}`] = entry;
+    index.push(entry);
+  }
+}
+
 function consider(record, hashes, rules) {
   const hits = [];
   if (rules.text) {
@@ -133,6 +192,7 @@ function consider(record, hashes, rules) {
         hashes[`visual:${visual}`] = { messageId: record.id, channelId: record.channelId, createdAt: record.createdAt || 0 };
       }
     }
+    if (record.mediaPrints && record.mediaPrints.length) considerMedia(record, hashes, rules, hits);
   }
   return hits;
 }

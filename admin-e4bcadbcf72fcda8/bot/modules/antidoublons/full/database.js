@@ -116,9 +116,13 @@ function fingerprintKeys(entry) {
     if (entry.contentMd5) keys.push(`md5:${String(entry.contentMd5).toLowerCase()}`);
     if (entry.contentFamily) keys.push(`family:${String(entry.contentFamily)}`);
     for (const fingerprint of entry.mediaFingerprints || []) {
-        if (fingerprint && fingerprint.hash) {
-            keys.push(`${fingerprint.kind || "image"}:${String(fingerprint.hash).toLowerCase()}`);
-        }
+        if (!fingerprint || !fingerprint.hash) continue;
+        const kind = fingerprint.kind || "image";
+        // Index exact seulement pour les empreintes de fichier : les empreintes visuelles
+        // (images, images de vidéo) sont comparées avec le seuil de ressemblance choisi.
+        if (kind === "video-frame" || fingerprint.flat) continue;
+        if (kind === "image" && fingerprint.phash) continue;
+        keys.push(`${kind}:${String(fingerprint.hash).toLowerCase()}`);
     }
     return keys;
 }
@@ -1248,8 +1252,11 @@ function addLink(
                                 : 0,
 
                         hash:
-                            fingerprint.hash
-
+                            fingerprint.hash,
+                        ...(typeof fingerprint.phash === "string" && fingerprint.phash
+                            ? { phash: fingerprint.phash }
+                            : {}),
+                        ...(fingerprint.flat ? { flat: true } : {})
                     })
                 )
 

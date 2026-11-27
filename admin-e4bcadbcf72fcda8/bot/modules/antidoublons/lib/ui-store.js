@@ -14,7 +14,7 @@ const KINDS = {
   sound: { base: 'click-sound', max: 3 * 1024 * 1024, label: 'Le son', exts: ['.mp3'] },
 };
 const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.mp3': 'audio/mpeg' };
-const FX = ['none', 'custom', 'rain', 'drops', 'night', 'blur', 'hacker'];
+const FX = ['none', 'custom', 'rain', 'drops', 'night', 'blur', 'hacker', 'synthwave', 'constellation'];
 const RGB_DIRS = ['right', 'left', 'down', 'up', 'both'];
 
 function useDir(dir) {

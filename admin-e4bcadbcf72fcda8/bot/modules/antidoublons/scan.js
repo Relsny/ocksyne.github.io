@@ -6,6 +6,7 @@ const { consider, sha256, isImageAttachment, extractUrls } = require('./engine')
 const { dHashBuffer } = require('./lib/fingerprint');
 const { normalizeLink } = require('./lib/normalizer');
 const { analyzeLink } = require('./lib/sources');
+const mediaLib = require('./lib/media');
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const TWO_WEEKS = 14 * 24 * 60 * 60 * 1000;
@@ -85,6 +86,47 @@ async function fileHashes(message, { visual = false, cache } = {}) {
   return { hashes, visualHashes };
 }
 
+// Détection par le contenu : fichiers joints, aperçus intégrés et liens directs / Tenor / Giphy / Imgur d'un message.
+// Renvoie [{ key, analysis }] : `key` est stable (identique à celle du moteur en direct pour les fichiers joints).
+async function contentPrints(message, rules = {}) {
+  const options = mediaLib.optionsFromRules(rules);
+  if (!options.enabled) return [];
+  let sources;
+  try {
+    sources = mediaLib.collectSources(message, options);
+  } catch {
+    return [];
+  }
+  const found = [];
+  let linkWorked = false;
+  const embeds = [];
+  for (let index = 0; index < sources.length; index += 1) {
+    const source = sources[index];
+    if (source.origin === 'embed') {
+      embeds.push({ source, index });
+      continue;
+    }
+    const analysis = await mediaLib.analyzeSource(source, { options });
+    if (!analysis) continue;
+    if (source.origin !== 'attachment') linkWorked = true;
+    const key = source.origin === 'attachment' ? `discord-attachment://${message.id}/${source.id || index}` : `discord-media://${message.id}/${index}`;
+    found.push({ key, analysis });
+  }
+  if (!linkWorked) {
+    for (const { source, index } of embeds) {
+      const analysis = await mediaLib.analyzeSource(source, { options });
+      if (analysis) found.push({ key: `discord-embed://${message.id}/${index}`, analysis });
+    }
+  }
+  return found;
+}
+
+function printHashes(prints) {
+  return (prints || [])
+    .map((item) => (item.analysis.mediaFingerprints || []).find((entry) => entry.kind === 'sha256')?.hash)
+    .filter(Boolean);
+}
+
 async function rule34Fingerprints(content, config) {
   const rules = config.rules || {};
   const auth = config.rule34 || {};
@@ -128,6 +170,7 @@ async function targetChannels(guild, config) {
 
 async function walkChannel(channel, config, hashes, progress, stop) {
   let before;
+  const content = mediaLib.optionsFromRules(config.rules);
   while (!stop()) {
     const batch = await channel.messages.fetch({ limit: 100, before }).catch(() => null);
     if (!batch || batch.size === 0) break;
@@ -142,6 +185,11 @@ async function walkChannel(channel, config, hashes, progress, stop) {
         createdAt: message.createdTimestamp,
         ...await (async () => {
           if (!config.rules.images) return { fileHashes: [], visualHashes: [] };
+          if (content.enabled) {
+            const mediaPrints = await contentPrints(message, config.rules);
+            const remote = await rule34Fingerprints(message.content, config);
+            return { fileHashes: printHashes(mediaPrints).concat(remote), visualHashes: [], mediaPrints };
+          }
           const media = await fileHashes(message, { visual: config.rules.imageMode === 'strong' || config.rules.imageMode === 'advanced' });
           const remote = await rule34Fingerprints(message.content, config);
           return { fileHashes: media.hashes.concat(remote), visualHashes: media.visualHashes };
@@ -260,4 +308,4 @@ async function warnAndDelete(message, hit, delay = 4000) {
   return true;
 }
 
-module.exports = { targetChannels, isWatchedChannel, fileHashes, clearFileHashCache, rule34Fingerprints, runScan, warnAndDelete, linkTo };
+module.exports = { targetChannels, isWatchedChannel, fileHashes, contentPrints, printHashes, clearFileHashCache, rule34Fingerprints, runScan, warnAndDelete, linkTo };

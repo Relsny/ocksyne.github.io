@@ -6,6 +6,7 @@ const axios = require("axios");
 let sharp = null;
 try { sharp = require("sharp"); } catch { sharp = null; }
 const crypto = require("crypto");
+const contentLib = require("../lib/media");
 
 const {
     execFile
@@ -1361,7 +1362,7 @@ function durationsAreCompatible(
 // COMPARER LES EMPREINTES
 // ==========================
 
-function fingerprintsMatch(
+function legacyFingerprintsMatch(
     firstAnalysis,
     secondAnalysis
 ) {
@@ -2751,7 +2752,7 @@ function guessMediaKind(url, contentType, filename) {
 }
 
 
-async function analyzeDirectMedia(
+async function legacyAnalyzeDirectMedia(
     mediaUrl,
     options = {}
 ) {
@@ -2946,6 +2947,69 @@ function canAnalyzeLink(link) {
 // EXPORTS
 // ==========================
 
+
+// ==========================
+// DÉTECTION PAR LE CONTENU
+// ==========================
+// Réglages (panneau : « Détection par le contenu ») lus dans la configuration, mis en cache quelques secondes.
+let contentOptionsCache = null;
+let contentOptionsAt = 0;
+let contentOptionsOverride = null;
+
+function contentOptions() {
+    if (contentOptionsOverride) return contentOptionsOverride;
+    const now = Date.now();
+    if (contentOptionsCache && now - contentOptionsAt < 3000) return contentOptionsCache;
+    try {
+        contentOptionsCache = require("./runtime-config").getConfig().content || contentLib.optionsFromRules({});
+    } catch {
+        contentOptionsCache = contentLib.optionsFromRules({});
+    }
+    contentOptionsAt = now;
+    return contentOptionsCache;
+}
+
+function setContentOptions(options) {
+    contentOptionsOverride = options || null;
+}
+
+function fingerprintsMatch(firstAnalysis, secondAnalysis) {
+    const options = contentOptions();
+    if (!options.enabled) {
+        return legacyFingerprintsMatch(firstAnalysis, secondAnalysis);
+    }
+    return contentLib.matchAnalyses(firstAnalysis, secondAnalysis, options).matched;
+}
+
+async function analyzeDirectMedia(mediaUrl, options = {}) {
+    const content = contentOptions();
+    if (!content.enabled) {
+        return legacyAnalyzeDirectMedia(mediaUrl, options);
+    }
+    return contentLib.analyzeUrl(mediaUrl, {
+        options: content,
+        platform: options.platform || "attachment",
+        postId: options.postId || null,
+        contentType: options.contentType || null,
+        filename: options.filename || null,
+        ordered: options.ordered === true
+    });
+}
+
+// Page Tenor / Giphy / Imgur / Streamable ou fichier direct : on récupère le média lui-même.
+async function analyzeContentLink(link, options = {}) {
+    const content = contentOptions();
+    if (!content.enabled) return null;
+    return contentLib.analyzeSource(
+        { url: link, origin: contentLib.directKind(link) ? "link" : "page", kind: contentLib.directKind(link) || null },
+        { options: content, ordered: options.ordered === true }
+    );
+}
+
+function canAnalyzeContentLink(link) {
+    return contentOptions().enabled && contentLib.isContentUrl(link);
+}
+
 module.exports = {
 
     parseSocialLink,
@@ -2973,6 +3037,12 @@ module.exports = {
     analyzeDirectMedia,
 
     analyzeLink,
+
+    analyzeContentLink,
+
+    canAnalyzeContentLink,
+
+    setContentOptions,
 
     fingerprintsMatch,
 

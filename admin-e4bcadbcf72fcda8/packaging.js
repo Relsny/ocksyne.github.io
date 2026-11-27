@@ -120,11 +120,8 @@
       'for /d %%D in ("%~dp0*fichiers-du-bot") do set "BOT=%%~fD"',
       'if not defined BOT goto nofolder',
       'cd /d "%BOT%"',
-      'if not exist node_modules (',
-      '  echo Premiere ouverture : installation des composants.',
-      '  call npm install',
-      '  if errorlevel 1 goto fail',
-      ')',
+      'call node src\\ensure-deps.js',
+      'if errorlevel 1 goto fail',
       'echo Enregistrement des commandes slash...',
       'call npm run deploy',
       'if errorlevel 1 goto fail',
@@ -172,10 +169,7 @@
       '  exit 1',
       'fi',
       'cd "$BOT" || exit 1',
-      'if [ ! -d node_modules ]; then',
-      '  echo "Première ouverture : installation des composants."',
-      '  npm install || { echo "npm install a échoué."; read -r -p "Appuie sur Entrée pour fermer."; exit 1; }',
-      'fi',
+      'node src/ensure-deps.js || { read -r -p "Appuie sur Entrée pour fermer."; exit 1; }',
       'echo "Enregistrement des commandes slash..."',
       'npm run deploy || { echo "Le déploiement a échoué. Si le jeton est encore l’exemple, ouvre token.txt."; read -r -p "Appuie sur Entrée pour fermer."; exit 1; }',
       'echo "Démarrage du bot. Laisse cette fenêtre ouverte."',
@@ -316,7 +310,8 @@
 <li>Le lien commence par http://127.0.0.1 . Ouvre-le sur le même ordinateur que le bot.</li>
 <li>Coche un salon, plusieurs salons, ou une catégorie. Plus tu en coches, plus l analyse dure.</li>
 <li>Choisis les textes, les liens et les images. Les applications sont des tuiles. La section Mature (18+) est repliée.</li>
-<li>Exact compare une empreinte identique. Avancé (ressemblance) ajoute la ressemblance si sharp est installé, et des images de vidéo si ffmpeg est installé.</li>
+<li>La détection par le contenu est activée par défaut. Le bot compare les fichiers eux-mêmes (images, GIF, vidéos), pas seulement leurs liens : deux médias identiques, même avec des liens ou des noms différents, sont repérés, et le plus récent est supprimé. Cela couvre les fichiers joints, les aperçus de Discord, les liens directs et les pages Tenor, Giphy, Imgur ou Streamable. Les copies recompressées ou redimensionnées sont reconnues aussi. La sensibilité se règle (Stricte, Équilibrée, Large) et les vidéos se comparent avec ffmpeg, installé avec le bot. Les vidéos YouTube, TikTok ou Instagram ne peuvent pas être téléchargées : elles restent comparées par leur lien. Si vous désactivez cette option, l’ancien choix Exact ou Avancé (ressemblance) revient.</li>
+<li>Pour que les anciens médias soient eux aussi comparés par leur contenu, cliquez sur Activer : l’historique est analysé de nouveau.</li>
 <li>Rule34.xxx se coche dans Mature. Les champs s ouvrent sous la tuile : RULE34_API_KEY et RULE34_USER_ID. Elles sont enregistrées dans data/antidoublons.json, sur cet ordinateur seulement. Elles ne vont pas dans token.txt. La clé se crée sur <a href="https://rule34.xxx/index.php?page=account&amp;s=options">la page Options du compte Rule34</a>.</li>
 <li>Clique sur Activer. Le panneau demande une première confirmation : tout l’historique des salons choisis sera analysé, et tous les doublons seront supprimés (le plus ancien est gardé). Puis une seconde : les messages supprimés ne pourront pas être récupérés.</li>
 <li>L’analyse démarre tout de suite. Le tableau et l’historique montrent les messages lus et les doublons, retirés au fur et à mesure. À la fin, la surveillance en direct s’active.</li>
@@ -391,6 +386,14 @@ ${usage}
     const forbidden = [];
     for (const file of codeFiles) {
       if (file.path.includes('METS TON TOKEN') || file.path.endsWith('token.txt')) continue;
+      if (file.path === 'package.json' && slugs.includes('antidoublons')) {
+        // ffmpeg (comparer les vidéos par leur contenu) : composant facultatif, ajouté seulement avec Anti-doublons.
+        const source = typeof file.text === 'string' ? file.text : new TextDecoder().decode(file.text || file.bytes);
+        const pkg = JSON.parse(source);
+        pkg.optionalDependencies = { ...(pkg.optionalDependencies || {}), 'ffmpeg-static': '^5.2.0' };
+        list.push({ path: `${L.CODE}/${file.path}`, text: `${JSON.stringify(pkg, null, 2)}\n` });
+        continue;
+      }
       if (slugs.includes('avatars') && file.path.includes('modules/avatars/forbidden/')) {
         forbidden.push(file);
         continue;
