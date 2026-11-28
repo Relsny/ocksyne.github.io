@@ -57,3 +57,7 @@ Activée par défaut (carte « Règles », sous « Images et GIF »). Elle compa
 - **Limites** : les vidéos YouTube, TikTok, Instagram ou X ne sont pas téléchargeables : elles restent comparées par leur lien (et les images d’aperçu quand le mode Avancé est actif). Une image retournée ou très recadrée n’est pas reconnue. Le bot ne télécharge jamais d’adresse du réseau local. Une adresse inaccessible (lien expiré, site qui bloque) est ignorée sans erreur.
 - **Anciens médias** : cliquez sur Activer pour que l’historique soit analysé de nouveau avec cette détection.
 - Réglages enregistrés dans les règles : `contentMatch` (oui/non), `contentSensitivity` (`strict`, `balanced`, `loose`), `contentVideos`.
+
+## Réinitialiser l’historique
+
+Le bouton discret « Réinitialiser l’historique », fixé en bas à gauche du panneau, remet tout à zéro pour le serveur après une confirmation : liens et empreintes d’images et de vidéos enregistrés, liste des liens supprimés, historique des doublons et compteurs affichés. C’est irréversible et le bot en cours d’exécution utilise tout de suite l’état vidé. Les réglages (salons, règles, clés) et l’apparence du panneau ne sont pas touchés. Le bouton est refusé pendant une analyse en cours. Les messages déjà supprimés sur Discord ne reviennent évidemment pas.

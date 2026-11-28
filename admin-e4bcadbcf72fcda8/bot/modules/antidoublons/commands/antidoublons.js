@@ -9,6 +9,7 @@ const { runFullScan } = require('../fullscan');
 const { consider } = require('../engine');
 const { defaultSources } = require('../lib/normalizer');
 const history = require('../lib/history');
+const { reset: resetHistory } = require('../lib/reset');
 
 const store = createStore('antidoublons.json', () => ({
   active: false,
@@ -176,6 +177,11 @@ async function openFor(interaction) {
       const sources = { ...(current.rules.sources || {}), rule34: true };
       store.set(guild.id, { rule34: { apiKey, userId }, rules: { ...current.rules, sources } });
       return { ok: true, configured: true };
+    },
+    resetHistory: () => {
+      const progress = jobFor(guild.id);
+      if (progress.running) return { ok: false, running: true, message: 'Une analyse est en cours. Arrêtez-la avant de réinitialiser l’historique.' };
+      return resetHistory({ guildId: guild.id, store, progress });
     },
     activate: () => startCleanup(),
     fullScan: () => startCleanup(),

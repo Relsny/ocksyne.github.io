@@ -889,6 +889,47 @@ function resetDatabase() {
 
 
 // ==========================
+// RESET D'UN SERVEUR
+// ==========================
+
+// Supprime les liens et empreintes d'un serveur (et ceux qui n'ont pas de serveur connu).
+// Sans identifiant, tout est supprimé. Écriture immédiate : le bot en cours utilise tout de suite l'état vidé.
+function resetGuild(guildId) {
+
+    const database = loadDatabase();
+    const id = guildId == null || guildId === "" ? null : String(guildId);
+    let removed = 0;
+
+    if (database.links && typeof database.links === "object") {
+
+        for (const [key, entry] of Object.entries(database.links)) {
+
+            const owner = entry && entry.guildId != null ? String(entry.guildId) : null;
+
+            if (id !== null && owner !== null && owner !== id) continue;
+
+            delete database.links[key];
+            removed += 1;
+
+        }
+
+    }
+
+    if (saveTimer) {
+
+        clearTimeout(saveTimer);
+        saveTimer = null;
+
+    }
+
+    rebuildIndexes(database);
+
+    return { ok: writeDatabaseNow(), removed };
+
+}
+
+
+// ==========================
 // RECHERCHE GLOBALE
 // ==========================
 
@@ -1947,6 +1988,9 @@ module.exports = {
 
     // Reset complet
     resetDatabase,
+
+    // Reset d'un seul serveur (bouton du panneau)
+    resetGuild,
 
     // Ancien système de statut
     resetScanner,

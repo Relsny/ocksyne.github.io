@@ -96,6 +96,8 @@
       "modules/antidoublons/lib/media-test.js",
       "modules/antidoublons/lib/media.js",
       "modules/antidoublons/lib/normalizer.js",
+      "modules/antidoublons/lib/reset-test.js",
+      "modules/antidoublons/lib/reset.js",
       "modules/antidoublons/lib/selftest.js",
       "modules/antidoublons/lib/sources.js",
       "modules/antidoublons/lib/ui-store.js",

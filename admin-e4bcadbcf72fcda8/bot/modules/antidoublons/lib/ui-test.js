@@ -99,6 +99,10 @@ async function main() {
   const panel = fs.readFileSync(path.join(__dirname, '..', 'panel.html'), 'utf8');
   for (const id of ['rule-content', 'rule-videos', 'sens', 'content-slide', 'legacy-slide']) assert(panel.includes(`id="${id}"`), `panneau : ${id}`);
   assert(panel.includes('contentMatch:$(') && panel.includes('contentSensitivity:S.level') && panel.includes('contentVideos:$('), 'panneau : réglages du contenu envoyés au bot');
+  for (const id of ['hist-reset', 'modal-reset', 'rst-yes', 'rst-no']) assert(panel.includes(`id="${id}"`), `panneau : ${id}`);
+  assert(panel.includes('Réinitialiser l’historique') && panel.includes('irréversible') && panel.includes('/api/reset-history'), 'panneau : bouton de remise à zéro en français et route appelée');
+  assert(/\.reset-fab\{[^}]*position:fixed;left:16px;bottom:16px[^}]*opacity:\.5/.test(panel) && /\.reset-fab:hover[^{]*\{[^}]*opacity:1/.test(panel), 'panneau : bouton discret en bas à gauche, opaque au survol');
+  assert(require('../dashboard').page().includes('id="modal-reset"'), 'page servie : confirmation de remise à zéro présente');
   for (const level of ['strict', 'balanced', 'loose']) assert(panel.includes(`data-level="${level}"`), `panneau : sensibilité ${level}`);
   assert(/Détection par le contenu/.test(panel) && !/Detection par le contenu/.test(panel), 'panneau : texte français');
   console.log('ANTI-DOUBLONS UI TEST OK');

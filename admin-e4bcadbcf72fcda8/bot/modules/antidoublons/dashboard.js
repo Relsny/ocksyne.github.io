@@ -100,6 +100,13 @@ async function openDashboard(context) {
       { method: 'get', path: '/api/state', handler: (_req, res) => res.json(context.getState()) },
       { method: 'post', path: '/api/config', handler: (req, res) => res.json(context.saveConfig(req.body || {})) },
       { method: 'post', path: '/api/rule34', handler: (req, res) => res.json(context.saveRule34 ? context.saveRule34(req.body || {}) : { ok: false }) },
+      { method: 'post', path: '/api/reset-history', handler: (_req, res) => {
+        try {
+          res.json(context.resetHistory ? context.resetHistory() : { ok: false });
+        } catch {
+          res.json({ ok: false, message: 'La réinitialisation a échoué.' });
+        }
+      } },
       { method: 'post', path: '/api/activate', handler: async (_req, res) => res.json(await context.activate()) },
       { method: 'post', path: '/api/fullscan', handler: (_req, res) => res.json(context.fullScan ? context.fullScan() : { ok: false }) },
       { method: 'post', path: '/api/stop', handler: (_req, res) => res.json(context.stop()) },

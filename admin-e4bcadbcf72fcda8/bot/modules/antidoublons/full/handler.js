@@ -2395,6 +2395,15 @@ async function handleUpdate(
 // EXPORTS
 // ==========================
 
+// Vide la mémoire du direct (doublons en attente) après une réinitialisation de l'historique.
+function resetRuntime() {
+
+    pendingDuplicateLinks.clear();
+
+    return true;
+
+}
+
 module.exports = {
 
     name:
@@ -2404,6 +2413,8 @@ module.exports = {
 
     handleDelete,
 
-    handleUpdate
+    handleUpdate,
+
+    resetRuntime
 
 };

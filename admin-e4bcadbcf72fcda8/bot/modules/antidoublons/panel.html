@@ -374,6 +374,17 @@ textarea.input{height:auto;padding:12px 14px;line-height:1.55;resize:vertical;mi
 .recap dd.warn{color:#ff8f8f}
 .dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px}
 
+/* ---------- Réinitialiser l'historique : discret, fixé en bas à gauche ---------- */
+.reset-fab{position:fixed;left:16px;bottom:16px;z-index:45;display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 15px 0 12px;border-radius:999px;border:1px solid var(--line-2);background:rgba(14,14,16,.55);backdrop-filter:blur(10px) saturate(1.2);-webkit-backdrop-filter:blur(10px) saturate(1.2);color:var(--muted);font-family:inherit;font-size:12.5px;font-weight:600;white-space:nowrap;cursor:pointer;opacity:.5;transition:opacity .2s,background .2s,border-color .2s,color .2s}
+.reset-fab .ic{font-size:16px}
+.reset-fab:hover,.reset-fab:focus-visible{opacity:1;color:var(--red-text);border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.12)}
+.reset-fab:focus-visible{outline:2px solid rgba(var(--acc-rgb),.75);outline-offset:2px}
+.dialog .warn-list{margin:14px 0 0;padding:0 0 0 18px;color:var(--muted);font-size:14px}
+.dialog .warn-list li{margin:4px 0}
+.dialog .warn-note{margin-top:14px;padding:11px 14px;border-radius:14px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.1);color:var(--red-text);font-size:14px;font-weight:600}
+@media (max-width:1240px){.reset-fab{width:38px;padding:0;justify-content:center}.reset-fab span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}
+@media (max-width:900px){.reset-fab{left:12px;bottom:88px}}
+
 /* ---------- Notifications ---------- */
 .toasts{position:fixed;left:50%;bottom:104px;z-index:120;transform:translateX(-50%);display:grid;gap:8px;justify-items:center;width:min(92vw,460px);pointer-events:none}
 .toast{pointer-events:auto;display:flex;align-items:center;gap:11px;padding:12px 16px;border-radius:14px;border:1px solid rgba(var(--acc-rgb),calc(.45*var(--int)));background:#141416;color:var(--text);font-weight:600;font-size:14px;line-height:1.35;box-shadow:0 22px 44px -14px rgba(0,0,0,.9);animation:toastIn .32s cubic-bezier(.2,.9,.3,1.2)}
@@ -1144,6 +1155,8 @@ if(/^(rain|drops|night|blur|hacker|synthwave|constellation|custom)$/.test(t.fx)&
   <footer class="foot">DCAS Anti-doublons · panneau local. Les réglages restent sur cet ordinateur.</footer>
 </main>
 
+<button class="reset-fab" id="hist-reset" type="button" title="Réinitialiser l’historique" aria-label="Réinitialiser l’historique"><svg class="ic" aria-hidden="true"><use href="#i-reset"/></svg><span>Réinitialiser l’historique</span></button>
+
 <div class="modal" id="modal" inert>
   <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title" aria-describedby="dlg-text">
     <span class="mark" id="dlg-logo-wrap"><svg class="back" viewBox="0 0 512 512" aria-hidden="true"><path d="M148 226L238 318L374 164" fill="none" stroke="#fff" stroke-width="70" stroke-linecap="round" stroke-linejoin="round"/></svg><img id="dlg-logo" alt="" width="60" height="60"></span>
@@ -1166,6 +1179,19 @@ if(/^(rain|drops|night|blur|hacker|synthwave|constellation|custom)$/.test(t.fx)&
     <h3 id="sure-title">Êtes-vous vraiment sûr ?</h3>
     <p>Les messages supprimés ne pourront pas être récupérés.</p>
     <div class="dialog-actions"><button class="btn" id="sure-no" type="button">Annuler</button><button class="btn danger" id="sure-yes" type="button">Oui, activer et tout nettoyer</button></div>
+  </div>
+</div>
+<div class="modal" id="modal-reset" inert>
+  <div class="dialog danger" role="alertdialog" aria-modal="true" aria-labelledby="rst-title" aria-describedby="rst-text">
+    <h3 id="rst-title">Réinitialiser l’historique ?</h3>
+    <p id="rst-text">Tout ce qui suit sera supprimé pour ce serveur :</p>
+    <ul class="warn-list">
+      <li>tous les liens et toutes les empreintes d’images et de vidéos enregistrés ;</li>
+      <li>la liste des liens supprimés et l’historique des doublons ;</li>
+      <li>les compteurs affichés dans ce panneau (retour à zéro).</li>
+    </ul>
+    <p class="warn-note">Cette action est irréversible. Vos réglages et l’apparence du panneau sont conservés.</p>
+    <div class="dialog-actions"><button class="btn" id="rst-no" type="button">Annuler</button><button class="btn danger" id="rst-yes" type="button">Réinitialiser</button></div>
   </div>
 </div>
 <div class="modal" id="modal-links" inert>
@@ -1322,6 +1348,12 @@ async function mockApi(path, options){
   if (path === '/api/rule34') {
     mock.state.rule34Configured = !body.clear;
     return {ok:true, configured: !body.clear};
+  }
+  if (path === '/api/reset-history') {
+    stopMockRun();
+    Object.assign(mock.state, {history:[], deletedLinks:[], deletedLinksCount:0, deletedCount:0});
+    mock.progress = {scanned:0, found:0, deleted:0, errors:0, percent:0, phase:'en attente', channelName:'', logs:[], history:[], deletedLinksCount:0};
+    return {ok:true, removed:{links:0, history:0, deletedLinks:0, deleted:0}};
   }
   if (path === '/api/activate' || path === '/api/fullscan') { startMockFull(); return {ok:true}; }
   if (path === '/api/stop') { stopMockRun('analyse arrêtée'); mock.state.active = false; return {ok:true, stopped:true}; }
@@ -1812,14 +1844,43 @@ $('sure-yes').addEventListener('click', async ()=>{
   } catch (e) { toast('L’analyse complète n’a pas démarré. '+NET_ERR, 'err'); }
   finally { busy(btn, false); }
 });
+/* Réinitialiser l'historique : confirmation, puis remise à zéro côté bot et côté panneau */
+function openReset(){ lastFocus = document.activeElement; const m = $('modal-reset'); m.removeAttribute('inert'); m.classList.add('on'); setTimeout(()=>$('rst-no').focus(), 30); }
+function closeReset(){ const m = $('modal-reset'); m.classList.remove('on'); m.setAttribute('inert',''); if (lastFocus && lastFocus.focus) lastFocus.focus(); }
+function clearHistoryUI(){
+  H.map.clear(); H.seen.clear(); H.links = []; H.linksField = true; H.linksCount = 0; H.logs = []; H.lastKey = ''; H.first = true;
+  S.total = 0; lastLog = null;
+}
+$('hist-reset').addEventListener('click', openReset);
+$('rst-no').addEventListener('click', closeReset);
+$('modal-reset').addEventListener('mousedown', e=>{ if (e.target === $('modal-reset')) closeReset(); });
+$('rst-yes').addEventListener('click', async ()=>{
+  const btn = $('rst-yes'); busy(btn, true);
+  try {
+    const res = await post('/api/reset-history', {});
+    if (!res || res.ok === false) {
+      closeReset();
+      toast((res && res.message) || 'La réinitialisation a échoué. '+NET_ERR, 'err');
+      return;
+    }
+    clearHistoryUI();
+    closeReset();
+    renderHeader(); renderInsights();
+    await refreshLive(); await tick();
+    renderHeader(); renderInsights();
+    toast('Historique réinitialisé. Tous les compteurs sont à zéro.');
+  } catch (e) { toast('La réinitialisation a échoué. '+NET_ERR, 'err'); }
+  finally { busy(btn, false); }
+});
 $('no').addEventListener('click', closeModal);
 $('modal').addEventListener('mousedown', e=>{ if (e.target === $('modal')) closeModal(); });
 document.addEventListener('keydown', e=>{
-  const m = ['modal-links','modal','modal-scan','modal-sure'].map($).find(el=>el && el.classList.contains('on'));
+  const m = ['modal-links','modal','modal-scan','modal-sure','modal-reset'].map($).find(el=>el && el.classList.contains('on'));
   if (!m) return;
   if (e.key === 'Escape') {
     if (m === $('modal-links')) closeLinks();
     else if (m === $('modal-sure')) closeSure();
+    else if (m === $('modal-reset')) closeReset();
     else if (m === $('modal-scan')) closeScan();
     else closeModal();
     return;

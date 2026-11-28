@@ -35,8 +35,10 @@ function flush() {
       fs.copyFileSync(tmp, FILE);
       try { fs.unlinkSync(tmp); } catch { /* ignore */ }
     }
+    return true;
   } catch (error) {
     console.error('Anti-doublons historique :', error.message);
+    return false;
   }
 }
 
@@ -92,6 +94,17 @@ function record(guildId, data = {}) {
   }
 }
 
+// Remet l'historique d'un serveur à zéro (doublons, liens supprimés, total) et l'écrit tout de suite sur le disque.
+function reset(guildId) {
+  const all = load();
+  all[String(guildId || 'local')] = { history: [], links: [], linkTotal: 0 };
+  if (timer) {
+    clearTimeout(timer);
+    timer = null;
+  }
+  return flush();
+}
+
 function list(guildId, limit = 200) {
   return bucket(guildId).history.slice(0, limit);
 }
@@ -121,4 +134,4 @@ function describe(kind, key, message) {
   return content || (k.startsWith('text:') ? k.slice(5) : '');
 }
 
-module.exports = { record, list, links, linkTotal, describe, flush, FILE };
+module.exports = { record, reset, list, links, linkTotal, describe, flush, FILE };
